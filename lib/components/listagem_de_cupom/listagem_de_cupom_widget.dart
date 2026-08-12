@@ -224,8 +224,9 @@ class _ListagemDeCupomWidgetState extends State<ListagemDeCupomWidget> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: MediaQuery.sizeOf(context).width * 0.74,
+      width: double.infinity,
       child: Stack(
+        clipBehavior: Clip.antiAlias,
         children: [
           Align(
             alignment: AlignmentDirectional(0.0, -1.0),
@@ -239,7 +240,7 @@ class _ListagemDeCupomWidgetState extends State<ListagemDeCupomWidget> {
                       FlutterFlowTheme.of(context).designToken.radius.md),
                 ),
                 child: Container(
-                  width: MediaQuery.sizeOf(context).width * 0.74,
+                  width: double.infinity,
                   height: MediaQuery.sizeOf(context).height * 0.8,
                   decoration: BoxDecoration(
                     color: FlutterFlowTheme.of(context).secondaryBackground,

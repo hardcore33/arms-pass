@@ -1,4 +1,5 @@
 import '/backend/api_requests/api_calls.dart';
+import '/components/header_pagina/header_pagina_widget.dart';
 import '/components/listagem_de_cupom/listagem_de_cupom_widget.dart';
 import '/components/menu/menu_widget.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
@@ -121,31 +122,34 @@ class _CuponsWidgetState extends State<CuponsWidget> {
                       ],
                     ),
                   ),
-                  Container(
-                    width: MediaQuery.sizeOf(context).width * 0.78,
-                    height: MediaQuery.sizeOf(context).height * 1.0,
-                    decoration: BoxDecoration(
-                      color: FlutterFlowTheme.of(context).primary,
-                    ),
-                    child: Padding(
-                      padding:
-                          EdgeInsetsDirectional.fromSTEB(50.0, 30.0, 0.0, 0.0),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.max,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
-                                0.0, 20.0, 50.0, 0.0),
-                            child: wrapWithModel(
-                              model: _model.listagemDeCupomModel,
-                              updateCallback: () => safeSetState(() {}),
-                              child: ListagemDeCupomWidget(
-                                cupons: cuponsObterCuponsResponse.jsonBody,
+                  Expanded(
+                    child: Container(
+                      height: MediaQuery.sizeOf(context).height * 1.0,
+                      decoration: BoxDecoration(
+                        color: FlutterFlowTheme.of(context).primary,
+                      ),
+                      child: Padding(
+                        padding: EdgeInsetsDirectional.fromSTEB(
+                            30.0, 20.0, 30.0, 0.0),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.max,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const HeaderPaginaWidget(
+                              titulo: 'Cupons',
+                              breadcrumb: 'Painel',
+                            ),
+                            Expanded(
+                              child: wrapWithModel(
+                                model: _model.listagemDeCupomModel,
+                                updateCallback: () => safeSetState(() {}),
+                                child: ListagemDeCupomWidget(
+                                  cupons: cuponsObterCuponsResponse.jsonBody,
+                                ),
                               ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                   ),
