@@ -83,7 +83,7 @@ class _ModalAdicionarDescontoWidgetState
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: MediaQuery.sizeOf(context).width * 0.6,
+      width: 550.0,
       height: 692.0,
       decoration: BoxDecoration(
         color: FlutterFlowTheme.of(context).secondaryBackground,
@@ -164,7 +164,7 @@ class _ModalAdicionarDescontoWidgetState
               ),
             ),
             Padding(
-              padding: EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
+              padding: const EdgeInsetsDirectional.fromSTEB(40.0, 20.0, 40.0, 0.0),
               child: Column(
                 mainAxisSize: MainAxisSize.max,
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -190,8 +190,8 @@ class _ModalAdicionarDescontoWidgetState
                               FlutterFlowTheme.of(context).bodyMedium.fontStyle,
                         ),
                   ),
-                  Container(
-                    width: MediaQuery.sizeOf(context).width * 0.35,
+                  SizedBox(
+                    width: double.infinity,
                     child: TextFormField(
                       controller: _model.descricaoTextController,
                       focusNode: _model.descricaoFocusNode,
@@ -236,38 +236,38 @@ class _ModalAdicionarDescontoWidgetState
                                       .fontStyle,
                                 ),
                         enabledBorder: OutlineInputBorder(
-                          borderSide: BorderSide(
-                            color: FlutterFlowTheme.of(context).secondary,
-                            width: 0.5,
+                          borderSide: const BorderSide(
+                            color: Color(0xFFCCCCCC),
+                            width: 1.0,
                           ),
-                          borderRadius: BorderRadius.only(),
+                          borderRadius: BorderRadius.circular(8.0),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderSide: BorderSide(
-                            color: FlutterFlowTheme.of(context).secondary,
-                            width: 0.5,
+                            color: FlutterFlowTheme.of(context).primary,
+                            width: 1.5,
                           ),
-                          borderRadius: BorderRadius.only(),
+                          borderRadius: BorderRadius.circular(8.0),
                         ),
                         errorBorder: OutlineInputBorder(
                           borderSide: BorderSide(
                             color: FlutterFlowTheme.of(context).error,
-                            width: 0.5,
+                            width: 1.0,
                           ),
-                          borderRadius: BorderRadius.only(),
+                          borderRadius: BorderRadius.circular(8.0),
                         ),
                         focusedErrorBorder: OutlineInputBorder(
                           borderSide: BorderSide(
                             color: FlutterFlowTheme.of(context).error,
-                            width: 0.5,
+                            width: 1.5,
                           ),
-                          borderRadius: BorderRadius.only(),
+                          borderRadius: BorderRadius.circular(8.0),
                         ),
                         filled: true,
                         fillColor:
                             FlutterFlowTheme.of(context).secondaryBackground,
                         contentPadding: EdgeInsetsDirectional.fromSTEB(
-                            10.0, 25.0, 10.0, 25.0),
+                            14.0, 14.0, 14.0, 14.0),
                       ),
                       style: FlutterFlowTheme.of(context).bodyMedium.override(
                             font: GoogleFonts.readexPro(
@@ -296,7 +296,7 @@ class _ModalAdicionarDescontoWidgetState
               ),
             ),
             Padding(
-              padding: EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
+              padding: const EdgeInsetsDirectional.fromSTEB(40.0, 20.0, 40.0, 0.0),
               child: Column(
                 mainAxisSize: MainAxisSize.max,
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -322,37 +322,44 @@ class _ModalAdicionarDescontoWidgetState
                               FlutterFlowTheme.of(context).bodyMedium.fontStyle,
                         ),
                   ),
-                  Container(
-                    width: MediaQuery.sizeOf(context).width * 0.35,
-                    decoration: BoxDecoration(),
+                  SizedBox(
+                    width: double.infinity,
                     child: Row(
                       mainAxisSize: MainAxisSize.max,
                       children: [
-                        FlutterFlowDropDown<String>(
-                          controller: _model.segmentoValueController ??=
-                              FormFieldController<String>(null),
-                          options: _model.nomeSegmentos,
-                          onChanged: (val) async {
-                            safeSetState(() => _model.segmentoValue = val);
-                            _model.idSegmento =
-                                await actions.obterIdDoSegmentoPorNome(
-                              widget!.segmentos!.toList(),
-                              _model.segmentoValue,
-                            );
-                            _model.parceirosfiltrados = functions
-                                .criarParceiros(widget!.parceiros!.toList(),
-                                    _model.idSegmento!)
-                                .toList()
-                                .cast<String>();
-                            safeSetState(() {});
+                        Expanded(
+                          child: FlutterFlowDropDown<String>(
+                            controller: _model.segmentoValueController ??=
+                                FormFieldController<String>(null),
+                            options: _model.nomeSegmentos,
+                            onChanged: (val) async {
+                              safeSetState(() => _model.segmentoValue = val);
+                              _model.idSegmento =
+                                  await actions.obterIdDoSegmentoPorNome(
+                                widget!.segmentos!.toList(),
+                                _model.segmentoValue,
+                              );
+                              _model.parceirosfiltrados = functions
+                                  .criarParceiros(widget!.parceiros!.toList(),
+                                      _model.idSegmento!)
+                                  .toList()
+                                  .cast<String>();
+                              safeSetState(() {});
 
-                            safeSetState(() {});
-                          },
-                          width: MediaQuery.sizeOf(context).width * 0.32,
-                          height: 65.0,
-                          textStyle:
-                              FlutterFlowTheme.of(context).bodyMedium.override(
-                                    font: GoogleFonts.readexPro(
+                              safeSetState(() {});
+                            },
+                            height: 65.0,
+                            textStyle:
+                                FlutterFlowTheme.of(context).bodyMedium.override(
+                                      font: GoogleFonts.readexPro(
+                                        fontWeight: FlutterFlowTheme.of(context)
+                                            .bodyMedium
+                                            .fontWeight,
+                                        fontStyle: FlutterFlowTheme.of(context)
+                                            .bodyMedium
+                                            .fontStyle,
+                                      ),
+                                      letterSpacing: 0.0,
                                       fontWeight: FlutterFlowTheme.of(context)
                                           .bodyMedium
                                           .fontWeight,
@@ -360,31 +367,24 @@ class _ModalAdicionarDescontoWidgetState
                                           .bodyMedium
                                           .fontStyle,
                                     ),
-                                    letterSpacing: 0.0,
-                                    fontWeight: FlutterFlowTheme.of(context)
-                                        .bodyMedium
-                                        .fontWeight,
-                                    fontStyle: FlutterFlowTheme.of(context)
-                                        .bodyMedium
-                                        .fontStyle,
-                                  ),
-                          hintText: 'Selecione o segmento',
-                          icon: Icon(
-                            Icons.keyboard_arrow_down_rounded,
-                            color: FlutterFlowTheme.of(context).secondaryText,
-                            size: 24.0,
+                            hintText: 'Selecione o segmento',
+                            icon: Icon(
+                              Icons.keyboard_arrow_down_rounded,
+                              color: FlutterFlowTheme.of(context).secondaryText,
+                              size: 24.0,
+                            ),
+                            fillColor: Colors.white,
+                            elevation: 0.0,
+                            borderColor: const Color(0xFFCCCCCC),
+                            borderWidth: 1.0,
+                            borderRadius: 8.0,
+                            margin: EdgeInsetsDirectional.fromSTEB(
+                                12.0, 0.0, 12.0, 0.0),
+                            hidesUnderline: true,
+                            isOverButton: false,
+                            isSearchable: false,
+                            isMultiSelect: false,
                           ),
-                          fillColor: Colors.white,
-                          elevation: 3.0,
-                          borderColor: Colors.transparent,
-                          borderWidth: 0.0,
-                          borderRadius: 8.0,
-                          margin: EdgeInsetsDirectional.fromSTEB(
-                              12.0, 0.0, 12.0, 0.0),
-                          hidesUnderline: true,
-                          isOverButton: false,
-                          isSearchable: false,
-                          isMultiSelect: false,
                         ),
                         Builder(
                           builder: (context) => Padding(
@@ -442,7 +442,7 @@ class _ModalAdicionarDescontoWidgetState
               ),
             ),
             Padding(
-              padding: EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
+              padding: const EdgeInsetsDirectional.fromSTEB(40.0, 20.0, 40.0, 0.0),
               child: Column(
                 mainAxisSize: MainAxisSize.max,
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -468,8 +468,8 @@ class _ModalAdicionarDescontoWidgetState
                               FlutterFlowTheme.of(context).bodyMedium.fontStyle,
                         ),
                   ),
-                  Container(
-                    width: MediaQuery.sizeOf(context).width * 0.35,
+                  SizedBox(
+                    width: double.infinity,
                     child: TextFormField(
                       controller: _model.porcentagemTextController,
                       focusNode: _model.porcentagemFocusNode,
@@ -513,39 +513,44 @@ class _ModalAdicionarDescontoWidgetState
                                       .labelMedium
                                       .fontStyle,
                                 ),
+                        suffixIcon: const Icon(
+                          Icons.percent_rounded,
+                          color: Color(0xFF9A9A9A),
+                          size: 18.0,
+                        ),
                         enabledBorder: OutlineInputBorder(
-                          borderSide: BorderSide(
-                            color: Color(0xFFC5C4C4),
-                            width: 0.5,
+                          borderSide: const BorderSide(
+                            color: Color(0xFFCCCCCC),
+                            width: 1.0,
                           ),
-                          borderRadius: BorderRadius.only(),
+                          borderRadius: BorderRadius.circular(8.0),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderSide: BorderSide(
-                            color: Color(0xFFC5C4C4),
-                            width: 0.5,
+                            color: FlutterFlowTheme.of(context).primary,
+                            width: 1.5,
                           ),
-                          borderRadius: BorderRadius.only(),
+                          borderRadius: BorderRadius.circular(8.0),
                         ),
                         errorBorder: OutlineInputBorder(
                           borderSide: BorderSide(
                             color: FlutterFlowTheme.of(context).error,
-                            width: 0.5,
+                            width: 1.0,
                           ),
-                          borderRadius: BorderRadius.only(),
+                          borderRadius: BorderRadius.circular(8.0),
                         ),
                         focusedErrorBorder: OutlineInputBorder(
                           borderSide: BorderSide(
                             color: FlutterFlowTheme.of(context).error,
-                            width: 0.5,
+                            width: 1.5,
                           ),
-                          borderRadius: BorderRadius.only(),
+                          borderRadius: BorderRadius.circular(8.0),
                         ),
                         filled: true,
                         fillColor:
                             FlutterFlowTheme.of(context).secondaryBackground,
                         contentPadding: EdgeInsetsDirectional.fromSTEB(
-                            10.0, 25.0, 10.0, 25.0),
+                            14.0, 14.0, 14.0, 14.0),
                       ),
                       style: FlutterFlowTheme.of(context).bodyMedium.override(
                             font: GoogleFonts.readexPro(
@@ -573,7 +578,7 @@ class _ModalAdicionarDescontoWidgetState
               ),
             ),
             Padding(
-              padding: EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
+              padding: const EdgeInsetsDirectional.fromSTEB(40.0, 20.0, 40.0, 0.0),
               child: Column(
                 mainAxisSize: MainAxisSize.max,
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -613,7 +618,7 @@ class _ModalAdicionarDescontoWidgetState
 
                       safeSetState(() {});
                     },
-                    width: MediaQuery.sizeOf(context).width * 0.35,
+                    width: double.infinity,
                     height: 65.0,
                     searchHintTextStyle:
                         FlutterFlowTheme.of(context).labelMedium.override(
@@ -674,30 +679,23 @@ class _ModalAdicionarDescontoWidgetState
                       color: FlutterFlowTheme.of(context).secondaryText,
                       size: 24.0,
                     ),
-                    fillColor: Colors.white,
-                    elevation: 3.0,
-                    borderColor: Colors.transparent,
-                    borderWidth: 0.0,
-                    borderRadius: 8.0,
                     margin:
                         EdgeInsetsDirectional.fromSTEB(12.0, 0.0, 12.0, 0.0),
                     hidesUnderline: true,
                     isOverButton: false,
                     isSearchable: true,
                     isMultiSelect: false,
-                  ),
-                  Container(
-                    width: MediaQuery.sizeOf(context).width * 0.35,
-                    height: 1.0,
-                    decoration: BoxDecoration(
-                      color: Color(0xFFC5C4C4),
-                    ),
+                    fillColor: Colors.white,
+                    elevation: 0.0,
+                    borderColor: const Color(0xFFCCCCCC),
+                    borderWidth: 1.0,
+                    borderRadius: 8.0,
                   ),
                 ],
               ),
             ),
             Padding(
-              padding: EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
+              padding: const EdgeInsetsDirectional.fromSTEB(40.0, 20.0, 40.0, 0.0),
               child: Column(
                 mainAxisSize: MainAxisSize.max,
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -717,8 +715,8 @@ class _ModalAdicionarDescontoWidgetState
                           fontSize: 16.0,
                           letterSpacing: 0.0,
                           fontWeight: FlutterFlowTheme.of(context)
-                              .bodyMedium
-                              .fontWeight,
+                                .bodyMedium
+                                .fontWeight,
                           fontStyle:
                               FlutterFlowTheme.of(context).bodyMedium.fontStyle,
                         ),
@@ -792,48 +790,41 @@ class _ModalAdicionarDescontoWidgetState
                       }
                     },
                     child: Container(
-                      width: MediaQuery.sizeOf(context).width * 0.35,
+                      width: double.infinity,
                       height: 60.0,
                       decoration: BoxDecoration(
                         color: FlutterFlowTheme.of(context).secondaryBackground,
                         border: Border.all(
-                          color: Color(0xFFC5C4C4),
+                          color: const Color(0xFFCCCCCC),
                           width: 1.0,
                         ),
+                        borderRadius: BorderRadius.circular(8.0),
                       ),
-                      child: Visibility(
-                        visible: _model.hasData,
-                        child: Align(
-                          alignment: AlignmentDirectional(-1.0, 0.0),
-                          child: Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
-                                10.0, 0.0, 0.0, 0.0),
-                            child: Text(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 14.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
                               _model.hasData
                                   ? functions.formataDataDeExibicao(
                                       _model.datePicked?.toString())!
-                                  : ' ',
+                                  : 'Selecione uma data',
                               style: FlutterFlowTheme.of(context)
                                   .bodyMedium
                                   .override(
-                                    font: GoogleFonts.readexPro(
-                                      fontWeight: FlutterFlowTheme.of(context)
-                                          .bodyMedium
-                                          .fontWeight,
-                                      fontStyle: FlutterFlowTheme.of(context)
-                                          .bodyMedium
-                                          .fontStyle,
-                                    ),
-                                    letterSpacing: 0.0,
-                                    fontWeight: FlutterFlowTheme.of(context)
-                                        .bodyMedium
-                                        .fontWeight,
-                                    fontStyle: FlutterFlowTheme.of(context)
-                                        .bodyMedium
-                                        .fontStyle,
+                                    font: GoogleFonts.readexPro(),
+                                    color: _model.hasData
+                                        ? FlutterFlowTheme.of(context).primaryText
+                                        : const Color(0xFF9A9A9A),
                                   ),
                             ),
-                          ),
+                            const Icon(
+                              Icons.calendar_today_rounded,
+                              color: Color(0xFF9A9A9A),
+                              size: 18.0,
+                            ),
+                          ],
                         ),
                       ),
                     ),
@@ -842,7 +833,7 @@ class _ModalAdicionarDescontoWidgetState
               ),
             ),
             Padding(
-              padding: EdgeInsetsDirectional.fromSTEB(20.0, 15.0, 20.0, 15.0),
+              padding: const EdgeInsetsDirectional.fromSTEB(40.0, 24.0, 40.0, 15.0),
               child: Row(
                 mainAxisSize: MainAxisSize.max,
                 mainAxisAlignment: MainAxisAlignment.end,

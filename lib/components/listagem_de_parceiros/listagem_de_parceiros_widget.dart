@@ -189,7 +189,7 @@ class _ListagemDeParceirosWidgetState extends State<ListagemDeParceirosWidget> {
                         padding: EdgeInsetsDirectional.fromSTEB(
                             35.0, 30.0, 0.0, 0.0),
                         child: Container(
-                          width: MediaQuery.sizeOf(context).width * 0.2,
+                          width: 250.0,
                           child: TextFormField(
                             controller: _model.textController,
                             focusNode: _model.textFieldFocusNode,
@@ -413,12 +413,13 @@ class _ListagemDeParceirosWidgetState extends State<ListagemDeParceirosWidget> {
                         ),
                       ),
                     ),
+                    const Spacer(),
                     Align(
                       alignment: AlignmentDirectional(-1.0, 0.0),
                       child: Builder(
                         builder: (context) => Padding(
                           padding: EdgeInsetsDirectional.fromSTEB(
-                              20.0, 30.0, 0.0, 0.0),
+                              0.0, 30.0, 35.0, 0.0),
                           child: FFButtonWidget(
                             onPressed: () async {
                               _model.segmentos =

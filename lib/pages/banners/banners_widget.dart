@@ -4,6 +4,7 @@ import '/components/menu/menu_widget.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
+import '/components/header_pagina/header_pagina_widget.dart';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
@@ -44,6 +45,7 @@ class _BannersWidgetState extends State<BannersWidget> {
 
   @override
   Widget build(BuildContext context) {
+    context.watch<FFAppState>();
     return FutureBuilder<ApiCallResponse>(
       future: ObterBannersCall.call(),
       builder: (context, snapshot) {
@@ -79,95 +81,47 @@ class _BannersWidgetState extends State<BannersWidget> {
                 mainAxisSize: MainAxisSize.max,
                 children: [
                   Container(
-                    width: MediaQuery.sizeOf(context).width * 0.22,
+                    width: FFAppState().sidebarCollapsed
+                        ? 80.0
+                        : MediaQuery.sizeOf(context).width * 0.22,
                     height: MediaQuery.sizeOf(context).height * 1.0,
                     decoration: BoxDecoration(
                       color: FlutterFlowTheme.of(context).secondary,
                     ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.max,
-                      children: [
-                        Padding(
-                          padding: EdgeInsetsDirectional.fromSTEB(
-                              0.0, 30.0, 0.0, 20.0),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(8.0),
-                            child: Image.asset(
-                              'assets/images/logo.png',
-                              width: MediaQuery.sizeOf(context).width * 0.13,
-                              height: MediaQuery.sizeOf(context).height * 0.1,
-                              fit: BoxFit.contain,
-                            ),
-                          ),
-                        ),
-                        Divider(
-                          thickness: 2.0,
-                          indent: 20.0,
-                          endIndent: 20.0,
-                          color: FlutterFlowTheme.of(context).primary,
-                        ),
-                        Expanded(
-                          child: Align(
-                            alignment: AlignmentDirectional(0.0, -1.0),
-                            child: Padding(
-                              padding: EdgeInsetsDirectional.fromSTEB(
-                                  0.0, 15.0, 0.0, 0.0),
-                              child: wrapWithModel(
-                                model: _model.menuModel,
-                                updateCallback: () => safeSetState(() {}),
-                                child: MenuWidget(),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
+                    child: wrapWithModel(
+                      model: _model.menuModel,
+                      updateCallback: () => safeSetState(() {}),
+                      child: const MenuWidget(),
                     ),
                   ),
-                  Container(
-                    width: MediaQuery.sizeOf(context).width * 0.78,
-                    height: MediaQuery.sizeOf(context).height * 1.0,
-                    decoration: BoxDecoration(
-                      color: FlutterFlowTheme.of(context).primary,
-                    ),
-                    child: Padding(
-                      padding:
-                          EdgeInsetsDirectional.fromSTEB(50.0, 30.0, 0.0, 0.0),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.max,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Banners',
-                            style: FlutterFlowTheme.of(context)
-                                .bodyMedium
-                                .override(
-                                  font: GoogleFonts.openSans(
-                                    fontWeight: FontWeight.w600,
-                                    fontStyle: FlutterFlowTheme.of(context)
-                                        .bodyMedium
-                                        .fontStyle,
-                                  ),
-                                  color: FlutterFlowTheme.of(context).secondary,
-                                  fontSize: 16.0,
-                                  letterSpacing: 0.0,
-                                  fontWeight: FontWeight.w600,
-                                  fontStyle: FlutterFlowTheme.of(context)
-                                      .bodyMedium
-                                      .fontStyle,
+                  Expanded(
+                    child: Container(
+                      height: MediaQuery.sizeOf(context).height * 1.0,
+                      decoration: BoxDecoration(
+                        color: FlutterFlowTheme.of(context).primary,
+                      ),
+                      child: Padding(
+                        padding:
+                            EdgeInsetsDirectional.fromSTEB(24.0, 20.0, 24.0, 20.0),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.max,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const HeaderPaginaWidget(
+                              titulo: 'Banners',
+                              breadcrumb: 'Painel',
+                            ),
+                            Expanded(
+                              child: wrapWithModel(
+                                model: _model.listagemDeBannersModel,
+                                updateCallback: () => safeSetState(() {}),
+                                child: ListagemDeBannersWidget(
+                                  banners: bannersObterBannersResponse.jsonBody,
                                 ),
-                          ),
-                          Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
-                                0.0, 50.0, 50.0, 0.0),
-                            child: wrapWithModel(
-                              model: _model.listagemDeBannersModel,
-                              updateCallback: () => safeSetState(() {}),
-                              child: ListagemDeBannersWidget(
-                                banners: bannersObterBannersResponse.jsonBody,
                               ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                   ),

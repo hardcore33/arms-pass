@@ -359,6 +359,75 @@ class EnviarNotificacaoCall {
   }
 }
 
+class ObterNotificacoesCall {
+  static Future<ApiCallResponse> call({
+    String? tenantId = '',
+  }) async {
+    return ApiManager.instance.makeApiCall(
+      callName: 'obterNotificacoes',
+      apiUrl: 'https://codeflowbr.online:8080/api/v1/notify',
+      callType: ApiCallType.GET,
+      headers: {},
+      params: {
+        'tenant_id': tenantId,
+      },
+      returnBody: true,
+      encodeBodyUtf8: false,
+      decodeUtf8: true,
+      cache: false,
+      isStreamingApi: false,
+      alwaysAllowBody: false,
+    );
+  }
+}
+
+class AlterarStatusNotificacaoCall {
+  static Future<ApiCallResponse> call({
+    int? id,
+    bool? active,
+  }) async {
+    final ffApiRequestBody = '''
+{
+  "active": ${active ?? false}
+}''';
+    return ApiManager.instance.makeApiCall(
+      callName: 'alterarStatusNotificacao',
+      apiUrl: 'https://codeflowbr.online:8080/api/v1/notify/${id}',
+      callType: ApiCallType.PATCH,
+      headers: {},
+      params: {},
+      body: ffApiRequestBody,
+      bodyType: BodyType.JSON,
+      returnBody: true,
+      encodeBodyUtf8: false,
+      decodeUtf8: true,
+      cache: false,
+      isStreamingApi: false,
+      alwaysAllowBody: false,
+    );
+  }
+}
+
+class ExcluirNotificacaoCall {
+  static Future<ApiCallResponse> call({
+    int? id,
+  }) async {
+    return ApiManager.instance.makeApiCall(
+      callName: 'excluirNotificacao',
+      apiUrl: 'https://codeflowbr.online:8080/api/v1/notify/${id}',
+      callType: ApiCallType.DELETE,
+      headers: {},
+      params: {},
+      returnBody: true,
+      encodeBodyUtf8: false,
+      decodeUtf8: true,
+      cache: false,
+      isStreamingApi: false,
+      alwaysAllowBody: false,
+    );
+  }
+}
+
 class AdicionarBannerCall {
   static Future<ApiCallResponse> call({
     String? url = '',
@@ -1365,6 +1434,24 @@ class GetHistoricoRecenteCall {
       params: {
         'partnerId': partnerId,
       },
+      returnBody: true,
+      encodeBodyUtf8: false,
+      decodeUtf8: false,
+      cache: false,
+      isStreamingApi: false,
+      alwaysAllowBody: false,
+    );
+  }
+}
+
+class GetHistoricoCompletoCall {
+  static Future<ApiCallResponse> call() async {
+    return ApiManager.instance.makeApiCall(
+      callName: 'GetHistoricoCompleto',
+      apiUrl: 'https://codeflowbr.online:8080/api/v1/history',
+      callType: ApiCallType.GET,
+      headers: {},
+      params: {},
       returnBody: true,
       encodeBodyUtf8: false,
       decodeUtf8: false,

@@ -316,9 +316,10 @@ class _ModalEditarParceiroWidgetState extends State<ModalEditarParceiroWidget> {
                     width: 300.0,
                     decoration: BoxDecoration(
                       border: Border.all(
-                        color: Color(0xFFC5C4C4),
+                        color: Color(0xFFCCCCCC),
                         width: 1.0,
                       ),
+                      borderRadius: BorderRadius.circular(8.0),
                     ),
                     child: Column(
                       mainAxisSize: MainAxisSize.max,
@@ -467,37 +468,37 @@ class _ModalEditarParceiroWidgetState extends State<ModalEditarParceiroWidget> {
                                   ),
                               enabledBorder: OutlineInputBorder(
                                 borderSide: BorderSide(
-                                  color: Color(0xFFC5C4C4),
-                                  width: 0.5,
+                                  color: Color(0xFFCCCCCC),
+                                  width: 1.0,
                                 ),
-                                borderRadius: BorderRadius.only(),
+                                borderRadius: BorderRadius.circular(8.0),
                               ),
                               focusedBorder: OutlineInputBorder(
                                 borderSide: BorderSide(
-                                  color: Color(0xFFC5C4C4),
-                                  width: 0.5,
+                                  color: Color(0xFFCCCCCC),
+                                  width: 1.0,
                                 ),
-                                borderRadius: BorderRadius.only(),
+                                borderRadius: BorderRadius.circular(8.0),
                               ),
                               errorBorder: OutlineInputBorder(
                                 borderSide: BorderSide(
                                   color: FlutterFlowTheme.of(context).error,
-                                  width: 0.5,
+                                  width: 1.0,
                                 ),
-                                borderRadius: BorderRadius.only(),
+                                borderRadius: BorderRadius.circular(8.0),
                               ),
                               focusedErrorBorder: OutlineInputBorder(
                                 borderSide: BorderSide(
                                   color: FlutterFlowTheme.of(context).error,
-                                  width: 0.5,
+                                  width: 1.0,
                                 ),
-                                borderRadius: BorderRadius.only(),
+                                borderRadius: BorderRadius.circular(8.0),
                               ),
                               filled: true,
                               fillColor: FlutterFlowTheme.of(context)
                                   .secondaryBackground,
                               contentPadding: EdgeInsetsDirectional.fromSTEB(
-                                  10.0, 25.0, 10.0, 25.0),
+                                  14.0, 14.0, 14.0, 14.0),
                             ),
                             style: FlutterFlowTheme.of(context)
                                 .bodyMedium
@@ -585,9 +586,9 @@ class _ModalEditarParceiroWidgetState extends State<ModalEditarParceiroWidget> {
                               size: 24.0,
                             ),
                             fillColor: Colors.white,
-                            elevation: 3.0,
-                            borderColor: Colors.transparent,
-                            borderWidth: 0.0,
+                            elevation: 0.0,
+                                  borderColor: const Color(0xFFCCCCCC),
+                                  borderWidth: 1.0,
                             borderRadius: 8.0,
                             margin: EdgeInsetsDirectional.fromSTEB(
                                 12.0, 0.0, 12.0, 0.0),
@@ -735,37 +736,37 @@ class _ModalEditarParceiroWidgetState extends State<ModalEditarParceiroWidget> {
                                   ),
                               enabledBorder: OutlineInputBorder(
                                 borderSide: BorderSide(
-                                  color: Color(0xFFC5C4C4),
-                                  width: 0.5,
+                                  color: Color(0xFFCCCCCC),
+                                  width: 1.0,
                                 ),
-                                borderRadius: BorderRadius.only(),
+                                borderRadius: BorderRadius.circular(8.0),
                               ),
                               focusedBorder: OutlineInputBorder(
                                 borderSide: BorderSide(
-                                  color: Color(0xFFC5C4C4),
-                                  width: 0.5,
+                                  color: Color(0xFFCCCCCC),
+                                  width: 1.0,
                                 ),
-                                borderRadius: BorderRadius.only(),
+                                borderRadius: BorderRadius.circular(8.0),
                               ),
                               errorBorder: OutlineInputBorder(
                                 borderSide: BorderSide(
                                   color: FlutterFlowTheme.of(context).error,
-                                  width: 0.5,
+                                  width: 1.0,
                                 ),
-                                borderRadius: BorderRadius.only(),
+                                borderRadius: BorderRadius.circular(8.0),
                               ),
                               focusedErrorBorder: OutlineInputBorder(
                                 borderSide: BorderSide(
                                   color: FlutterFlowTheme.of(context).error,
-                                  width: 0.5,
+                                  width: 1.0,
                                 ),
-                                borderRadius: BorderRadius.only(),
+                                borderRadius: BorderRadius.circular(8.0),
                               ),
                               filled: true,
                               fillColor: FlutterFlowTheme.of(context)
                                   .secondaryBackground,
                               contentPadding: EdgeInsetsDirectional.fromSTEB(
-                                  10.0, 25.0, 10.0, 25.0),
+                                  14.0, 14.0, 14.0, 14.0),
                             ),
                             style: FlutterFlowTheme.of(context)
                                 .bodyMedium
@@ -874,37 +875,37 @@ class _ModalEditarParceiroWidgetState extends State<ModalEditarParceiroWidget> {
                                   ),
                               enabledBorder: OutlineInputBorder(
                                 borderSide: BorderSide(
-                                  color: Color(0xFFC5C4C4),
-                                  width: 0.5,
+                                  color: Color(0xFFCCCCCC),
+                                  width: 1.0,
                                 ),
-                                borderRadius: BorderRadius.only(),
+                                borderRadius: BorderRadius.circular(8.0),
                               ),
                               focusedBorder: OutlineInputBorder(
                                 borderSide: BorderSide(
-                                  color: Color(0xFFC5C4C4),
-                                  width: 0.5,
+                                  color: Color(0xFFCCCCCC),
+                                  width: 1.0,
                                 ),
-                                borderRadius: BorderRadius.only(),
+                                borderRadius: BorderRadius.circular(8.0),
                               ),
                               errorBorder: OutlineInputBorder(
                                 borderSide: BorderSide(
                                   color: FlutterFlowTheme.of(context).error,
-                                  width: 0.5,
+                                  width: 1.0,
                                 ),
-                                borderRadius: BorderRadius.only(),
+                                borderRadius: BorderRadius.circular(8.0),
                               ),
                               focusedErrorBorder: OutlineInputBorder(
                                 borderSide: BorderSide(
                                   color: FlutterFlowTheme.of(context).error,
-                                  width: 0.5,
+                                  width: 1.0,
                                 ),
-                                borderRadius: BorderRadius.only(),
+                                borderRadius: BorderRadius.circular(8.0),
                               ),
                               filled: true,
                               fillColor: FlutterFlowTheme.of(context)
                                   .secondaryBackground,
                               contentPadding: EdgeInsetsDirectional.fromSTEB(
-                                  10.0, 25.0, 10.0, 25.0),
+                                  14.0, 14.0, 14.0, 14.0),
                             ),
                             style: FlutterFlowTheme.of(context)
                                 .bodyMedium
@@ -1019,37 +1020,37 @@ class _ModalEditarParceiroWidgetState extends State<ModalEditarParceiroWidget> {
                                   ),
                               enabledBorder: OutlineInputBorder(
                                 borderSide: BorderSide(
-                                  color: Color(0xFFC5C4C4),
-                                  width: 0.5,
+                                  color: Color(0xFFCCCCCC),
+                                  width: 1.0,
                                 ),
-                                borderRadius: BorderRadius.only(),
+                                borderRadius: BorderRadius.circular(8.0),
                               ),
                               focusedBorder: OutlineInputBorder(
                                 borderSide: BorderSide(
-                                  color: Color(0xFFC5C4C4),
-                                  width: 0.5,
+                                  color: Color(0xFFCCCCCC),
+                                  width: 1.0,
                                 ),
-                                borderRadius: BorderRadius.only(),
+                                borderRadius: BorderRadius.circular(8.0),
                               ),
                               errorBorder: OutlineInputBorder(
                                 borderSide: BorderSide(
                                   color: FlutterFlowTheme.of(context).error,
-                                  width: 0.5,
+                                  width: 1.0,
                                 ),
-                                borderRadius: BorderRadius.only(),
+                                borderRadius: BorderRadius.circular(8.0),
                               ),
                               focusedErrorBorder: OutlineInputBorder(
                                 borderSide: BorderSide(
                                   color: FlutterFlowTheme.of(context).error,
-                                  width: 0.5,
+                                  width: 1.0,
                                 ),
-                                borderRadius: BorderRadius.only(),
+                                borderRadius: BorderRadius.circular(8.0),
                               ),
                               filled: true,
                               fillColor: FlutterFlowTheme.of(context)
                                   .secondaryBackground,
                               contentPadding: EdgeInsetsDirectional.fromSTEB(
-                                  10.0, 25.0, 10.0, 25.0),
+                                  14.0, 14.0, 14.0, 14.0),
                             ),
                             style: FlutterFlowTheme.of(context)
                                 .bodyMedium
@@ -1158,37 +1159,37 @@ class _ModalEditarParceiroWidgetState extends State<ModalEditarParceiroWidget> {
                                   ),
                               enabledBorder: OutlineInputBorder(
                                 borderSide: BorderSide(
-                                  color: Color(0xFFC5C4C4),
-                                  width: 0.5,
+                                  color: Color(0xFFCCCCCC),
+                                  width: 1.0,
                                 ),
-                                borderRadius: BorderRadius.only(),
+                                borderRadius: BorderRadius.circular(8.0),
                               ),
                               focusedBorder: OutlineInputBorder(
                                 borderSide: BorderSide(
-                                  color: Color(0xFFC5C4C4),
-                                  width: 0.5,
+                                  color: Color(0xFFCCCCCC),
+                                  width: 1.0,
                                 ),
-                                borderRadius: BorderRadius.only(),
+                                borderRadius: BorderRadius.circular(8.0),
                               ),
                               errorBorder: OutlineInputBorder(
                                 borderSide: BorderSide(
                                   color: FlutterFlowTheme.of(context).error,
-                                  width: 0.5,
+                                  width: 1.0,
                                 ),
-                                borderRadius: BorderRadius.only(),
+                                borderRadius: BorderRadius.circular(8.0),
                               ),
                               focusedErrorBorder: OutlineInputBorder(
                                 borderSide: BorderSide(
                                   color: FlutterFlowTheme.of(context).error,
-                                  width: 0.5,
+                                  width: 1.0,
                                 ),
-                                borderRadius: BorderRadius.only(),
+                                borderRadius: BorderRadius.circular(8.0),
                               ),
                               filled: true,
                               fillColor: FlutterFlowTheme.of(context)
                                   .secondaryBackground,
                               contentPadding: EdgeInsetsDirectional.fromSTEB(
-                                  10.0, 25.0, 10.0, 25.0),
+                                  14.0, 14.0, 14.0, 14.0),
                             ),
                             style: FlutterFlowTheme.of(context)
                                 .bodyMedium
@@ -1325,33 +1326,31 @@ class _ModalEditarParceiroWidgetState extends State<ModalEditarParceiroWidget> {
                                         ),
                                     enabledBorder: OutlineInputBorder(
                                       borderSide: BorderSide(
-                                        color: Color(0xFFC5C4C4),
-                                        width: 0.5,
-                                      ),
-                                      borderRadius: BorderRadius.only(),
+                                  color: Color(0xFFCCCCCC),
+                                  width: 1.0,
+                                ),
+                                      borderRadius: BorderRadius.circular(8.0),
                                     ),
                                     focusedBorder: OutlineInputBorder(
                                       borderSide: BorderSide(
-                                        color: Color(0xFFC5C4C4),
-                                        width: 0.5,
-                                      ),
-                                      borderRadius: BorderRadius.only(),
+                                  color: Color(0xFFCCCCCC),
+                                  width: 1.0,
+                                ),
+                                      borderRadius: BorderRadius.circular(8.0),
                                     ),
                                     errorBorder: OutlineInputBorder(
                                       borderSide: BorderSide(
-                                        color:
-                                            FlutterFlowTheme.of(context).error,
-                                        width: 0.5,
-                                      ),
-                                      borderRadius: BorderRadius.only(),
+                                  color: FlutterFlowTheme.of(context).error,
+                                  width: 1.0,
+                                ),
+                                      borderRadius: BorderRadius.circular(8.0),
                                     ),
                                     focusedErrorBorder: OutlineInputBorder(
                                       borderSide: BorderSide(
-                                        color:
-                                            FlutterFlowTheme.of(context).error,
-                                        width: 0.5,
-                                      ),
-                                      borderRadius: BorderRadius.only(),
+                                  color: FlutterFlowTheme.of(context).error,
+                                  width: 1.0,
+                                ),
+                                      borderRadius: BorderRadius.circular(8.0),
                                     ),
                                     filled: true,
                                     fillColor: FlutterFlowTheme.of(context)
@@ -1482,33 +1481,33 @@ class _ModalEditarParceiroWidgetState extends State<ModalEditarParceiroWidget> {
                                           ),
                                       enabledBorder: OutlineInputBorder(
                                         borderSide: BorderSide(
-                                          color: Color(0xFFC5C4C4),
-                                          width: 0.5,
-                                        ),
-                                        borderRadius: BorderRadius.only(),
+                                  color: Color(0xFFCCCCCC),
+                                  width: 1.0,
+                                ),
+                                        borderRadius: BorderRadius.circular(8.0),
                                       ),
                                       focusedBorder: OutlineInputBorder(
                                         borderSide: BorderSide(
-                                          color: Color(0xFFC5C4C4),
-                                          width: 0.5,
-                                        ),
-                                        borderRadius: BorderRadius.only(),
+                                  color: Color(0xFFCCCCCC),
+                                  width: 1.0,
+                                ),
+                                        borderRadius: BorderRadius.circular(8.0),
                                       ),
                                       errorBorder: OutlineInputBorder(
                                         borderSide: BorderSide(
-                                          color: FlutterFlowTheme.of(context)
+                                  color: FlutterFlowTheme.of(context)
                                               .error,
-                                          width: 0.5,
-                                        ),
-                                        borderRadius: BorderRadius.only(),
+                                  width: 1.0,
+                                ),
+                                        borderRadius: BorderRadius.circular(8.0),
                                       ),
                                       focusedErrorBorder: OutlineInputBorder(
                                         borderSide: BorderSide(
-                                          color: FlutterFlowTheme.of(context)
+                                  color: FlutterFlowTheme.of(context)
                                               .error,
-                                          width: 0.5,
-                                        ),
-                                        borderRadius: BorderRadius.only(),
+                                  width: 1.0,
+                                ),
+                                        borderRadius: BorderRadius.circular(8.0),
                                       ),
                                       filled: true,
                                       fillColor: FlutterFlowTheme.of(context)
@@ -1652,33 +1651,33 @@ class _ModalEditarParceiroWidgetState extends State<ModalEditarParceiroWidget> {
                                           ),
                                       enabledBorder: OutlineInputBorder(
                                         borderSide: BorderSide(
-                                          color: Color(0xFFC5C4C4),
-                                          width: 0.5,
-                                        ),
-                                        borderRadius: BorderRadius.only(),
+                                  color: Color(0xFFCCCCCC),
+                                  width: 1.0,
+                                ),
+                                        borderRadius: BorderRadius.circular(8.0),
                                       ),
                                       focusedBorder: OutlineInputBorder(
                                         borderSide: BorderSide(
-                                          color: Color(0xFFC5C4C4),
-                                          width: 0.5,
-                                        ),
-                                        borderRadius: BorderRadius.only(),
+                                  color: Color(0xFFCCCCCC),
+                                  width: 1.0,
+                                ),
+                                        borderRadius: BorderRadius.circular(8.0),
                                       ),
                                       errorBorder: OutlineInputBorder(
                                         borderSide: BorderSide(
-                                          color: FlutterFlowTheme.of(context)
+                                  color: FlutterFlowTheme.of(context)
                                               .error,
-                                          width: 0.5,
-                                        ),
-                                        borderRadius: BorderRadius.only(),
+                                  width: 1.0,
+                                ),
+                                        borderRadius: BorderRadius.circular(8.0),
                                       ),
                                       focusedErrorBorder: OutlineInputBorder(
                                         borderSide: BorderSide(
-                                          color: FlutterFlowTheme.of(context)
+                                  color: FlutterFlowTheme.of(context)
                                               .error,
-                                          width: 0.5,
-                                        ),
-                                        borderRadius: BorderRadius.only(),
+                                  width: 1.0,
+                                ),
+                                        borderRadius: BorderRadius.circular(8.0),
                                       ),
                                       filled: true,
                                       fillColor: FlutterFlowTheme.of(context)
@@ -1796,9 +1795,9 @@ class _ModalEditarParceiroWidgetState extends State<ModalEditarParceiroWidget> {
                                   ),
                                   fillColor: FlutterFlowTheme.of(context)
                                       .secondaryBackground,
-                                  elevation: 2.0,
-                                  borderColor: Colors.transparent,
-                                  borderWidth: 0.0,
+                                  elevation: 0.0,
+                                  borderColor: const Color(0xFFCCCCCC),
+                                  borderWidth: 1.0,
                                   borderRadius: 8.0,
                                   margin: EdgeInsetsDirectional.fromSTEB(
                                       12.0, 0.0, 12.0, 0.0),
@@ -1899,37 +1898,37 @@ class _ModalEditarParceiroWidgetState extends State<ModalEditarParceiroWidget> {
                                   ),
                               enabledBorder: OutlineInputBorder(
                                 borderSide: BorderSide(
-                                  color: Color(0xFFC5C4C4),
-                                  width: 0.5,
+                                  color: Color(0xFFCCCCCC),
+                                  width: 1.0,
                                 ),
-                                borderRadius: BorderRadius.only(),
+                                borderRadius: BorderRadius.circular(8.0),
                               ),
                               focusedBorder: OutlineInputBorder(
                                 borderSide: BorderSide(
-                                  color: Color(0xFFC5C4C4),
-                                  width: 0.5,
+                                  color: Color(0xFFCCCCCC),
+                                  width: 1.0,
                                 ),
-                                borderRadius: BorderRadius.only(),
+                                borderRadius: BorderRadius.circular(8.0),
                               ),
                               errorBorder: OutlineInputBorder(
                                 borderSide: BorderSide(
                                   color: FlutterFlowTheme.of(context).error,
-                                  width: 0.5,
+                                  width: 1.0,
                                 ),
-                                borderRadius: BorderRadius.only(),
+                                borderRadius: BorderRadius.circular(8.0),
                               ),
                               focusedErrorBorder: OutlineInputBorder(
                                 borderSide: BorderSide(
                                   color: FlutterFlowTheme.of(context).error,
-                                  width: 0.5,
+                                  width: 1.0,
                                 ),
-                                borderRadius: BorderRadius.only(),
+                                borderRadius: BorderRadius.circular(8.0),
                               ),
                               filled: true,
                               fillColor: FlutterFlowTheme.of(context)
                                   .secondaryBackground,
                               contentPadding: EdgeInsetsDirectional.fromSTEB(
-                                  10.0, 25.0, 10.0, 25.0),
+                                  14.0, 14.0, 14.0, 14.0),
                             ),
                             style: FlutterFlowTheme.of(context)
                                 .bodyMedium
@@ -2045,37 +2044,37 @@ class _ModalEditarParceiroWidgetState extends State<ModalEditarParceiroWidget> {
                                   ),
                               enabledBorder: OutlineInputBorder(
                                 borderSide: BorderSide(
-                                  color: Color(0xFFC5C4C4),
-                                  width: 0.5,
+                                  color: Color(0xFFCCCCCC),
+                                  width: 1.0,
                                 ),
-                                borderRadius: BorderRadius.only(),
+                                borderRadius: BorderRadius.circular(8.0),
                               ),
                               focusedBorder: OutlineInputBorder(
                                 borderSide: BorderSide(
-                                  color: Color(0xFFC5C4C4),
-                                  width: 0.5,
+                                  color: Color(0xFFCCCCCC),
+                                  width: 1.0,
                                 ),
-                                borderRadius: BorderRadius.only(),
+                                borderRadius: BorderRadius.circular(8.0),
                               ),
                               errorBorder: OutlineInputBorder(
                                 borderSide: BorderSide(
                                   color: FlutterFlowTheme.of(context).error,
-                                  width: 0.5,
+                                  width: 1.0,
                                 ),
-                                borderRadius: BorderRadius.only(),
+                                borderRadius: BorderRadius.circular(8.0),
                               ),
                               focusedErrorBorder: OutlineInputBorder(
                                 borderSide: BorderSide(
                                   color: FlutterFlowTheme.of(context).error,
-                                  width: 0.5,
+                                  width: 1.0,
                                 ),
-                                borderRadius: BorderRadius.only(),
+                                borderRadius: BorderRadius.circular(8.0),
                               ),
                               filled: true,
                               fillColor: FlutterFlowTheme.of(context)
                                   .secondaryBackground,
                               contentPadding: EdgeInsetsDirectional.fromSTEB(
-                                  10.0, 25.0, 10.0, 25.0),
+                                  14.0, 14.0, 14.0, 14.0),
                             ),
                             style: FlutterFlowTheme.of(context)
                                 .bodyMedium
@@ -2190,37 +2189,37 @@ class _ModalEditarParceiroWidgetState extends State<ModalEditarParceiroWidget> {
                                   ),
                               enabledBorder: OutlineInputBorder(
                                 borderSide: BorderSide(
-                                  color: Color(0xFFC5C4C4),
-                                  width: 0.5,
+                                  color: Color(0xFFCCCCCC),
+                                  width: 1.0,
                                 ),
-                                borderRadius: BorderRadius.only(),
+                                borderRadius: BorderRadius.circular(8.0),
                               ),
                               focusedBorder: OutlineInputBorder(
                                 borderSide: BorderSide(
-                                  color: Color(0xFFC5C4C4),
-                                  width: 0.5,
+                                  color: Color(0xFFCCCCCC),
+                                  width: 1.0,
                                 ),
-                                borderRadius: BorderRadius.only(),
+                                borderRadius: BorderRadius.circular(8.0),
                               ),
                               errorBorder: OutlineInputBorder(
                                 borderSide: BorderSide(
                                   color: FlutterFlowTheme.of(context).error,
-                                  width: 0.5,
+                                  width: 1.0,
                                 ),
-                                borderRadius: BorderRadius.only(),
+                                borderRadius: BorderRadius.circular(8.0),
                               ),
                               focusedErrorBorder: OutlineInputBorder(
                                 borderSide: BorderSide(
                                   color: FlutterFlowTheme.of(context).error,
-                                  width: 0.5,
+                                  width: 1.0,
                                 ),
-                                borderRadius: BorderRadius.only(),
+                                borderRadius: BorderRadius.circular(8.0),
                               ),
                               filled: true,
                               fillColor: FlutterFlowTheme.of(context)
                                   .secondaryBackground,
                               contentPadding: EdgeInsetsDirectional.fromSTEB(
-                                  10.0, 25.0, 10.0, 25.0),
+                                  14.0, 14.0, 14.0, 14.0),
                             ),
                             style: FlutterFlowTheme.of(context)
                                 .bodyMedium
@@ -2563,37 +2562,37 @@ class _ModalEditarParceiroWidgetState extends State<ModalEditarParceiroWidget> {
                                   ),
                               enabledBorder: OutlineInputBorder(
                                 borderSide: BorderSide(
-                                  color: Color(0xFFC5C4C4),
-                                  width: 0.5,
+                                  color: Color(0xFFCCCCCC),
+                                  width: 1.0,
                                 ),
-                                borderRadius: BorderRadius.only(),
+                                borderRadius: BorderRadius.circular(8.0),
                               ),
                               focusedBorder: OutlineInputBorder(
                                 borderSide: BorderSide(
-                                  color: Color(0xFFC5C4C4),
-                                  width: 0.5,
+                                  color: Color(0xFFCCCCCC),
+                                  width: 1.0,
                                 ),
-                                borderRadius: BorderRadius.only(),
+                                borderRadius: BorderRadius.circular(8.0),
                               ),
                               errorBorder: OutlineInputBorder(
                                 borderSide: BorderSide(
                                   color: FlutterFlowTheme.of(context).error,
-                                  width: 0.5,
+                                  width: 1.0,
                                 ),
-                                borderRadius: BorderRadius.only(),
+                                borderRadius: BorderRadius.circular(8.0),
                               ),
                               focusedErrorBorder: OutlineInputBorder(
                                 borderSide: BorderSide(
                                   color: FlutterFlowTheme.of(context).error,
-                                  width: 0.5,
+                                  width: 1.0,
                                 ),
-                                borderRadius: BorderRadius.only(),
+                                borderRadius: BorderRadius.circular(8.0),
                               ),
                               filled: true,
                               fillColor: FlutterFlowTheme.of(context)
                                   .secondaryBackground,
                               contentPadding: EdgeInsetsDirectional.fromSTEB(
-                                  10.0, 25.0, 10.0, 25.0),
+                                  14.0, 14.0, 14.0, 14.0),
                             ),
                             style: FlutterFlowTheme.of(context)
                                 .bodyMedium
@@ -2702,37 +2701,37 @@ class _ModalEditarParceiroWidgetState extends State<ModalEditarParceiroWidget> {
                                   ),
                               enabledBorder: OutlineInputBorder(
                                 borderSide: BorderSide(
-                                  color: Color(0xFFC5C4C4),
-                                  width: 0.5,
+                                  color: Color(0xFFCCCCCC),
+                                  width: 1.0,
                                 ),
-                                borderRadius: BorderRadius.only(),
+                                borderRadius: BorderRadius.circular(8.0),
                               ),
                               focusedBorder: OutlineInputBorder(
                                 borderSide: BorderSide(
-                                  color: Color(0xFFC5C4C4),
-                                  width: 0.5,
+                                  color: Color(0xFFCCCCCC),
+                                  width: 1.0,
                                 ),
-                                borderRadius: BorderRadius.only(),
+                                borderRadius: BorderRadius.circular(8.0),
                               ),
                               errorBorder: OutlineInputBorder(
                                 borderSide: BorderSide(
                                   color: FlutterFlowTheme.of(context).error,
-                                  width: 0.5,
+                                  width: 1.0,
                                 ),
-                                borderRadius: BorderRadius.only(),
+                                borderRadius: BorderRadius.circular(8.0),
                               ),
                               focusedErrorBorder: OutlineInputBorder(
                                 borderSide: BorderSide(
                                   color: FlutterFlowTheme.of(context).error,
-                                  width: 0.5,
+                                  width: 1.0,
                                 ),
-                                borderRadius: BorderRadius.only(),
+                                borderRadius: BorderRadius.circular(8.0),
                               ),
                               filled: true,
                               fillColor: FlutterFlowTheme.of(context)
                                   .secondaryBackground,
                               contentPadding: EdgeInsetsDirectional.fromSTEB(
-                                  10.0, 25.0, 10.0, 25.0),
+                                  14.0, 14.0, 14.0, 14.0),
                             ),
                             style: FlutterFlowTheme.of(context)
                                 .bodyMedium
@@ -2854,37 +2853,37 @@ class _ModalEditarParceiroWidgetState extends State<ModalEditarParceiroWidget> {
                                   ),
                               enabledBorder: OutlineInputBorder(
                                 borderSide: BorderSide(
-                                  color: Color(0xFFC5C4C4),
-                                  width: 0.5,
+                                  color: Color(0xFFCCCCCC),
+                                  width: 1.0,
                                 ),
-                                borderRadius: BorderRadius.only(),
+                                borderRadius: BorderRadius.circular(8.0),
                               ),
                               focusedBorder: OutlineInputBorder(
                                 borderSide: BorderSide(
-                                  color: Color(0xFFC5C4C4),
-                                  width: 0.5,
+                                  color: Color(0xFFCCCCCC),
+                                  width: 1.0,
                                 ),
-                                borderRadius: BorderRadius.only(),
+                                borderRadius: BorderRadius.circular(8.0),
                               ),
                               errorBorder: OutlineInputBorder(
                                 borderSide: BorderSide(
                                   color: FlutterFlowTheme.of(context).error,
-                                  width: 0.5,
+                                  width: 1.0,
                                 ),
-                                borderRadius: BorderRadius.only(),
+                                borderRadius: BorderRadius.circular(8.0),
                               ),
                               focusedErrorBorder: OutlineInputBorder(
                                 borderSide: BorderSide(
                                   color: FlutterFlowTheme.of(context).error,
-                                  width: 0.5,
+                                  width: 1.0,
                                 ),
-                                borderRadius: BorderRadius.only(),
+                                borderRadius: BorderRadius.circular(8.0),
                               ),
                               filled: true,
                               fillColor: FlutterFlowTheme.of(context)
                                   .secondaryBackground,
                               contentPadding: EdgeInsetsDirectional.fromSTEB(
-                                  10.0, 25.0, 10.0, 25.0),
+                                  14.0, 14.0, 14.0, 14.0),
                             ),
                             style: FlutterFlowTheme.of(context)
                                 .bodyMedium
@@ -3000,37 +2999,37 @@ class _ModalEditarParceiroWidgetState extends State<ModalEditarParceiroWidget> {
                                   ),
                               enabledBorder: OutlineInputBorder(
                                 borderSide: BorderSide(
-                                  color: Color(0xFFC5C4C4),
-                                  width: 0.5,
+                                  color: Color(0xFFCCCCCC),
+                                  width: 1.0,
                                 ),
-                                borderRadius: BorderRadius.only(),
+                                borderRadius: BorderRadius.circular(8.0),
                               ),
                               focusedBorder: OutlineInputBorder(
                                 borderSide: BorderSide(
-                                  color: Color(0xFFC5C4C4),
-                                  width: 0.5,
+                                  color: Color(0xFFCCCCCC),
+                                  width: 1.0,
                                 ),
-                                borderRadius: BorderRadius.only(),
+                                borderRadius: BorderRadius.circular(8.0),
                               ),
                               errorBorder: OutlineInputBorder(
                                 borderSide: BorderSide(
                                   color: FlutterFlowTheme.of(context).error,
-                                  width: 0.5,
+                                  width: 1.0,
                                 ),
-                                borderRadius: BorderRadius.only(),
+                                borderRadius: BorderRadius.circular(8.0),
                               ),
                               focusedErrorBorder: OutlineInputBorder(
                                 borderSide: BorderSide(
                                   color: FlutterFlowTheme.of(context).error,
-                                  width: 0.5,
+                                  width: 1.0,
                                 ),
-                                borderRadius: BorderRadius.only(),
+                                borderRadius: BorderRadius.circular(8.0),
                               ),
                               filled: true,
                               fillColor: FlutterFlowTheme.of(context)
                                   .secondaryBackground,
                               contentPadding: EdgeInsetsDirectional.fromSTEB(
-                                  10.0, 25.0, 10.0, 25.0),
+                                  14.0, 14.0, 14.0, 14.0),
                             ),
                             style: FlutterFlowTheme.of(context)
                                 .bodyMedium
@@ -3152,37 +3151,37 @@ class _ModalEditarParceiroWidgetState extends State<ModalEditarParceiroWidget> {
                                   ),
                               enabledBorder: OutlineInputBorder(
                                 borderSide: BorderSide(
-                                  color: Color(0xFFC5C4C4),
-                                  width: 0.5,
+                                  color: Color(0xFFCCCCCC),
+                                  width: 1.0,
                                 ),
-                                borderRadius: BorderRadius.only(),
+                                borderRadius: BorderRadius.circular(8.0),
                               ),
                               focusedBorder: OutlineInputBorder(
                                 borderSide: BorderSide(
-                                  color: Color(0xFFC5C4C4),
-                                  width: 0.5,
+                                  color: Color(0xFFCCCCCC),
+                                  width: 1.0,
                                 ),
-                                borderRadius: BorderRadius.only(),
+                                borderRadius: BorderRadius.circular(8.0),
                               ),
                               errorBorder: OutlineInputBorder(
                                 borderSide: BorderSide(
                                   color: FlutterFlowTheme.of(context).error,
-                                  width: 0.5,
+                                  width: 1.0,
                                 ),
-                                borderRadius: BorderRadius.only(),
+                                borderRadius: BorderRadius.circular(8.0),
                               ),
                               focusedErrorBorder: OutlineInputBorder(
                                 borderSide: BorderSide(
                                   color: FlutterFlowTheme.of(context).error,
-                                  width: 0.5,
+                                  width: 1.0,
                                 ),
-                                borderRadius: BorderRadius.only(),
+                                borderRadius: BorderRadius.circular(8.0),
                               ),
                               filled: true,
                               fillColor: FlutterFlowTheme.of(context)
                                   .secondaryBackground,
                               contentPadding: EdgeInsetsDirectional.fromSTEB(
-                                  10.0, 25.0, 10.0, 25.0),
+                                  14.0, 14.0, 14.0, 14.0),
                             ),
                             style: FlutterFlowTheme.of(context)
                                 .bodyMedium
@@ -3291,37 +3290,37 @@ class _ModalEditarParceiroWidgetState extends State<ModalEditarParceiroWidget> {
                                   ),
                               enabledBorder: OutlineInputBorder(
                                 borderSide: BorderSide(
-                                  color: Color(0xFFC5C4C4),
-                                  width: 0.5,
+                                  color: Color(0xFFCCCCCC),
+                                  width: 1.0,
                                 ),
-                                borderRadius: BorderRadius.only(),
+                                borderRadius: BorderRadius.circular(8.0),
                               ),
                               focusedBorder: OutlineInputBorder(
                                 borderSide: BorderSide(
-                                  color: Color(0xFFC5C4C4),
-                                  width: 0.5,
+                                  color: Color(0xFFCCCCCC),
+                                  width: 1.0,
                                 ),
-                                borderRadius: BorderRadius.only(),
+                                borderRadius: BorderRadius.circular(8.0),
                               ),
                               errorBorder: OutlineInputBorder(
                                 borderSide: BorderSide(
                                   color: FlutterFlowTheme.of(context).error,
-                                  width: 0.5,
+                                  width: 1.0,
                                 ),
-                                borderRadius: BorderRadius.only(),
+                                borderRadius: BorderRadius.circular(8.0),
                               ),
                               focusedErrorBorder: OutlineInputBorder(
                                 borderSide: BorderSide(
                                   color: FlutterFlowTheme.of(context).error,
-                                  width: 0.5,
+                                  width: 1.0,
                                 ),
-                                borderRadius: BorderRadius.only(),
+                                borderRadius: BorderRadius.circular(8.0),
                               ),
                               filled: true,
                               fillColor: FlutterFlowTheme.of(context)
                                   .secondaryBackground,
                               contentPadding: EdgeInsetsDirectional.fromSTEB(
-                                  10.0, 25.0, 10.0, 25.0),
+                                  14.0, 14.0, 14.0, 14.0),
                               suffixIcon: InkWell(
                                 onTap: () async {
                                   safeSetState(() => _model.passRepVisibility =

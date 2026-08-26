@@ -72,9 +72,10 @@ class _ListagemDeUsuariosWidgetState extends State<ListagemDeUsuariosWidget> {
       switch (_model.sortField) {
         case 'id':
           return getJsonField(user, r'''$.id''');
-        case 'tipo':
-          return functions.defineTipoDeUsuario(
-              getJsonField(user, r'''$.user.role''').toString()).toLowerCase();
+        case 'pass':
+          return getJsonField(user, r'''$.armspass''') == true ? 1 : 0;
+        case 'status':
+          return getJsonField(user, r'''$.isActive''') == true ? 1 : 0;
         case 'identificacao':
           return (getJsonField(user, r'''$.partner''') != null
               ? getJsonField(user, r'''$.partner.cnpj''')
@@ -124,14 +125,14 @@ class _ListagemDeUsuariosWidgetState extends State<ListagemDeUsuariosWidget> {
         mainAxisSize: MainAxisSize.min,
         children: [
           label,
-          const SizedBox(width: 4.0),
+          const SizedBox(width: 2.0),
           Icon(
             isActive
                 ? (_model.sortAscending
                     ? Icons.arrow_upward_rounded
                     : Icons.arrow_downward_rounded)
                 : Icons.unfold_more_rounded,
-            size: 14.0,
+            size: 12.0,
             color: isActive
                 ? FlutterFlowTheme.of(context).primary
                 : FlutterFlowTheme.of(context).secondaryText.withOpacity(0.5),
@@ -191,7 +192,7 @@ class _ListagemDeUsuariosWidgetState extends State<ListagemDeUsuariosWidget> {
                           padding: EdgeInsetsDirectional.fromSTEB(
                               35.0, 30.0, 0.0, 0.0),
                           child: Container(
-                            width: MediaQuery.sizeOf(context).width * 0.2,
+                            width: 250.0,
                             child: TextFormField(
                               controller: _model.textController,
                               focusNode: _model.textFieldFocusNode,
@@ -329,10 +330,18 @@ class _ListagemDeUsuariosWidgetState extends State<ListagemDeUsuariosWidget> {
                   Padding(
                     padding:
                         EdgeInsetsDirectional.fromSTEB(0.0, 40.0, 0.0, 0.0),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.max,
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: FlutterFlowTheme.of(context).alternate,
+                        borderRadius: BorderRadius.circular(
+                            FlutterFlowTheme.of(context).designToken.radius.sm),
+                      ),
+                      padding:
+                          EdgeInsetsDirectional.fromSTEB(16.0, 12.0, 16.0, 12.0),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.max,
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
                         Expanded(
                           flex: 1,
                           child: Container(
@@ -342,52 +351,14 @@ class _ListagemDeUsuariosWidgetState extends State<ListagemDeUsuariosWidget> {
                               child: _buildSortableHeader(
                                 context,
                                 'id',
-                                wrapWithModel(
-                                  model: _model.fonteTituloTabelaModel1,
-                                  updateCallback: () => safeSetState(() {}),
-                                  child: FonteTituloTabelaWidget(
-                                    text: 'ID',
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                        Expanded(
-                          flex: 5,
-                          child: Container(
-                            decoration: BoxDecoration(),
-                            child: Align(
-                              alignment: AlignmentDirectional(0.0, 0.0),
-                              child: _buildSortableHeader(
-                                context,
-                                'nome',
-                                wrapWithModel(
-                                  model: _model.fonteTituloTabelaModel2,
-                                  updateCallback: () => safeSetState(() {}),
-                                  child: FonteTituloTabelaWidget(
-                                    text: 'NOME',
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                        Expanded(
-                          flex: 1,
-                          child: Container(
-                            decoration: BoxDecoration(),
-                            child: Align(
-                              alignment: AlignmentDirectional(0.0, 0.0),
-                              child: _buildSortableHeader(
-                                context,
-                                'tipo',
-                                wrapWithModel(
-                                  model: _model.fonteTituloTabelaModel3,
-                                  updateCallback: () => safeSetState(() {}),
-                                  child: FonteTituloTabelaWidget(
-                                    text: 'TIPO',
-                                  ),
+                                Text(
+                                  'ID',
+                                  style: FlutterFlowTheme.of(context).bodyMedium.override(
+                                        font: GoogleFonts.openSans(
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                        fontSize: 13.5,
+                                      ),
                                 ),
                               ),
                             ),
@@ -401,20 +372,88 @@ class _ListagemDeUsuariosWidgetState extends State<ListagemDeUsuariosWidget> {
                               alignment: AlignmentDirectional(0.0, 0.0),
                               child: _buildSortableHeader(
                                 context,
-                                'identificacao',
-                                wrapWithModel(
-                                  model: _model.fonteTituloTabelaModel4,
-                                  updateCallback: () => safeSetState(() {}),
-                                  child: FonteTituloTabelaWidget(
-                                    text: 'IDENTIFICAÇÃO',
-                                  ),
+                                'nome',
+                                Text(
+                                  'NOME',
+                                  style: FlutterFlowTheme.of(context).bodyMedium.override(
+                                        font: GoogleFonts.openSans(
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                        fontSize: 13.5,
+                                      ),
                                 ),
                               ),
                             ),
                           ),
                         ),
                         Expanded(
-                          flex: 5,
+                          flex: 1,
+                          child: Container(
+                            decoration: const BoxDecoration(),
+                            child: Align(
+                              alignment: const AlignmentDirectional(0.0, 0.0),
+                              child: _buildSortableHeader(
+                                context,
+                                'pass',
+                                Text(
+                                  'PASS',
+                                  style: FlutterFlowTheme.of(context).bodyMedium.override(
+                                        font: GoogleFonts.openSans(
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                        fontSize: 13.5,
+                                      ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                          flex: 2,
+                          child: Container(
+                            decoration: const BoxDecoration(),
+                            child: Align(
+                              alignment: const AlignmentDirectional(0.0, 0.0),
+                              child: _buildSortableHeader(
+                                context,
+                                'status',
+                                Text(
+                                  'STATUS',
+                                  style: FlutterFlowTheme.of(context).bodyMedium.override(
+                                        font: GoogleFonts.openSans(
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                        fontSize: 13.5,
+                                      ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                          flex: 3,
+                          child: Container(
+                            decoration: BoxDecoration(),
+                            child: Align(
+                              alignment: AlignmentDirectional(0.0, 0.0),
+                              child: _buildSortableHeader(
+                                context,
+                                'identificacao',
+                                Text(
+                                  'IDENTIFICAÇÃO',
+                                  style: FlutterFlowTheme.of(context).bodyMedium.override(
+                                        font: GoogleFonts.openSans(
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                        fontSize: 13.5,
+                                      ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                          flex: 4,
                           child: Container(
                             decoration: BoxDecoration(),
                             child: Align(
@@ -422,30 +461,31 @@ class _ListagemDeUsuariosWidgetState extends State<ListagemDeUsuariosWidget> {
                               child: _buildSortableHeader(
                                 context,
                                 'email',
-                                wrapWithModel(
-                                  model: _model.fonteTituloTabelaModel5,
-                                  updateCallback: () => safeSetState(() {}),
-                                  child: FonteTituloTabelaWidget(
-                                    text: 'EMAIL',
-                                  ),
+                                Text(
+                                  'EMAIL',
+                                  style: FlutterFlowTheme.of(context).bodyMedium.override(
+                                        font: GoogleFonts.openSans(
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                        fontSize: 13.5,
+                                      ),
                                 ),
                               ),
                             ),
                           ),
                         ),
                         Padding(
-                          padding: EdgeInsetsDirectional.fromSTEB(
-                              15.0, 0.0, 15.0, 0.0),
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: FlutterFlowTheme.of(context)
-                                  .secondaryBackground,
-                            ),
+                          padding: const EdgeInsetsDirectional.fromSTEB(
+                              0.0, 0.0, 10.0, 0.0),
+                          child: SizedBox(
+                            width: 20.0,
+                            height: 20.0,
                           ),
                         ),
                       ],
                     ),
                   ),
+                ),
                   Padding(
                     padding: EdgeInsetsDirectional.fromSTEB(0.0, 6.0, 0.0, 6.0),
                     child: Container(
@@ -508,7 +548,7 @@ class _ListagemDeUsuariosWidgetState extends State<ListagemDeUsuariosWidget> {
                                       ),
                                     ),
                                     Expanded(
-                                      flex: 5,
+                                      flex: 4,
                                       child: Container(
                                         decoration: BoxDecoration(),
                                         child: Align(
@@ -539,36 +579,57 @@ class _ListagemDeUsuariosWidgetState extends State<ListagemDeUsuariosWidget> {
                                     Expanded(
                                       flex: 1,
                                       child: Container(
-                                        decoration: BoxDecoration(),
+                                        decoration: const BoxDecoration(),
                                         child: Align(
-                                          alignment:
-                                              AlignmentDirectional(0.0, 0.0),
-                                          child: wrapWithModel(
-                                            model: _model
-                                                .fonteDadosTabelaModels3
-                                                .getModel(
-                                              itemUsuariosItem.toString(),
-                                              itemUsuariosIndex,
+                                          alignment: const AlignmentDirectional(0.0, 0.0),
+                                          child: getJsonField(itemUsuariosItem, r'''$.armspass''') == true
+                                              ? const Icon(
+                                                  Icons.check_circle_rounded,
+                                                  color: Color(0xFF00C853),
+                                                  size: 20.0,
+                                                )
+                                              : const Icon(
+                                                  Icons.remove_circle_outline_rounded,
+                                                  color: Color(0xFF909090),
+                                                  size: 20.0,
+                                                ),
+                                        ),
+                                      ),
+                                    ),
+                                    Expanded(
+                                      flex: 2,
+                                      child: Container(
+                                        decoration: const BoxDecoration(),
+                                        child: Align(
+                                          alignment: const AlignmentDirectional(0.0, 0.0),
+                                          child: Container(
+                                            padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+                                            decoration: BoxDecoration(
+                                              color: (getJsonField(itemUsuariosItem, r'''$.isActive''') == true || getJsonField(itemUsuariosItem, r'''$.user.isActive''') == true)
+                                                  ? const Color(0x2000C853)
+                                                  : const Color(0x20909090),
+                                              borderRadius: BorderRadius.circular(12.0),
                                             ),
-                                            updateCallback: () =>
-                                                safeSetState(() {}),
-                                            child: FonteDadosTabelaWidget(
-                                              key: Key(
-                                                'Keyjtu_${itemUsuariosItem.toString()}',
-                                              ),
-                                              text:
-                                                  functions.defineTipoDeUsuario(
-                                                      getJsonField(
-                                                itemUsuariosItem,
-                                                r'''$.user.role''',
-                                              ).toString()),
+                                            child: Text(
+                                              (getJsonField(itemUsuariosItem, r'''$.isActive''') == true || getJsonField(itemUsuariosItem, r'''$.user.isActive''') == true)
+                                                  ? 'Ativo'
+                                                  : 'Inativo',
+                                              style: FlutterFlowTheme.of(context).bodyMedium.override(
+                                                    font: GoogleFonts.openSans(
+                                                      fontWeight: FontWeight.bold,
+                                                    ),
+                                                    fontSize: 12.0,
+                                                    color: (getJsonField(itemUsuariosItem, r'''$.isActive''') == true || getJsonField(itemUsuariosItem, r'''$.user.isActive''') == true)
+                                                        ? const Color(0xFF00C853)
+                                                        : const Color(0xFF707070),
+                                                  ),
                                             ),
                                           ),
                                         ),
                                       ),
                                     ),
                                     Expanded(
-                                      flex: 4,
+                                      flex: 3,
                                       child: Container(
                                         decoration: BoxDecoration(),
                                         child: Align(
@@ -617,7 +678,7 @@ class _ListagemDeUsuariosWidgetState extends State<ListagemDeUsuariosWidget> {
                                       ),
                                     ),
                                     Expanded(
-                                      flex: 5,
+                                      flex: 4,
                                       child: Container(
                                         decoration: BoxDecoration(),
                                         child: Align(

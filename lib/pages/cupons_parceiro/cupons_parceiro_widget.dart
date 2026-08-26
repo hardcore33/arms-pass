@@ -47,6 +47,7 @@ class _CuponsParceiroWidgetState extends State<CuponsParceiroWidget> {
 
   @override
   Widget build(BuildContext context) {
+    context.watch<FFAppState>();
     return FutureBuilder<ApiCallResponse>(
       future: ObterCuponsDoParceiroCall.call(
         partnerId: currentUserUid,
@@ -92,52 +93,19 @@ class _CuponsParceiroWidgetState extends State<CuponsParceiroWidget> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Container(
-                        width: MediaQuery.sizeOf(context).width * 0.22,
-                        height: MediaQuery.sizeOf(context).height * 1.0,
-                        decoration: BoxDecoration(
-                          color: FlutterFlowTheme.of(context).secondary,
-                          border: Border.all(
-                            color: FlutterFlowTheme.of(context).secondary,
-                          ),
-                        ),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.max,
-                          children: [
-                            Padding(
-                              padding: EdgeInsetsDirectional.fromSTEB(
-                                  0.0, 30.0, 0.0, 20.0),
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(8.0),
-                                child: Image.asset(
-                                  'assets/images/logo.png',
-                                  width:
-                                      MediaQuery.sizeOf(context).width * 0.13,
-                                  height:
-                                      MediaQuery.sizeOf(context).height * 0.1,
-                                  fit: BoxFit.contain,
-                                ),
-                              ),
-                            ),
-                            Divider(
-                              thickness: 2.0,
-                              indent: 20.0,
-                              endIndent: 20.0,
-                              color: FlutterFlowTheme.of(context).primary,
-                            ),
-                            Expanded(
-                              child: Padding(
-                                padding: EdgeInsetsDirectional.fromSTEB(
-                                    0.0, 15.0, 0.0, 0.0),
-                                child: wrapWithModel(
-                                  model: _model.menuParceiroModel,
-                                  updateCallback: () => safeSetState(() {}),
-                                  child: MenuParceiroWidget(),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
+                    width: FFAppState().sidebarCollapsed
+                        ? 80.0
+                        : MediaQuery.sizeOf(context).width * 0.22,
+                    height: MediaQuery.sizeOf(context).height * 1.0,
+                    decoration: BoxDecoration(
+                      color: FlutterFlowTheme.of(context).secondary,
+                    ),
+                    child: wrapWithModel(
+                      model: _model.menuParceiroModel,
+                      updateCallback: () => safeSetState(() {}),
+                      child: const MenuParceiroWidget(),
+                    ),
+                  ),
                       Expanded(
                         child: Container(
                           height: MediaQuery.sizeOf(context).height * 1.0,

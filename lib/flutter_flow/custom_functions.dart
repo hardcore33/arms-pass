@@ -116,7 +116,8 @@ List<String> obterEstados() {
 }
 
 List<dynamic>? obterParceiros(List<dynamic>? clientes) {
-  return clientes!.where((cliente) => cliente['partner'] != null).toList();
+  if (clientes == null) return [];
+  return clientes.where((cliente) => cliente is Map && cliente['partner'] != null).toList();
 }
 
 double? calcularValorAPagar(

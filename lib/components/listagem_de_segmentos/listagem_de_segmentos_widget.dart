@@ -396,91 +396,87 @@ class _ListagemDeSegmentosWidgetState extends State<ListagemDeSegmentosWidget> {
                   ],
                 ),
                 Padding(
-                  padding: EdgeInsetsDirectional.fromSTEB(0.0, 40.0, 0.0, 0.0),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.max,
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        flex: 1,
-                        child: Container(
-                          decoration: BoxDecoration(),
-                          child: Align(
-                            alignment: AlignmentDirectional(0.0, 0.0),
-                            child: _buildSortableHeader(
-                              context,
-                              'id',
-                              wrapWithModel(
-                                model: _model.fonteTituloTabelaModel1,
-                                updateCallback: () => safeSetState(() {}),
-                                child: FonteTituloTabelaWidget(
-                                  text: 'ID',
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                        flex: 6,
-                        child: Container(
-                          width: 80.0,
-                          decoration: BoxDecoration(),
-                          child: Align(
-                            alignment: AlignmentDirectional(-1.0, 0.0),
-                            child: _buildSortableHeader(
-                              context,
-                              'nome',
-                              wrapWithModel(
-                                model: _model.fonteTituloTabelaModel2,
-                                updateCallback: () => safeSetState(() {}),
-                                child: FonteTituloTabelaWidget(
-                                  text: 'NOME',
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                        flex: 1,
-                        child: Container(
-                          width: 200.0,
-                          height: 20.0,
-                          decoration: BoxDecoration(
-                            color: FlutterFlowTheme.of(context)
-                                .secondaryBackground,
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                        flex: 1,
-                        child: Container(
-                          width: 100.0,
-                          height: 20.0,
-                          decoration: BoxDecoration(
-                            color: FlutterFlowTheme.of(context)
-                                .secondaryBackground,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Padding(
-                  padding: EdgeInsetsDirectional.fromSTEB(0.0, 6.0, 0.0, 6.0),
+                  padding: const EdgeInsetsDirectional.fromSTEB(0.0, 40.0, 0.0, 0.0),
                   child: Container(
-                    width: MediaQuery.sizeOf(context).width * 1.0,
-                    height: 0.5,
                     decoration: BoxDecoration(
-                      color: Color(0xFFC7C7C7),
+                      color: FlutterFlowTheme.of(context).alternate,
+                      borderRadius: BorderRadius.circular(
+                          FlutterFlowTheme.of(context)
+                              .designToken
+                              .radius
+                              .sm),
+                    ),
+                    padding: const EdgeInsetsDirectional.fromSTEB(
+                        16.0, 12.0, 16.0, 12.0),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.max,
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          flex: 1,
+                          child: Container(
+                            decoration: const BoxDecoration(),
+                            child: Align(
+                              alignment: const AlignmentDirectional(0.0, 0.0),
+                              child: _buildSortableHeader(
+                                context,
+                                'id',
+                                wrapWithModel(
+                                  model: _model.fonteTituloTabelaModel1,
+                                  updateCallback: () => safeSetState(() {}),
+                                  child: const FonteTituloTabelaWidget(
+                                    text: 'ID',
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                          flex: 6,
+                          child: Container(
+                            width: 80.0,
+                            decoration: const BoxDecoration(),
+                            child: Align(
+                              alignment: const AlignmentDirectional(-1.0, 0.0),
+                              child: _buildSortableHeader(
+                                context,
+                                'nome',
+                                wrapWithModel(
+                                  model: _model.fonteTituloTabelaModel2,
+                                  updateCallback: () => safeSetState(() {}),
+                                  child: const FonteTituloTabelaWidget(
+                                    text: 'NOME',
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                          flex: 1,
+                          child: Container(
+                            width: 200.0,
+                            height: 20.0,
+                            decoration: const BoxDecoration(),
+                          ),
+                        ),
+                        Expanded(
+                          flex: 1,
+                          child: Container(
+                            width: 100.0,
+                            height: 20.0,
+                            decoration: const BoxDecoration(),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
-                Container(
-                  height: MediaQuery.sizeOf(context).height * 0.56,
-                  decoration: BoxDecoration(),
-                  child: Builder(
+                Expanded(
+                  child: Container(
+                    decoration: const BoxDecoration(),
+                    child: Builder(
                     builder: (context) {
                       final itemCupons = _applySort(_model.cuponsLocal);
 
@@ -724,8 +720,9 @@ class _ListagemDeSegmentosWidgetState extends State<ListagemDeSegmentosWidget> {
                       );
                     },
                   ),
-                  ),
-                ],
+                ),
+              ),
+            ],
               ),
             ),
           ),

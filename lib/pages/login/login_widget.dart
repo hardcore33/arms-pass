@@ -50,6 +50,7 @@ class _LoginWidgetState extends State<LoginWidget> {
 
   @override
   Widget build(BuildContext context) {
+    context.watch<FFAppState>();
     final isDesktop = MediaQuery.sizeOf(context).width >= 800.0;
     return GestureDetector(
       onTap: () {

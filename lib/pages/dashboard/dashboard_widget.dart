@@ -6,6 +6,7 @@ import '/components/box_graficos_trocas_mensais/box_graficos_trocas_mensais_widg
 import '/components/box_indicadores/box_indicadores_widget.dart';
 import '/components/box_segmentos_destaque/box_segmentos_destaque_widget.dart';
 import '/components/box_parceiros_destaque/box_parceiros_destaque_widget.dart';
+import '/components/tabela_desempenho_parceiros/tabela_desempenho_parceiros_widget.dart';
 import '/components/box_grafico_cupons/box_grafico_cupons_widget.dart';
 import '/components/menu/menu_widget.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
@@ -51,6 +52,7 @@ class _DashboardWidgetState extends State<DashboardWidget> {
 
   @override
   Widget build(BuildContext context) {
+    context.watch<FFAppState>();
     return FutureBuilder<ApiCallResponse>(
       future: ObterDashboardCompletoCall.call(),
       builder: (context, snapshot) {
@@ -87,51 +89,17 @@ class _DashboardWidgetState extends State<DashboardWidget> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Container(
-                    width: MediaQuery.sizeOf(context).width * 0.22,
+                    width: FFAppState().sidebarCollapsed
+                        ? 80.0
+                        : MediaQuery.sizeOf(context).width * 0.22,
                     height: MediaQuery.sizeOf(context).height * 1.0,
                     decoration: BoxDecoration(
                       color: FlutterFlowTheme.of(context).secondary,
-                      border: Border.all(
-                        color: FlutterFlowTheme.of(context).secondary,
-                      ),
                     ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.max,
-                      children: [
-                        Padding(
-                          padding: EdgeInsetsDirectional.fromSTEB(
-                              0.0, 30.0, 0.0, 20.0),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(8.0),
-                            child: Image.asset(
-                              'assets/images/logo.png',
-                              width: MediaQuery.sizeOf(context).width * 0.13,
-                              height: MediaQuery.sizeOf(context).height * 0.1,
-                              fit: BoxFit.contain,
-                            ),
-                          ),
-                        ),
-                        Divider(
-                          thickness: 2.0,
-                          indent: 20.0,
-                          endIndent: 20.0,
-                          color: FlutterFlowTheme.of(context).primary,
-                        ),
-                        Expanded(
-                          child: Align(
-                            alignment: AlignmentDirectional(0.0, -1.0),
-                            child: Padding(
-                              padding: EdgeInsetsDirectional.fromSTEB(
-                                  0.0, 15.0, 0.0, 0.0),
-                              child: wrapWithModel(
-                                model: _model.menuModel,
-                                updateCallback: () => safeSetState(() {}),
-                                child: MenuWidget(),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
+                    child: wrapWithModel(
+                      model: _model.menuModel,
+                      updateCallback: () => safeSetState(() {}),
+                      child: const MenuWidget(),
                     ),
                   ),
                   Expanded(
@@ -289,7 +257,7 @@ class _DashboardWidgetState extends State<DashboardWidget> {
                             padding: EdgeInsetsDirectional.fromSTEB(
                                 0.0, 25.0, 0.0, 0.0),
                             child: Container(
-                              width: MediaQuery.sizeOf(context).width * 0.78,
+                              width: double.infinity,
                               decoration: BoxDecoration(
                                 color: FlutterFlowTheme.of(context).primary,
                               ),
@@ -334,51 +302,39 @@ class _DashboardWidgetState extends State<DashboardWidget> {
                             ),
                           ),
                           // Bottom Section: Dynamic highlights (Segmentos Ranking & Parceiros Carrossel)
+                          // Bottom Section: Tabela Consolidada de Desempenho dos Parceiros
                           Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
-                                0.0, 25.0, 0.0, 25.0),
-                            child: Container(
-                              width: MediaQuery.sizeOf(context).width * 0.78,
-                              decoration: BoxDecoration(
-                                color: FlutterFlowTheme.of(context).primary,
-                              ),
-                              child: Padding(
-                                padding: EdgeInsetsDirectional.fromSTEB(
-                                    20.0, 0.0, 20.0, 0.0),
-                                child: FutureBuilder<ApiCallResponse>(
-                                  future: ObterCuponsCall.call(),
-                                  builder: (context, cuponsSnapshot) {
-                                    if (!cuponsSnapshot.hasData) {
-                                      return const SizedBox(
-                                        height: 198.0,
-                                        child: Center(
-                                          child: CircularProgressIndicator(),
-                                        ),
-                                      );
-                                    }
-                                    final cupons = (cuponsSnapshot
-                                            .data!.jsonBody as List?) ??
-                                        [];
-                                    return Row(
-                                      mainAxisSize: MainAxisSize.max,
-                                      children: [
-                                        Expanded(
-                                          child: BoxSegmentosDestaqueWidget(
-                                            cupons: cupons,
-                                          ),
-                                        ),
-                                        Expanded(
-                                          child: BoxParceirosDestaqueWidget(
-                                            cupons: cupons,
-                                          ),
-                                        ),
-                                      ].divide(SizedBox(width: 16.0)),
-                                    );
-                                  },
-                                ),
-                              ),
+                            padding: const EdgeInsetsDirectional.fromSTEB(
+                                20.0, 25.0, 20.0, 30.0),
+                            child: FutureBuilder<List<ApiCallResponse>>(
+                              future: Future.wait([
+                                ObterParceirosCall.call(),
+                                ObterCuponsCall.call(),
+                                GetHistoricoCompletoCall.call(),
+                              ]),
+                              builder: (context, snapshot) {
+                                if (!snapshot.hasData) {
+                                  return Container(
+                                    height: 250.0,
+                                    decoration: BoxDecoration(
+                                      color: FlutterFlowTheme.of(context).secondaryBackground,
+                                      borderRadius: BorderRadius.circular(16.0),
+                                    ),
+                                    child: const Center(
+                                      child: CircularProgressIndicator(),
+                                    ),
+                                  );
+                                }
+                                return TabelaDesempenhoParceirosWidget(
+                                  parceiros: snapshot.data![0].jsonBody,
+                                  cupons: snapshot.data![1].jsonBody,
+                                  trocas: snapshot.data![2].jsonBody,
+                                  dashboardJson: dashboardObterDashboardCompletoResponse.jsonBody,
+                                );
+                              },
                             ),
                           ),
+
                           ],
                         ),
                       ),
@@ -392,4 +348,5 @@ class _DashboardWidgetState extends State<DashboardWidget> {
       },
     );
   }
+
 }

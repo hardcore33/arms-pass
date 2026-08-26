@@ -287,118 +287,120 @@ class _ListagemDePropostasWidgetState extends State<ListagemDePropostasWidget> {
                   ],
                 ),
                 Padding(
-                  padding: EdgeInsetsDirectional.fromSTEB(0.0, 40.0, 0.0, 0.0),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.max,
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        flex: 1,
-                        child: Container(
-                          decoration: BoxDecoration(),
-                          child: Align(
-                            alignment: AlignmentDirectional(0.0, 0.0),
-                            child: wrapWithModel(
-                              model: _model.fonteTituloTabelaModel1,
-                              updateCallback: () => safeSetState(() {}),
-                              child: FonteTituloTabelaWidget(
-                                text: 'ID',
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                        flex: 4,
-                        child: Container(
-                          decoration: BoxDecoration(),
-                          child: Align(
-                            alignment: AlignmentDirectional(0.0, 0.0),
-                            child: wrapWithModel(
-                              model: _model.fonteTituloTabelaModel2,
-                              updateCallback: () => safeSetState(() {}),
-                              child: FonteTituloTabelaWidget(
-                                text: 'RAZÃO',
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                        flex: 4,
-                        child: Container(
-                          decoration: BoxDecoration(),
-                          child: Align(
-                            alignment: AlignmentDirectional(0.0, 0.0),
-                            child: wrapWithModel(
-                              model: _model.fonteTituloTabelaModel3,
-                              updateCallback: () => safeSetState(() {}),
-                              child: FonteTituloTabelaWidget(
-                                text: 'NOME',
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                        flex: 3,
-                        child: Container(
-                          decoration: BoxDecoration(),
-                          child: Align(
-                            alignment: AlignmentDirectional(0.0, 0.0),
-                            child: wrapWithModel(
-                              model: _model.fonteTituloTabelaModel4,
-                              updateCallback: () => safeSetState(() {}),
-                              child: FonteTituloTabelaWidget(
-                                text: 'TELEFONE',
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                        flex: 3,
-                        child: Container(
-                          decoration: BoxDecoration(),
-                          child: Align(
-                            alignment: AlignmentDirectional(0.0, 0.0),
-                            child: wrapWithModel(
-                              model: _model.fonteTituloTabelaModel5,
-                              updateCallback: () => safeSetState(() {}),
-                              child: FonteTituloTabelaWidget(
-                                text: 'PROPOSTA',
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                        flex: 1,
-                        child: Container(
-                          width: 100.0,
-                          height: 20.0,
-                          decoration: BoxDecoration(
-                            color: Colors.transparent,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Padding(
-                  padding: EdgeInsetsDirectional.fromSTEB(0.0, 6.0, 0.0, 6.0),
+                  padding: const EdgeInsetsDirectional.fromSTEB(0.0, 40.0, 0.0, 0.0),
                   child: Container(
-                    width: MediaQuery.sizeOf(context).width * 1.0,
-                    height: 0.5,
                     decoration: BoxDecoration(
                       color: FlutterFlowTheme.of(context).alternate,
+                      borderRadius: BorderRadius.circular(
+                          FlutterFlowTheme.of(context)
+                              .designToken
+                              .radius
+                              .sm),
+                    ),
+                    padding: const EdgeInsetsDirectional.fromSTEB(
+                        16.0, 12.0, 16.0, 12.0),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.max,
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          flex: 1,
+                          child: Container(
+                            decoration: const BoxDecoration(),
+                            child: Align(
+                              alignment: const AlignmentDirectional(0.0, 0.0),
+                              child: wrapWithModel(
+                                model: _model.fonteTituloTabelaModel1,
+                                updateCallback: () => safeSetState(() {}),
+                                child: const FonteTituloTabelaWidget(
+                                  text: 'ID',
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                          flex: 4,
+                          child: Container(
+                            decoration: const BoxDecoration(),
+                            child: Align(
+                              alignment: const AlignmentDirectional(0.0, 0.0),
+                              child: wrapWithModel(
+                                model: _model.fonteTituloTabelaModel2,
+                                updateCallback: () => safeSetState(() {}),
+                                child: const FonteTituloTabelaWidget(
+                                  text: 'RAZÃO',
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                          flex: 4,
+                          child: Container(
+                            decoration: const BoxDecoration(),
+                            child: Align(
+                              alignment: const AlignmentDirectional(0.0, 0.0),
+                              child: wrapWithModel(
+                                model: _model.fonteTituloTabelaModel3,
+                                updateCallback: () => safeSetState(() {}),
+                                child: const FonteTituloTabelaWidget(
+                                  text: 'NOME',
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                          flex: 3,
+                          child: Container(
+                            decoration: const BoxDecoration(),
+                            child: Align(
+                              alignment: const AlignmentDirectional(0.0, 0.0),
+                              child: wrapWithModel(
+                                model: _model.fonteTituloTabelaModel4,
+                                updateCallback: () => safeSetState(() {}),
+                                child: const FonteTituloTabelaWidget(
+                                  text: 'TELEFONE',
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                          flex: 3,
+                          child: Container(
+                            decoration: const BoxDecoration(),
+                            child: Align(
+                              alignment: const AlignmentDirectional(0.0, 0.0),
+                              child: wrapWithModel(
+                                model: _model.fonteTituloTabelaModel5,
+                                updateCallback: () => safeSetState(() {}),
+                                child: const FonteTituloTabelaWidget(
+                                  text: 'PROPOSTA',
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                          flex: 1,
+                          child: Container(
+                            width: 100.0,
+                            height: 20.0,
+                            decoration: const BoxDecoration(
+                              color: Colors.transparent,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
-                Container(
-                  height: MediaQuery.sizeOf(context).height * 0.56,
-                  decoration: BoxDecoration(),
-                  child: Builder(
+                Expanded(
+                  child: Container(
+                    decoration: const BoxDecoration(),
+                    child: Builder(
                     builder: (context) {
                       final itemPropostas = _model.propostasLocal.toList();
 
@@ -839,7 +841,8 @@ class _ListagemDePropostasWidgetState extends State<ListagemDePropostasWidget> {
                     },
                   ),
                 ),
-              ],
+              ),
+            ],
             ),
           ),
         ],

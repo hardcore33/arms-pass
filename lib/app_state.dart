@@ -36,4 +36,11 @@ class FFAppState extends ChangeNotifier {
   set parceiro(dynamic value) {
     _parceiro = value;
   }
+
+  bool _sidebarCollapsed = false;
+  bool get sidebarCollapsed => _sidebarCollapsed;
+  set sidebarCollapsed(bool value) {
+    _sidebarCollapsed = value;
+    notifyListeners();
+  }
 }

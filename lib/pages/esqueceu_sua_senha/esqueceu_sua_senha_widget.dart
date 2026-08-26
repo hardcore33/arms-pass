@@ -46,6 +46,7 @@ class _EsqueceuSuaSenhaWidgetState extends State<EsqueceuSuaSenhaWidget> {
 
   @override
   Widget build(BuildContext context) {
+    context.watch<FFAppState>();
     return GestureDetector(
       onTap: () {
         FocusScope.of(context).unfocus();

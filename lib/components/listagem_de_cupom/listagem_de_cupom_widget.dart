@@ -241,7 +241,7 @@ class _ListagemDeCupomWidgetState extends State<ListagemDeCupomWidget> {
                 ),
                 child: Container(
                   width: double.infinity,
-                  height: MediaQuery.sizeOf(context).height * 0.8,
+                  height: MediaQuery.sizeOf(context).height * 0.88,
                   decoration: BoxDecoration(
                     color: FlutterFlowTheme.of(context).secondaryBackground,
                     borderRadius: BorderRadius.circular(
@@ -257,18 +257,19 @@ class _ListagemDeCupomWidgetState extends State<ListagemDeCupomWidget> {
               mainAxisSize: MainAxisSize.max,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                const SizedBox(height: 25.0),
                 Row(
                   mainAxisSize: MainAxisSize.max,
                   mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.end,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Align(
                       alignment: AlignmentDirectional(-1.0, 0.0),
                       child: Padding(
                         padding: EdgeInsetsDirectional.fromSTEB(
-                            35.0, 30.0, 0.0, 0.0),
+                            35.0, 10.0, 0.0, 0.0),
                         child: Container(
-                          width: MediaQuery.sizeOf(context).width * 0.2,
+                          width: 250.0,
                           child: TextFormField(
                             controller: _model.textController,
                             focusNode: _model.textFieldFocusNode,
@@ -405,7 +406,7 @@ class _ListagemDeCupomWidgetState extends State<ListagemDeCupomWidget> {
                       alignment: AlignmentDirectional(-1.0, 0.0),
                       child: Padding(
                         padding: EdgeInsetsDirectional.fromSTEB(
-                            20.0, 30.0, 0.0, 0.0),
+                            20.0, 10.0, 0.0, 0.0),
                         child: Container(
                           width: 170.0,
                           height: 44.0,
@@ -495,12 +496,13 @@ class _ListagemDeCupomWidgetState extends State<ListagemDeCupomWidget> {
                         ),
                       ),
                     ),
+                    const Spacer(),
                     Align(
                       alignment: AlignmentDirectional(-1.0, 0.0),
                       child: Builder(
                         builder: (context) => Padding(
                           padding: EdgeInsetsDirectional.fromSTEB(
-                              20.0, 0.0, 0.0, 0.0),
+                              0.0, 10.0, 35.0, 0.0),
                           child: FFButtonWidget(
                             onPressed: () async {
                               _model.listaParceiros =
@@ -717,7 +719,7 @@ class _ListagemDeCupomWidgetState extends State<ListagemDeCupomWidget> {
                 ),
                 const SizedBox(height: 12.0),
                 Container(
-                  height: MediaQuery.sizeOf(context).height * 0.56,
+                  height: MediaQuery.sizeOf(context).height * 0.65,
                   decoration: BoxDecoration(),
                   child: Builder(
                     builder: (context) {
@@ -750,17 +752,26 @@ class _ListagemDeCupomWidgetState extends State<ListagemDeCupomWidget> {
                               false;
                           return Container(
                             margin: const EdgeInsetsDirectional.fromSTEB(
-                                0.0, 0.0, 0.0, 10.0),
+                                0.0, 0.0, 0.0, 12.0),
                             padding: const EdgeInsetsDirectional.fromSTEB(
                                 16.0, 12.0, 16.0, 12.0),
                             decoration: BoxDecoration(
                               color: FlutterFlowTheme.of(context)
                                   .primaryBackground,
-                              borderRadius: BorderRadius.circular(
-                                  FlutterFlowTheme.of(context)
-                                      .designToken
-                                      .radius
-                                      .sm),
+                              borderRadius: BorderRadius.circular(12.0),
+                              border: Border.all(
+                                color: FlutterFlowTheme.of(context)
+                                    .alternate
+                                    .withOpacity(0.35),
+                                width: 1.0,
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.03),
+                                  blurRadius: 6.0,
+                                  offset: const Offset(0, 3),
+                                ),
+                              ],
                             ),
                             child: Row(
                               mainAxisSize: MainAxisSize.max,
@@ -1062,7 +1073,7 @@ class _ListagemDeCupomWidgetState extends State<ListagemDeCupomWidget> {
                                             ),
                                           ),
                                         ),
-                                        const SizedBox(width: 6.0),
+                                        const SizedBox(width: 16.0),
                                         canDelete
                                             ? InkWell(
                                                 splashColor: Colors.transparent,

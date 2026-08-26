@@ -8,9 +8,11 @@ class BoxParceirosDestaqueWidget extends StatefulWidget {
   const BoxParceirosDestaqueWidget({
     super.key,
     required this.cupons,
+    this.trocas,
   });
 
   final List<dynamic> cupons;
+  final List<dynamic>? trocas;
 
   @override
   State<BoxParceirosDestaqueWidget> createState() =>
@@ -25,36 +27,102 @@ class _BoxParceirosDestaqueWidgetState
   late List<_PartnerData> partners;
 
   List<_PartnerData> _buildRanking() {
-    // Agrupa os cupons ativos por parceiro e conta quantos cada um tem.
     final Map<String, _PartnerAggData> byPartner = {};
+
+    // 1. Mapeia parceiros a partir dos cupons
     for (final cupom in widget.cupons) {
-      if (cupom is! Map || cupom['isActive'] != true) continue;
+      if (cupom is! Map) continue;
       final partner = cupom['partner'];
       if (partner is! Map) continue;
       final id = partner['id']?.toString();
       if (id == null) continue;
-      final fantasia = (partner['fantasia'] ?? '').toString();
+      final fantasia = (partner['fantasia'] ?? partner['nome'] ?? '').toString();
       final photo = (partner['photo'] ?? '').toString();
       final agg = byPartner.putIfAbsent(
         id,
-        () => _PartnerAggData(name: fantasia, photo: photo),
+        () => _PartnerAggData(id: id, name: fantasia, photo: photo),
       );
-      agg.count++;
+      if (cupom['isActive'] == true) {
+        agg.activeCount++;
+      }
     }
+
+    // 2. Mapeia trocas/validações realizadas em cada parceiro
+    for (final troca in widget.trocas ?? []) {
+      if (troca is! Map) continue;
+      String? partnerId;
+      String? partnerName;
+      String? partnerPhoto;
+
+      final partner = troca['partner'];
+      if (partner is Map) {
+        partnerId = partner['id']?.toString();
+        partnerName = (partner['fantasia'] ?? partner['nome'] ?? partner['name'])?.toString();
+        partnerPhoto = partner['photo']?.toString();
+      } else if (partner != null && partner.toString().isNotEmpty && partner.toString() != 'null') {
+        partnerId = partner.toString();
+      }
+
+      _PartnerAggData? targetAgg;
+      if (partnerId != null && byPartner.containsKey(partnerId)) {
+        targetAgg = byPartner[partnerId];
+      } else if (partnerName != null && partnerName.isNotEmpty) {
+        for (final p in byPartner.values) {
+          if (p.name.toLowerCase() == partnerName.toLowerCase()) {
+            targetAgg = p;
+            break;
+          }
+        }
+        if (targetAgg == null) {
+          final newKey = partnerId ?? partnerName;
+          targetAgg = byPartner.putIfAbsent(
+            newKey,
+            () => _PartnerAggData(
+              id: newKey,
+              name: partnerName!,
+              photo: partnerPhoto ?? '',
+            ),
+          );
+        }
+      }
+
+      if (targetAgg != null) {
+        targetAgg.usedCount++;
+      }
+    }
+
+    // Ordena pelo número de cupons utilizados (se houver empate, por cupons ativos)
     final ranked = byPartner.values.toList()
-      ..sort((a, b) => b.count.compareTo(a.count));
+      ..sort((a, b) {
+        final cmp = b.usedCount.compareTo(a.usedCount);
+        if (cmp != 0) return cmp;
+        return b.activeCount.compareTo(a.activeCount);
+      });
+
     final top = ranked.take(3).toList();
     const highlights = [
-      '🏆 Mais cupons ativos',
-      '2º em cupons ativos',
-      '3º em cupons ativos'
+      '🏆 Mais cupons utilizados',
+      '2º em cupons utilizados',
+      '3º em cupons utilizados'
     ];
+
+    if (top.isEmpty) {
+      return [
+        _PartnerData(
+          name: 'Nenhum parceiro',
+          photo: '',
+          countLabel: '0 cupons utilizados',
+          highlight: 'Sem movimentação',
+        )
+      ];
+    }
+
     return List.generate(top.length, (i) {
+      final used = top[i].usedCount;
       return _PartnerData(
         name: top[i].name,
         photo: top[i].photo,
-        countLabel:
-            '${top[i].count} cupom${top[i].count == 1 ? '' : 's'} ativo${top[i].count == 1 ? '' : 's'}',
+        countLabel: '$used cupom${used == 1 ? '' : 's'} utilizado${used == 1 ? '' : 's'}',
         highlight: highlights[i],
       );
     });
@@ -66,6 +134,7 @@ class _BoxParceirosDestaqueWidgetState
     partners = _buildRanking();
     _pageController = PageController(initialPage: 0);
     _timer = Timer.periodic(const Duration(seconds: 3), (Timer timer) {
+      if (partners.isEmpty) return;
       if (_currentPage < partners.length - 1) {
         _currentPage++;
       } else {
@@ -79,6 +148,19 @@ class _BoxParceirosDestaqueWidgetState
         );
       }
     });
+  }
+
+  @override
+  void didUpdateWidget(covariant BoxParceirosDestaqueWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.cupons != widget.cupons || oldWidget.trocas != widget.trocas) {
+      setState(() {
+        partners = _buildRanking();
+        if (_currentPage >= partners.length) {
+          _currentPage = 0;
+        }
+      });
+    }
   }
 
   @override
@@ -98,7 +180,7 @@ class _BoxParceirosDestaqueWidgetState
       ),
       child: Container(
         width: double.infinity,
-        height: 198.0, // Match exact height of segments card for grid alignment
+        height: 198.0,
         decoration: BoxDecoration(
           color: FlutterFlowTheme.of(context).primary,
           borderRadius: BorderRadius.circular(16.0),
@@ -243,7 +325,7 @@ class _BoxParceirosDestaqueWidgetState
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              'Cupons ativos:',
+                              'Cupons utilizados:',
                               style: FlutterFlowTheme.of(context)
                                   .bodyMedium
                                   .override(
@@ -315,9 +397,15 @@ class _PartnerData {
 }
 
 class _PartnerAggData {
+  final String id;
   final String name;
   final String photo;
-  int count = 0;
+  int activeCount = 0;
+  int usedCount = 0;
 
-  _PartnerAggData({required this.name, required this.photo});
+  _PartnerAggData({
+    required this.id,
+    required this.name,
+    required this.photo,
+  });
 }

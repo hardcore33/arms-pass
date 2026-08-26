@@ -32,6 +32,8 @@ class ListagemDeBannersWidget extends StatefulWidget {
 
 class _ListagemDeBannersWidgetState extends State<ListagemDeBannersWidget> {
   late ListagemDeBannersModel _model;
+  String sortField = 'id';
+  bool sortAscending = true;
 
   @override
   void setState(VoidCallback callback) {
@@ -44,16 +46,30 @@ class _ListagemDeBannersWidgetState extends State<ListagemDeBannersWidget> {
     super.initState();
     _model = createModel(context, () => ListagemDeBannersModel());
 
-    // On component load action.
-    SchedulerBinding.instance.addPostFrameCallback((_) async {
-      _model.bannersLocal = widget!.banners!.toList().cast<dynamic>();
-      safeSetState(() {});
-    });
+    final list = widget.banners;
+    if (list is List) {
+      _model.bannersLocal = list.toList().cast<dynamic>();
+    } else {
+      _model.bannersLocal = [];
+    }
 
     _model.textController ??= TextEditingController();
     _model.textFieldFocusNode ??= FocusNode();
 
     WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));
+  }
+
+  @override
+  void didUpdateWidget(covariant ListagemDeBannersWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.banners != oldWidget.banners) {
+      final list = widget.banners;
+      if (list is List) {
+        _model.bannersLocal = list.toList().cast<dynamic>();
+      } else {
+        _model.bannersLocal = [];
+      }
+    }
   }
 
   @override
@@ -63,81 +79,108 @@ class _ListagemDeBannersWidgetState extends State<ListagemDeBannersWidget> {
     super.dispose();
   }
 
+  List<dynamic> _applySort(List<dynamic> input) {
+    final result = input.toList();
+    result.sort((a, b) {
+      dynamic valA;
+      dynamic valB;
+      switch (sortField) {
+        case 'id':
+          valA = getJsonField(a, r'''$.id''');
+          valB = getJsonField(b, r'''$.id''');
+          break;
+        case 'url':
+          valA = (getJsonField(a, r'''$.url''') ?? '').toString().toLowerCase();
+          valB = (getJsonField(b, r'''$.url''') ?? '').toString().toLowerCase();
+          break;
+        default:
+          valA = '';
+          valB = '';
+      }
+      int comp;
+      if (valA is num && valB is num) {
+        comp = valA.compareTo(valB);
+      } else {
+        comp = valA.toString().compareTo(valB.toString());
+      }
+      return sortAscending ? comp : -comp;
+    });
+    return result;
+  }
+
+  Widget _buildSortableHeader(
+    BuildContext context,
+    String field,
+    Widget label,
+  ) {
+    final isActive = sortField == field;
+    return InkWell(
+      onTap: () {
+        safeSetState(() {
+          if (sortField == field) {
+            sortAscending = !sortAscending;
+          } else {
+            sortField = field;
+            sortAscending = true;
+          }
+        });
+      },
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          label,
+          const SizedBox(width: 4.0),
+          Icon(
+            isActive
+                ? (sortAscending
+                    ? Icons.arrow_upward_rounded
+                    : Icons.arrow_downward_rounded)
+                : Icons.unfold_more_rounded,
+            size: 14.0,
+            color: isActive
+                ? FlutterFlowTheme.of(context).primary
+                : FlutterFlowTheme.of(context).secondaryText.withOpacity(0.5),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: MediaQuery.sizeOf(context).width * 0.74,
+      width: double.infinity,
+      height: double.infinity,
       child: Stack(
         children: [
           Align(
             alignment: AlignmentDirectional(0.0, -1.0),
             child: Padding(
-              padding: EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
+              padding: const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
               child: Material(
                 color: Colors.transparent,
                 elevation: 3.0,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(6.0),
+                  borderRadius: BorderRadius.circular(
+                      FlutterFlowTheme.of(context).designToken.radius.md),
                 ),
                 child: Container(
-                  width: MediaQuery.sizeOf(context).width * 0.74,
-                  height: MediaQuery.sizeOf(context).height * 0.8,
+                  width: double.infinity,
+                  height: double.infinity,
                   decoration: BoxDecoration(
                     color: FlutterFlowTheme.of(context).secondaryBackground,
-                    borderRadius: BorderRadius.circular(6.0),
+                    borderRadius: BorderRadius.circular(
+                        FlutterFlowTheme.of(context).designToken.radius.md),
                   ),
                 ),
               ),
             ),
           ),
-          Align(
-            alignment: AlignmentDirectional(0.0, 0.0),
+          Positioned.fill(
             child: Column(
               mainAxisSize: MainAxisSize.max,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Align(
-                  alignment: AlignmentDirectional(0.0, -1.0),
-                  child: Padding(
-                    padding:
-                        EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 0.0),
-                    child: Container(
-                      width: MediaQuery.sizeOf(context).width * 0.7,
-                      height: 65.0,
-                      decoration: BoxDecoration(
-                        color: FlutterFlowTheme.of(context).secondary,
-                        borderRadius: BorderRadius.circular(6.0),
-                      ),
-                      child: Align(
-                        alignment: AlignmentDirectional(-1.0, 0.0),
-                        child: Padding(
-                          padding: EdgeInsetsDirectional.fromSTEB(
-                              30.0, 0.0, 0.0, 0.0),
-                          child: Text(
-                            'Lista de banners',
-                            style: FlutterFlowTheme.of(context)
-                                .bodyMedium
-                                .override(
-                                  font: GoogleFonts.openSans(
-                                    fontWeight: FontWeight.w500,
-                                    fontStyle: FlutterFlowTheme.of(context)
-                                        .bodyMedium
-                                        .fontStyle,
-                                  ),
-                                  color: FlutterFlowTheme.of(context).primary,
-                                  fontSize: 19.0,
-                                  letterSpacing: 0.0,
-                                  fontWeight: FontWeight.w500,
-                                  fontStyle: FlutterFlowTheme.of(context)
-                                      .bodyMedium
-                                      .fontStyle,
-                                ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
                 Row(
                   mainAxisSize: MainAxisSize.max,
                   mainAxisAlignment: MainAxisAlignment.start,
@@ -146,29 +189,30 @@ class _ListagemDeBannersWidgetState extends State<ListagemDeBannersWidget> {
                     Align(
                       alignment: AlignmentDirectional(-1.0, 0.0),
                       child: Padding(
-                        padding: EdgeInsetsDirectional.fromSTEB(
+                        padding: const EdgeInsetsDirectional.fromSTEB(
                             35.0, 30.0, 0.0, 0.0),
                         child: Container(
-                          width: MediaQuery.sizeOf(context).width * 0.45,
+                          width: 250.0,
                           child: TextFormField(
                             controller: _model.textController,
                             focusNode: _model.textFieldFocusNode,
                             onChanged: (_) => EasyDebounce.debounce(
                               '_model.textController',
-                              Duration(milliseconds: 2000),
+                              const Duration(milliseconds: 300),
                               () async {
+                                final rawBanners = widget.banners is List
+                                    ? widget.banners!.toList()
+                                    : [];
                                 _model.bannersFiltrados =
                                     await actions.filtrarPorNome(
-                                  widget!.banners!.toList(),
+                                  rawBanners,
                                   _model.textController.text,
                                   5,
                                   true,
                                 );
-                                _model.bannersLocal = _model.bannersFiltrados!
-                                    .toList()
-                                    .cast<dynamic>();
-                                safeSetState(() {});
-
+                                _model.bannersLocal = _model.bannersFiltrados != null
+                                    ? _model.bannersFiltrados!.toList().cast<dynamic>()
+                                    : rawBanners.cast<dynamic>();
                                 safeSetState(() {});
                               },
                             ),
@@ -190,12 +234,6 @@ class _ListagemDeBannersWidgetState extends State<ListagemDeBannersWidget> {
                                     ),
                                     color: Color(0xFF909090),
                                     letterSpacing: 0.0,
-                                    fontWeight: FlutterFlowTheme.of(context)
-                                        .labelMedium
-                                        .fontWeight,
-                                    fontStyle: FlutterFlowTheme.of(context)
-                                        .labelMedium
-                                        .fontStyle,
                                   ),
                               hintStyle: FlutterFlowTheme.of(context)
                                   .labelMedium
@@ -209,50 +247,44 @@ class _ListagemDeBannersWidgetState extends State<ListagemDeBannersWidget> {
                                           .fontStyle,
                                     ),
                                     letterSpacing: 0.0,
-                                    fontWeight: FlutterFlowTheme.of(context)
-                                        .labelMedium
-                                        .fontWeight,
-                                    fontStyle: FlutterFlowTheme.of(context)
-                                        .labelMedium
-                                        .fontStyle,
                                   ),
-                              enabledBorder: UnderlineInputBorder(
+                              enabledBorder: OutlineInputBorder(
                                 borderSide: BorderSide(
-                                  color: Color(0xFF8B8B8B),
+                                  color: Color(0xFFCCCCCC),
                                   width: 1.0,
                                 ),
-                                borderRadius: BorderRadius.circular(0.0),
+                                borderRadius: BorderRadius.circular(24.0),
                               ),
-                              focusedBorder: UnderlineInputBorder(
+                              focusedBorder: OutlineInputBorder(
                                 borderSide: BorderSide(
-                                  color: Color(0xFF8B8B8B),
-                                  width: 1.0,
+                                  color: FlutterFlowTheme.of(context).primary,
+                                  width: 1.5,
                                 ),
-                                borderRadius: BorderRadius.circular(0.0),
+                                borderRadius: BorderRadius.circular(24.0),
                               ),
-                              errorBorder: UnderlineInputBorder(
+                              errorBorder: OutlineInputBorder(
                                 borderSide: BorderSide(
                                   color: FlutterFlowTheme.of(context).error,
                                   width: 1.0,
                                 ),
-                                borderRadius: BorderRadius.circular(0.0),
+                                borderRadius: BorderRadius.circular(24.0),
                               ),
-                              focusedErrorBorder: UnderlineInputBorder(
+                              focusedErrorBorder: OutlineInputBorder(
                                 borderSide: BorderSide(
                                   color: FlutterFlowTheme.of(context).error,
-                                  width: 1.0,
+                                  width: 1.5,
                                 ),
-                                borderRadius: BorderRadius.circular(0.0),
+                                borderRadius: BorderRadius.circular(24.0),
                               ),
                               filled: true,
                               fillColor: FlutterFlowTheme.of(context)
                                   .secondaryBackground,
                               contentPadding: EdgeInsetsDirectional.fromSTEB(
                                   20.0, 10.0, 20.0, 10.0),
-                              suffixIcon: Icon(
+                              prefixIcon: const Icon(
                                 Icons.search_rounded,
                                 color: Color(0xFF9A9A9A),
-                                size: 21.0,
+                                size: 20.0,
                               ),
                             ),
                             style: FlutterFlowTheme.of(context)
@@ -267,12 +299,6 @@ class _ListagemDeBannersWidgetState extends State<ListagemDeBannersWidget> {
                                         .fontStyle,
                                   ),
                                   letterSpacing: 0.0,
-                                  fontWeight: FlutterFlowTheme.of(context)
-                                      .bodyMedium
-                                      .fontWeight,
-                                  fontStyle: FlutterFlowTheme.of(context)
-                                      .bodyMedium
-                                      .fontStyle,
                                 ),
                             cursorColor:
                                 FlutterFlowTheme.of(context).primaryText,
@@ -282,12 +308,13 @@ class _ListagemDeBannersWidgetState extends State<ListagemDeBannersWidget> {
                         ),
                       ),
                     ),
+                    const Spacer(),
                     Align(
                       alignment: AlignmentDirectional(-1.0, 0.0),
                       child: Builder(
                         builder: (context) => Padding(
-                          padding: EdgeInsetsDirectional.fromSTEB(
-                              70.0, 0.0, 0.0, 0.0),
+                          padding: const EdgeInsetsDirectional.fromSTEB(
+                              0.0, 30.0, 35.0, 0.0),
                           child: FFButtonWidget(
                             onPressed: () async {
                               await showDialog(
@@ -310,10 +337,11 @@ class _ListagemDeBannersWidgetState extends State<ListagemDeBannersWidget> {
                                   await ObterBannersCall.call();
 
                               if ((_model.apiResultdku?.succeeded ?? true)) {
-                                _model.bannersLocal =
-                                    (_model.apiResultdku?.jsonBody ?? '')
-                                        .toList()
-                                        .cast<dynamic>();
+                                final updated = _model.apiResultdku?.jsonBody;
+                                if (updated is List) {
+                                  _model.bannersLocal =
+                                      updated.toList().cast<dynamic>();
+                                }
                                 safeSetState(() {});
                               }
 
@@ -321,12 +349,12 @@ class _ListagemDeBannersWidgetState extends State<ListagemDeBannersWidget> {
                             },
                             text: 'Cadastrar',
                             icon: Icon(
-                              Icons.discount,
+                              Icons.add_circle_outline,
                               size: 15.0,
                             ),
                             options: FFButtonOptions(
-                              width: MediaQuery.sizeOf(context).width * 0.14,
-                              height: 50.0,
+                              width: 130.0,
+                              height: 45.0,
                               padding: EdgeInsetsDirectional.fromSTEB(
                                   16.0, 0.0, 16.0, 0.0),
                               iconPadding: EdgeInsetsDirectional.fromSTEB(
@@ -346,12 +374,6 @@ class _ListagemDeBannersWidgetState extends State<ListagemDeBannersWidget> {
                                     color: FlutterFlowTheme.of(context)
                                         .secondaryBackground,
                                     letterSpacing: 0.0,
-                                    fontWeight: FlutterFlowTheme.of(context)
-                                        .titleSmall
-                                        .fontWeight,
-                                    fontStyle: FlutterFlowTheme.of(context)
-                                        .titleSmall
-                                        .fontStyle,
                                   ),
                               elevation: 0.0,
                               borderRadius: BorderRadius.circular(6.0),
@@ -363,96 +385,135 @@ class _ListagemDeBannersWidgetState extends State<ListagemDeBannersWidget> {
                   ],
                 ),
                 Padding(
-                  padding: EdgeInsetsDirectional.fromSTEB(0.0, 40.0, 0.0, 0.0),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.max,
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        flex: 1,
-                        child: Container(
-                          decoration: BoxDecoration(),
-                          child: Align(
-                            alignment: AlignmentDirectional(0.0, 0.0),
-                            child: wrapWithModel(
-                              model: _model.fonteTituloTabelaModel1,
-                              updateCallback: () => safeSetState(() {}),
-                              child: FonteTituloTabelaWidget(
-                                text: 'ID',
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                        flex: 3,
-                        child: Container(
-                          decoration: BoxDecoration(),
-                          child: Align(
-                            alignment: AlignmentDirectional(0.0, 0.0),
-                            child: wrapWithModel(
-                              model: _model.fonteTituloTabelaModel2,
-                              updateCallback: () => safeSetState(() {}),
-                              child: FonteTituloTabelaWidget(
-                                text: 'IMAGEM',
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                        flex: 4,
-                        child: Container(
-                          decoration: BoxDecoration(),
-                          child: Align(
-                            alignment: AlignmentDirectional(0.0, 0.0),
-                            child: wrapWithModel(
-                              model: _model.fonteTituloTabelaModel3,
-                              updateCallback: () => safeSetState(() {}),
-                              child: FonteTituloTabelaWidget(
-                                text: 'DESTINO',
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                        flex: 1,
-                        child: Container(
-                          width: 100.0,
-                          height: 20.0,
-                          decoration: BoxDecoration(
-                            color: FlutterFlowTheme.of(context)
-                                .secondaryBackground,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Padding(
-                  padding: EdgeInsetsDirectional.fromSTEB(0.0, 6.0, 0.0, 6.0),
+                  padding: const EdgeInsetsDirectional.fromSTEB(0.0, 30.0, 0.0, 0.0),
                   child: Container(
-                    width: MediaQuery.sizeOf(context).width * 1.0,
-                    height: 0.5,
                     decoration: BoxDecoration(
-                      color: Color(0xFFC7C7C7),
+                      color: FlutterFlowTheme.of(context).alternate,
+                      borderRadius: BorderRadius.circular(
+                          FlutterFlowTheme.of(context)
+                              .designToken
+                              .radius
+                              .sm),
+                    ),
+                    padding: const EdgeInsetsDirectional.fromSTEB(
+                        16.0, 12.0, 16.0, 12.0),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.max,
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          flex: 1,
+                          child: Container(
+                            decoration: const BoxDecoration(),
+                            child: Align(
+                              alignment: const AlignmentDirectional(0.0, 0.0),
+                              child: _buildSortableHeader(
+                                context,
+                                'id',
+                                Text(
+                                  'ID',
+                                  style: FlutterFlowTheme.of(context).bodyMedium.override(
+                                        font: GoogleFonts.openSans(
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                        fontSize: 13.5,
+                                      ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                          flex: 3,
+                          child: Container(
+                            decoration: const BoxDecoration(),
+                            child: Align(
+                              alignment: const AlignmentDirectional(0.0, 0.0),
+                              child: Text(
+                                'IMAGEM',
+                                style: FlutterFlowTheme.of(context).bodyMedium.override(
+                                      font: GoogleFonts.openSans(
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                      fontSize: 13.5,
+                                    ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                          flex: 4,
+                          child: Container(
+                            decoration: const BoxDecoration(),
+                            child: Align(
+                              alignment: const AlignmentDirectional(0.0, 0.0),
+                              child: _buildSortableHeader(
+                                context,
+                                'url',
+                                Text(
+                                  'DESTINO',
+                                  style: FlutterFlowTheme.of(context).bodyMedium.override(
+                                        font: GoogleFonts.openSans(
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                        fontSize: 13.5,
+                                      ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                          flex: 1,
+                          child: Container(
+                            decoration: const BoxDecoration(),
+                            child: Align(
+                              alignment: const AlignmentDirectional(0.0, 0.0),
+                              child: Text(
+                                'AÇÕES',
+                                style: FlutterFlowTheme.of(context).bodyMedium.override(
+                                      font: GoogleFonts.openSans(
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                      fontSize: 13.5,
+                                    ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
-                Container(
-                  height: MediaQuery.sizeOf(context).height * 0.56,
-                  decoration: BoxDecoration(),
-                  child: Builder(
-                    builder: (context) {
-                      final itemBanners = _model.bannersLocal.toList();
 
-                      return ListView.builder(
-                        padding: EdgeInsets.zero,
-                        shrinkWrap: true,
-                        scrollDirection: Axis.vertical,
-                        itemCount: itemBanners.length,
-                        itemBuilder: (context, itemBannersIndex) {
+                Expanded(
+                  child: Container(
+                    decoration: const BoxDecoration(),
+                    child: Builder(
+                      builder: (context) {
+                        final itemBanners = _applySort(_model.bannersLocal);
+
+                        if (itemBanners.isEmpty) {
+                          return Center(
+                            child: Padding(
+                              padding: const EdgeInsets.all(24.0),
+                              child: Text(
+                                'Nenhum banner encontrado',
+                                style: FlutterFlowTheme.of(context).bodyMedium.override(
+                                      font: GoogleFonts.openSans(),
+                                      color: FlutterFlowTheme.of(context).secondaryText,
+                                    ),
+                              ),
+                            ),
+                          );
+                        }
+
+                        return ListView.builder(
+                          padding: EdgeInsets.zero,
+                          shrinkWrap: true,
+                          scrollDirection: Axis.vertical,
+                          itemCount: itemBanners.length,
+                          itemBuilder: (context, itemBannersIndex) {
                           final itemBannersItem = itemBanners[itemBannersIndex];
                           return Column(
                             mainAxisSize: MainAxisSize.max,
@@ -464,10 +525,10 @@ class _ListagemDeBannersWidgetState extends State<ListagemDeBannersWidget> {
                                   Expanded(
                                     flex: 1,
                                     child: Container(
-                                      decoration: BoxDecoration(),
+                                      decoration: const BoxDecoration(),
                                       child: Align(
                                         alignment:
-                                            AlignmentDirectional(0.0, 0.0),
+                                            const AlignmentDirectional(0.0, 0.0),
                                         child: wrapWithModel(
                                           model: _model.fonteDadosTabelaModels1
                                               .getModel(
@@ -492,43 +553,46 @@ class _ListagemDeBannersWidgetState extends State<ListagemDeBannersWidget> {
                                   Expanded(
                                     flex: 3,
                                     child: Container(
-                                      decoration: BoxDecoration(),
+                                      decoration: const BoxDecoration(),
                                       child: Align(
                                         alignment:
-                                            AlignmentDirectional(0.0, 0.0),
-                                        child: ClipRRect(
-                                          borderRadius:
-                                              BorderRadius.circular(4.0),
-                                          child: Image.network(
-                                            getJsonField(
-                                              itemBannersItem,
-                                              r'''$.imagem''',
-                                            ).toString(),
-                                            width: 60.0,
-                                            height: 40.0,
-                                            fit: BoxFit.cover,
-                                            errorBuilder:
-                                                (context, error, stackTrace) {
-                                              return Container(
-                                                width: 60.0,
-                                                height: 40.0,
-                                                decoration: BoxDecoration(
-                                                  color: FlutterFlowTheme.of(
-                                                          context)
-                                                      .alternate,
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                          4.0),
-                                                ),
-                                                child: Icon(
-                                                  Icons.broken_image_outlined,
-                                                  color: FlutterFlowTheme.of(
-                                                          context)
-                                                      .secondaryText,
-                                                  size: 20.0,
-                                                ),
-                                              );
-                                            },
+                                            const AlignmentDirectional(0.0, 0.0),
+                                        child: Padding(
+                                          padding: const EdgeInsets.symmetric(vertical: 6.0),
+                                          child: ClipRRect(
+                                            borderRadius:
+                                                BorderRadius.circular(6.0),
+                                            child: Image.network(
+                                              getJsonField(
+                                                itemBannersItem,
+                                                r'''$.imagem''',
+                                              ).toString(),
+                                              width: 80.0,
+                                              height: 48.0,
+                                              fit: BoxFit.cover,
+                                              errorBuilder:
+                                                  (context, error, stackTrace) {
+                                                return Container(
+                                                  width: 80.0,
+                                                  height: 48.0,
+                                                  decoration: BoxDecoration(
+                                                    color: FlutterFlowTheme.of(
+                                                            context)
+                                                        .alternate,
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            6.0),
+                                                  ),
+                                                  child: Icon(
+                                                    Icons.broken_image_outlined,
+                                                    color: FlutterFlowTheme.of(
+                                                            context)
+                                                        .secondaryText,
+                                                    size: 20.0,
+                                                  ),
+                                                );
+                                              },
+                                            ),
                                           ),
                                         ),
                                       ),
@@ -537,10 +601,10 @@ class _ListagemDeBannersWidgetState extends State<ListagemDeBannersWidget> {
                                   Expanded(
                                     flex: 4,
                                     child: Container(
-                                      decoration: BoxDecoration(),
+                                      decoration: const BoxDecoration(),
                                       child: Align(
                                         alignment:
-                                            AlignmentDirectional(0.0, 0.0),
+                                            const AlignmentDirectional(0.0, 0.0),
                                         child: wrapWithModel(
                                           model: _model.fonteDadosTabelaModels2
                                               .getModel(
@@ -553,10 +617,10 @@ class _ListagemDeBannersWidgetState extends State<ListagemDeBannersWidget> {
                                             key: Key(
                                               'Keyf2v_${itemBannersItem.toString()}',
                                             ),
-                                            text: getJsonField(
+                                            text: (getJsonField(
                                               itemBannersItem,
                                               r'''$.url''',
-                                            ).toString(),
+                                            ) ?? '-').toString(),
                                           ),
                                         ),
                                       ),
@@ -565,15 +629,10 @@ class _ListagemDeBannersWidgetState extends State<ListagemDeBannersWidget> {
                                   Expanded(
                                     flex: 1,
                                     child: Container(
-                                      width: 100.0,
-                                      height: 20.0,
-                                      decoration: BoxDecoration(
-                                        color: FlutterFlowTheme.of(context)
-                                            .secondaryBackground,
-                                      ),
+                                      decoration: const BoxDecoration(),
                                       child: Align(
                                         alignment:
-                                            AlignmentDirectional(-1.0, 0.0),
+                                            const AlignmentDirectional(0.0, 0.0),
                                         child: InkWell(
                                           splashColor: Colors.transparent,
                                           focusColor: Colors.transparent,
@@ -610,7 +669,7 @@ class _ListagemDeBannersWidgetState extends State<ListagemDeBannersWidget> {
                                             safeSetState(() {});
                                           },
                                           child: Icon(
-                                            Icons.delete_sharp,
+                                            Icons.delete_outline_rounded,
                                             color: FlutterFlowTheme.of(context)
                                                 .error,
                                             size: 22.0,
@@ -622,12 +681,12 @@ class _ListagemDeBannersWidgetState extends State<ListagemDeBannersWidget> {
                                 ],
                               ),
                               Padding(
-                                padding: EdgeInsetsDirectional.fromSTEB(
+                                padding: const EdgeInsetsDirectional.fromSTEB(
                                     0.0, 6.0, 0.0, 6.0),
                                 child: Container(
                                   width: MediaQuery.sizeOf(context).width * 1.0,
                                   height: 0.5,
-                                  decoration: BoxDecoration(
+                                  decoration: const BoxDecoration(
                                     color: Color(0xFFC7C7C7),
                                   ),
                                 ),
@@ -639,6 +698,7 @@ class _ListagemDeBannersWidgetState extends State<ListagemDeBannersWidget> {
                     },
                   ),
                 ),
+              ),
               ],
             ),
           ),
