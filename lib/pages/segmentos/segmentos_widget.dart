@@ -82,7 +82,7 @@ class _SegmentosWidgetState extends State<SegmentosWidget> {
                   Container(
                     width: FFAppState().sidebarCollapsed
                         ? 80.0
-                        : MediaQuery.sizeOf(context).width * 0.22,
+                        : (MediaQuery.sizeOf(context).width * 0.22).clamp(220.0, 320.0),
                     height: MediaQuery.sizeOf(context).height * 1.0,
                     decoration: BoxDecoration(
                       color: FlutterFlowTheme.of(context).secondary,
@@ -128,16 +128,23 @@ class _SegmentosWidgetState extends State<SegmentosWidget> {
                                 ),
                           ),
                           Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
-                                0.0, 50.0, 0.0, 0.0),
-                            child: wrapWithModel(
-                              model: _model.listagemDeSegmentosModel,
-                              updateCallback: () => safeSetState(() {}),
-                              child: ListagemDeSegmentosWidget(
-                                cupons:
-                                    segmentosObterSegmentosResponse.jsonBody,
-                              ),
-                            ),
+                            padding: const EdgeInsetsDirectional.fromSTEB(
+                                0.0, 50.0, 50.0, 0.0),
+                            child: () {
+                              final raw = segmentosObterSegmentosResponse.jsonBody;
+                              final List<dynamic> segmentosList = (raw is List)
+                                  ? raw
+                                  : (raw is Map && raw['data'] is List)
+                                      ? raw['data']
+                                      : [];
+                              return wrapWithModel(
+                                model: _model.listagemDeSegmentosModel,
+                                updateCallback: () => safeSetState(() {}),
+                                child: ListagemDeSegmentosWidget(
+                                  cupons: segmentosList,
+                                ),
+                              );
+                            }(),
                           ),
                         ],
                       ),
