@@ -148,6 +148,7 @@ class _ListagemDeSegmentosWidgetState extends State<ListagemDeSegmentosWidget> {
   Widget build(BuildContext context) {
     return Container(
       width: MediaQuery.sizeOf(context).width * 0.74,
+      height: MediaQuery.sizeOf(context).height * 0.82,
       child: Stack(
         children: [
           Align(
@@ -483,8 +484,10 @@ class _ListagemDeSegmentosWidgetState extends State<ListagemDeSegmentosWidget> {
                     ),
                   ),
                 ),
-                Expanded(
+                Padding(
+                  padding: const EdgeInsetsDirectional.fromSTEB(0.0, 10.0, 0.0, 0.0),
                   child: Container(
+                    height: MediaQuery.sizeOf(context).height * 0.58,
                     decoration: const BoxDecoration(),
                     child: Builder(
                     builder: (context) {
