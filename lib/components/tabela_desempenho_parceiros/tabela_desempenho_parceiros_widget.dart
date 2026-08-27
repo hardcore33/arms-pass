@@ -375,7 +375,7 @@ class _TabelaDesempenhoParceirosWidgetState
           color: FlutterFlowTheme.of(context).secondaryBackground,
           borderRadius: BorderRadius.circular(16.0),
           border: Border.all(
-            color: const Color(0xFFE5E5E5),
+            color: FlutterFlowTheme.of(context).alternate,
             width: 1.0,
           ),
         ),
@@ -438,7 +438,7 @@ class _TabelaDesempenhoParceirosWidgetState
               padding: const EdgeInsets.fromLTRB(24.0, 20.0, 24.0, 10.0),
               child: LayoutBuilder(
                 builder: (context, constraints) {
-                  final isWide = constraints.maxWidth > 900;
+                  final isWide = constraints.maxWidth > FFAppConstants.kWideLayoutBreakpoint;
                   return isWide
                       ? Row(
                           children: [
@@ -699,7 +699,7 @@ class _TabelaDesempenhoParceirosWidgetState
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                const Icon(Icons.trending_up_rounded, size: 15.0, color: Color(0xFFE65100)),
+                                const Icon(Icons.trending_up_rounded, size: 14.0, color: Color(0xFFE65100)),
                                 const SizedBox(width: 5.0),
                                 Text(
                                   'R\$ ${oportunidadeItem.toStringAsFixed(2).replaceAll('.', ',')}',
@@ -720,7 +720,7 @@ class _TabelaDesempenhoParceirosWidgetState
                             width: 240.0,
                             child: Row(
                               children: [
-                                const Icon(Icons.stars_rounded, size: 16.0, color: Color(0xFFF57C00)),
+                                const Icon(Icons.stars_rounded, size: 14.0, color: Color(0xFFF57C00)),
                                 const SizedBox(width: 6.0),
                                 Expanded(
                                   child: Text(

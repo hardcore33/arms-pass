@@ -91,7 +91,7 @@ class _DashboardWidgetState extends State<DashboardWidget> {
                   Container(
                     width: FFAppState().sidebarCollapsed
                         ? 80.0
-                        : MediaQuery.sizeOf(context).width * 0.22,
+                        : (MediaQuery.sizeOf(context).width * 0.22).clamp(220.0, 320.0),
                     height: MediaQuery.sizeOf(context).height * 1.0,
                     decoration: BoxDecoration(
                       color: FlutterFlowTheme.of(context).secondary,

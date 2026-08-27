@@ -194,11 +194,16 @@ class _MensagensWidgetState extends State<MensagensWidget> {
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Row(
-          children: const [
+        content: const Row(
+          children: [
             Icon(Icons.replay_rounded, color: Colors.white, size: 20.0),
             SizedBox(width: 8.0),
-            Text('Dados carregados no formulário de envio.'),
+            Expanded(
+              child: Text(
+                'Dados carregados no formulário de envio.',
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
           ],
         ),
         backgroundColor: FlutterFlowTheme.of(context).primary,
@@ -515,7 +520,7 @@ class _MensagensWidgetState extends State<MensagensWidget> {
   Widget _buildManualTab() {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final isWide = constraints.maxWidth > 900;
+        final isWide = constraints.maxWidth > FFAppConstants.kWideLayoutBreakpoint;
         return Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -1160,7 +1165,7 @@ class _MensagensWidgetState extends State<MensagensWidget> {
                           children: [
                             // Botão Reenviar / Carregar no Formulário
                             IconButton(
-                              icon: const Icon(Icons.replay_rounded, color: Color(0xFF1976D2), size: 19.0),
+                              icon: const Icon(Icons.replay_rounded, color: Color(0xFF1976D2), size: 18.0),
                               tooltip: 'Reenviar / Carregar no formulário',
                               onPressed: () => _preencherParaReenvio(item),
                             ),
@@ -1169,14 +1174,14 @@ class _MensagensWidgetState extends State<MensagensWidget> {
                               icon: Icon(
                                 isActive ? Icons.pause_circle_outline_rounded : Icons.play_circle_outline_rounded,
                                 color: isActive ? const Color(0xFFF57C00) : const Color(0xFF2E7D32),
-                                size: 19.0,
+                                size: 18.0,
                               ),
                               tooltip: isActive ? 'Expirar / Desativar notificação' : 'Reativar notificação',
                               onPressed: () => _alternarStatusNotificacao(id),
                             ),
                             // Botão Excluir
                             IconButton(
-                              icon: const Icon(Icons.delete_outline_rounded, color: Color(0xFFE53935), size: 19.0),
+                              icon: const Icon(Icons.delete_outline_rounded, color: Color(0xFFE53935), size: 18.0),
                               tooltip: 'Excluir do histórico',
                               onPressed: () => _excluirDoHistorico(id),
                             ),
@@ -1410,11 +1415,16 @@ class _MensagensWidgetState extends State<MensagensWidget> {
             onPressed: () {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Row(
-                    children: const [
+                  content: const Row(
+                    children: [
                       Icon(Icons.check_circle_rounded, color: Colors.white, size: 20.0),
                       SizedBox(width: 8.0),
-                      Text('Regras de automação salvas com sucesso!'),
+                      Expanded(
+                        child: Text(
+                          'Regras de automação salvas com sucesso!',
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
                     ],
                   ),
                   backgroundColor: const Color(0xFF2E7D32),
@@ -1506,13 +1516,18 @@ class _MensagensWidgetState extends State<MensagensWidget> {
               ),
             ],
           ),
-          if (isEnabled) ...[
-            const Padding(
-              padding: EdgeInsets.symmetric(vertical: 14.0),
-              child: Divider(height: 1.0, thickness: 1.0, color: Color(0xFFEEEEEE)),
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 14.0),
+            child: Divider(height: 1.0, thickness: 1.0, color: Color(0xFFEEEEEE)),
+          ),
+          AnimatedOpacity(
+            opacity: isEnabled ? 1.0 : 0.45,
+            duration: const Duration(milliseconds: 200),
+            child: IgnorePointer(
+              ignoring: !isEnabled,
+              child: child,
             ),
-            child,
-          ],
+          ),
         ],
       ),
     );
@@ -1537,7 +1552,7 @@ class _MensagensWidgetState extends State<MensagensWidget> {
               Container(
                 width: FFAppState().sidebarCollapsed
                     ? 80.0
-                    : MediaQuery.sizeOf(context).width * 0.22,
+                    : (MediaQuery.sizeOf(context).width * 0.22).clamp(220.0, 320.0),
                 height: MediaQuery.sizeOf(context).height * 1.0,
                 decoration: BoxDecoration(
                   color: FlutterFlowTheme.of(context).secondary,

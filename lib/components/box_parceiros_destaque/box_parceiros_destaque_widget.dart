@@ -284,6 +284,8 @@ class _BoxParceirosDestaqueWidgetState
                                 children: [
                                   Text(
                                     partner.name,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
                                     style: FlutterFlowTheme.of(context)
                                         .bodyMedium
                                         .override(
@@ -304,6 +306,8 @@ class _BoxParceirosDestaqueWidgetState
                                     ),
                                     child: Text(
                                       partner.highlight,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
                                       style: FlutterFlowTheme.of(context)
                                           .bodySmall
                                           .override(
@@ -324,15 +328,20 @@ class _BoxParceirosDestaqueWidgetState
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text(
-                              'Cupons utilizados:',
-                              style: FlutterFlowTheme.of(context)
-                                  .bodyMedium
-                                  .override(
-                                    font: GoogleFonts.openSans(),
-                                    color: const Color(0xFFD4D4D4),
-                                  ),
+                            Expanded(
+                              child: Text(
+                                'Cupons utilizados:',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: FlutterFlowTheme.of(context)
+                                    .bodyMedium
+                                    .override(
+                                      font: GoogleFonts.openSans(),
+                                      color: const Color(0xFFD4D4D4),
+                                    ),
+                              ),
                             ),
+                            const SizedBox(width: 8.0),
                             Text(
                               partner.countLabel,
                               style: FlutterFlowTheme.of(context)
