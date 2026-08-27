@@ -45,13 +45,21 @@ class _ListagemDeSegmentosWidgetState extends State<ListagemDeSegmentosWidget> {
     super.initState();
     _model = createModel(context, () => ListagemDeSegmentosModel());
 
+    if (widget.cupons != null) {
+      _model.cuponsLocal = widget.cupons!.toList();
+    }
+
     // On component load action.
     SchedulerBinding.instance.addPostFrameCallback((_) async {
       _model.obterSegmentos = await ObterSegmentosCall.call();
 
       if ((_model.obterSegmentos?.succeeded ?? true)) {
-        _model.cuponsLocal =
-            (_model.obterSegmentos?.jsonBody ?? '').toList().cast<dynamic>();
+        final body = _model.obterSegmentos?.jsonBody;
+        if (body is List) {
+          _model.cuponsLocal = body.cast<dynamic>();
+        } else if (body is Map && body['data'] is List) {
+          _model.cuponsLocal = (body['data'] as List).cast<dynamic>();
+        }
         safeSetState(() {});
       }
     });
@@ -343,10 +351,12 @@ class _ListagemDeSegmentosWidgetState extends State<ListagemDeSegmentosWidget> {
                                   await ObterSegmentosCall.call();
 
                               if ((_model.apiResult230s?.succeeded ?? true)) {
-                                _model.cuponsLocal =
-                                    (_model.apiResult230s?.jsonBody ?? '')
-                                        .toList()
-                                        .cast<dynamic>();
+                                final body = _model.apiResult230s?.jsonBody;
+                                if (body is List) {
+                                  _model.cuponsLocal = body.cast<dynamic>();
+                                } else if (body is Map && body['data'] is List) {
+                                  _model.cuponsLocal = (body['data'] as List).cast<dynamic>();
+                                }
                                 safeSetState(() {});
                               }
 
@@ -527,7 +537,7 @@ class _ListagemDeSegmentosWidgetState extends State<ListagemDeSegmentosWidget> {
                                     child: Align(
                                       alignment: AlignmentDirectional(-1.0, 0.0),
                                       child: Row(
-                                        mainAxisSize: MainAxisSize.min,
+                                        mainAxisSize: MainAxisSize.max,
                                         children: [
                                           Container(
                                             width: 32.0,
@@ -680,12 +690,12 @@ class _ListagemDeSegmentosWidgetState extends State<ListagemDeSegmentosWidget> {
                                               if ((_model.apiResult230ss
                                                       ?.succeeded ??
                                                   true)) {
-                                                _model.cuponsLocal = (_model
-                                                            .apiResult230ss
-                                                            ?.jsonBody ??
-                                                        '')
-                                                    .toList()
-                                                    .cast<dynamic>();
+                                                final body = _model.apiResult230ss?.jsonBody;
+                                                if (body is List) {
+                                                  _model.cuponsLocal = body.cast<dynamic>();
+                                                } else if (body is Map && body['data'] is List) {
+                                                  _model.cuponsLocal = (body['data'] as List).cast<dynamic>();
+                                                }
                                                 safeSetState(() {});
                                               }
 
