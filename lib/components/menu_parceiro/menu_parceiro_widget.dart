@@ -42,335 +42,208 @@ class _MenuParceiroWidgetState extends State<MenuParceiroWidget> {
     super.dispose();
   }
 
+  Widget _buildMenuItem({
+    required BuildContext context,
+    required String title,
+    required IconData icon,
+    required bool isActive,
+    required VoidCallback onTap,
+  }) {
+    final theme = FlutterFlowTheme.of(context);
+    final isCollapsed = FFAppState().sidebarCollapsed;
+
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(8.0),
+        hoverColor:
+            isActive ? Colors.transparent : theme.primary.withOpacity(0.12),
+        splashColor: theme.primary.withOpacity(0.2),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 150),
+          width: double.infinity,
+          height: 48.0,
+          decoration: BoxDecoration(
+            color: isActive ? theme.secondaryBackground : Colors.transparent,
+            borderRadius: BorderRadius.circular(8.0),
+            boxShadow: isActive
+                ? [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.08),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
+                    )
+                  ]
+                : null,
+          ),
+          child: Row(
+            mainAxisAlignment: isCollapsed
+                ? MainAxisAlignment.center
+                : MainAxisAlignment.start,
+            children: [
+              if (!isCollapsed) ...[
+                AnimatedContainer(
+                  duration: const Duration(milliseconds: 150),
+                  width: 4.0,
+                  height: isActive ? 24.0 : 0.0,
+                  decoration: BoxDecoration(
+                    color: theme.secondary,
+                    borderRadius: BorderRadius.circular(2.0),
+                  ),
+                ),
+                const SizedBox(width: 14.0),
+              ],
+              Icon(
+                icon,
+                size: 20.0,
+                color: isActive
+                    ? theme.primary
+                    : theme.primaryText.withOpacity(0.85),
+              ),
+              if (!isCollapsed) ...[
+                const SizedBox(width: 10.0),
+                Text(
+                  title,
+                  style: theme.bodyMedium.override(
+                    fontFamily: 'Open Sans',
+                    fontSize: 14.0,
+                    fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
+                    color: isActive
+                        ? theme.primary
+                        : theme.primaryText.withOpacity(0.85),
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     context.watch<FFAppState>();
+    final theme = FlutterFlowTheme.of(context);
+    final isCollapsed = FFAppState().sidebarCollapsed;
 
     return Padding(
-      padding: EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 0.0),
+      padding: EdgeInsetsDirectional.fromSTEB(
+        isCollapsed ? 8.0 : 16.0,
+        0.0,
+        isCollapsed ? 8.0 : 8.0,
+        0.0,
+      ),
       child: Column(
         mainAxisSize: MainAxisSize.max,
         children: [
-          InkWell(
-            splashColor: Colors.transparent,
-            focusColor: Colors.transparent,
-            hoverColor: Colors.transparent,
-            highlightColor: Colors.transparent,
-            onTap: () async {
-              context.pushNamed(
-                DashboardParceiroWidget.routeName,
-                extra: <String, dynamic>{
-                  '__transition_info__': TransitionInfo(
-                    hasTransition: true,
-                    transitionType: PageTransitionType.fade,
-                    duration: Duration(milliseconds: 0),
-                  ),
-                },
-              );
-
-              FFAppState().indexPage = 1;
-              safeSetState(() {});
-            },
-            child: Container(
-              width: MediaQuery.sizeOf(context).width * 0.23,
-              height: 55.0,
-              decoration: BoxDecoration(
-                color: valueOrDefault<Color>(
-                  FFAppState().indexPage != 1
-                      ? FlutterFlowTheme.of(context).primary
-                      : FlutterFlowTheme.of(context).secondaryBackground,
-                  FlutterFlowTheme.of(context).primary,
-                ),
-                borderRadius: BorderRadius.circular(8.0),
-              ),
-              child: Padding(
-                padding: EdgeInsetsDirectional.fromSTEB(30.0, 0.0, 0.0, 0.0),
-                child: Row(
-                  mainAxisSize: MainAxisSize.max,
-                  children: [
-                    Icon(
-                      Icons.home_rounded,
-                      color: valueOrDefault<Color>(
-                        FFAppState().indexPage != 1
-                            ? FlutterFlowTheme.of(context).secondary
-                            : FlutterFlowTheme.of(context).tertiary,
-                        FlutterFlowTheme.of(context).secondary,
-                      ),
-                    ),
-                    Padding(
-                      padding:
-                          EdgeInsetsDirectional.fromSTEB(7.0, 0.0, 0.0, 0.0),
-                      child: Text(
-                        'Home',
-                        style: FlutterFlowTheme.of(context).bodyMedium.override(
-                              font: GoogleFonts.openSans(
-                                fontWeight: FontWeight.w500,
-                                fontStyle: FlutterFlowTheme.of(context)
-                                    .bodyMedium
-                                    .fontStyle,
-                              ),
-                              color: valueOrDefault<Color>(
-                                FFAppState().indexPage != 1
-                                    ? FlutterFlowTheme.of(context).secondary
-                                    : FlutterFlowTheme.of(context).tertiary,
-                                FlutterFlowTheme.of(context).secondary,
-                              ),
-                              fontSize: 15.0,
-                              letterSpacing: 0.0,
-                              fontWeight: FontWeight.w500,
-                              fontStyle: FlutterFlowTheme.of(context)
-                                  .bodyMedium
-                                  .fontStyle,
-                            ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
           Padding(
-            padding: EdgeInsetsDirectional.fromSTEB(0.0, 5.0, 0.0, 0.0),
-            child: InkWell(
-              splashColor: Colors.transparent,
-              focusColor: Colors.transparent,
-              hoverColor: Colors.transparent,
-              highlightColor: Colors.transparent,
-              onTap: () async {
-                context.pushNamed(
-                  ValidarParceiroWidget.routeName,
-                  extra: <String, dynamic>{
-                    '__transition_info__': TransitionInfo(
-                      hasTransition: true,
-                      transitionType: PageTransitionType.fade,
-                      duration: Duration(milliseconds: 0),
+            padding: const EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 15.0),
+            child: Row(
+              mainAxisAlignment: isCollapsed
+                  ? MainAxisAlignment.center
+                  : MainAxisAlignment.spaceBetween,
+              children: [
+                if (!isCollapsed)
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(8.0),
+                    child: Image.asset(
+                      'assets/images/logo.png',
+                      width: 140.0,
+                      height: 50.0,
+                      fit: BoxFit.contain,
                     ),
+                  ),
+                InkWell(
+                  onTap: () {
+                    FFAppState().sidebarCollapsed = !isCollapsed;
                   },
-                );
-
-                FFAppState().indexPage = 3;
-                safeSetState(() {});
-              },
-              child: Container(
-                width: MediaQuery.sizeOf(context).width * 0.23,
-                height: 55.0,
-                decoration: BoxDecoration(
-                  color: valueOrDefault<Color>(
-                    FFAppState().indexPage != 3
-                        ? FlutterFlowTheme.of(context).primary
-                        : FlutterFlowTheme.of(context).secondaryBackground,
-                    FlutterFlowTheme.of(context).primary,
-                  ),
-                  borderRadius: BorderRadius.circular(8.0),
-                ),
-                child: Padding(
-                  padding: EdgeInsetsDirectional.fromSTEB(30.0, 0.0, 0.0, 0.0),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.max,
-                    children: [
-                      Icon(
-                        Icons.people_alt,
-                        color: valueOrDefault<Color>(
-                          FFAppState().indexPage != 3
-                              ? FlutterFlowTheme.of(context).secondary
-                              : FlutterFlowTheme.of(context).tertiary,
-                          FlutterFlowTheme.of(context).secondary,
-                        ),
-                      ),
-                      Padding(
-                        padding:
-                            EdgeInsetsDirectional.fromSTEB(7.0, 0.0, 0.0, 0.0),
-                        child: Text(
-                          'Validar',
-                          style: FlutterFlowTheme.of(context)
-                              .bodyMedium
-                              .override(
-                                font: GoogleFonts.openSans(
-                                  fontWeight: FontWeight.w500,
-                                  fontStyle: FlutterFlowTheme.of(context)
-                                      .bodyMedium
-                                      .fontStyle,
-                                ),
-                                color: valueOrDefault<Color>(
-                                  FFAppState().indexPage != 3
-                                      ? FlutterFlowTheme.of(context).secondary
-                                      : FlutterFlowTheme.of(context).tertiary,
-                                  FlutterFlowTheme.of(context).secondary,
-                                ),
-                                fontSize: 15.0,
-                                letterSpacing: 0.0,
-                                fontWeight: FontWeight.w500,
-                                fontStyle: FlutterFlowTheme.of(context)
-                                    .bodyMedium
-                                    .fontStyle,
-                              ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
-          Padding(
-            padding: EdgeInsetsDirectional.fromSTEB(0.0, 5.0, 0.0, 0.0),
-            child: InkWell(
-              splashColor: Colors.transparent,
-              focusColor: Colors.transparent,
-              hoverColor: Colors.transparent,
-              highlightColor: Colors.transparent,
-              onTap: () async {
-                context.pushNamed(
-                  CuponsParceiroWidget.routeName,
-                  extra: <String, dynamic>{
-                    '__transition_info__': TransitionInfo(
-                      hasTransition: true,
-                      transitionType: PageTransitionType.fade,
-                      duration: Duration(milliseconds: 0),
+                  borderRadius: BorderRadius.circular(20.0),
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Icon(
+                      isCollapsed
+                          ? Icons.chevron_right_rounded
+                          : Icons.chevron_left_rounded,
+                      color: theme.primary,
+                      size: 24.0,
                     ),
-                  },
-                );
-
-                FFAppState().indexPage = 2;
-                safeSetState(() {});
-              },
-              child: Container(
-                width: MediaQuery.sizeOf(context).width * 0.23,
-                height: 55.0,
-                decoration: BoxDecoration(
-                  color: valueOrDefault<Color>(
-                    FFAppState().indexPage != 2
-                        ? FlutterFlowTheme.of(context).primary
-                        : FlutterFlowTheme.of(context).secondaryBackground,
-                    FlutterFlowTheme.of(context).primary,
-                  ),
-                  borderRadius: BorderRadius.circular(8.0),
-                ),
-                child: Padding(
-                  padding: EdgeInsetsDirectional.fromSTEB(30.0, 0.0, 0.0, 0.0),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.max,
-                    children: [
-                      Icon(
-                        Icons.list_alt,
-                        color: valueOrDefault<Color>(
-                          FFAppState().indexPage != 2
-                              ? FlutterFlowTheme.of(context).secondary
-                              : FlutterFlowTheme.of(context).tertiary,
-                          FlutterFlowTheme.of(context).secondary,
-                        ),
-                      ),
-                      Padding(
-                        padding:
-                            EdgeInsetsDirectional.fromSTEB(7.0, 0.0, 0.0, 0.0),
-                        child: Text(
-                          'Cupons',
-                          style: FlutterFlowTheme.of(context)
-                              .bodyMedium
-                              .override(
-                                font: GoogleFonts.openSans(
-                                  fontWeight: FontWeight.w500,
-                                  fontStyle: FlutterFlowTheme.of(context)
-                                      .bodyMedium
-                                      .fontStyle,
-                                ),
-                                color: valueOrDefault<Color>(
-                                  FFAppState().indexPage != 2
-                                      ? FlutterFlowTheme.of(context).secondary
-                                      : FlutterFlowTheme.of(context).tertiary,
-                                  FlutterFlowTheme.of(context).secondary,
-                                ),
-                                fontSize: 15.0,
-                                letterSpacing: 0.0,
-                                fontWeight: FontWeight.w500,
-                                fontStyle: FlutterFlowTheme.of(context)
-                                    .bodyMedium
-                                    .fontStyle,
-                              ),
-                        ),
-                      ),
-                    ],
                   ),
                 ),
+              ],
+            ),
+          ),
+          Divider(
+            thickness: 2.0,
+            color: theme.primary,
+          ),
+          const SizedBox(height: 15.0),
+          Expanded(
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.max,
+                children: [
+                  _buildMenuItem(
+                    context: context,
+                    title: 'Home',
+                    icon: Icons.home_rounded,
+                    isActive: FFAppState().indexPage == 1,
+                    onTap: () {
+                      context.pushNamed(DashboardParceiroWidget.routeName);
+                      FFAppState().indexPage = 1;
+                      safeSetState(() {});
+                    },
+                  ),
+                  const SizedBox(height: 6.0),
+                  _buildMenuItem(
+                    context: context,
+                    title: 'Validar',
+                    icon: Icons.qr_code_scanner_rounded,
+                    isActive: FFAppState().indexPage == 3,
+                    onTap: () {
+                      context.pushNamed(ValidarParceiroWidget.routeName);
+                      FFAppState().indexPage = 3;
+                      safeSetState(() {});
+                    },
+                  ),
+                  const SizedBox(height: 6.0),
+                  _buildMenuItem(
+                    context: context,
+                    title: 'Cupons',
+                    icon: Icons.confirmation_number_outlined,
+                    isActive: FFAppState().indexPage == 2,
+                    onTap: () {
+                      context.pushNamed(CuponsParceiroWidget.routeName);
+                      FFAppState().indexPage = 2;
+                      safeSetState(() {});
+                    },
+                  ),
+                  const SizedBox(height: 6.0),
+                  _buildMenuItem(
+                    context: context,
+                    title: 'Contrato',
+                    icon: Icons.description_outlined,
+                    isActive: FFAppState().indexPage == 4,
+                    onTap: () {
+                      context.pushNamed(ContratoParceiroWidget.routeName);
+                      FFAppState().indexPage = 4;
+                      safeSetState(() {});
+                    },
+                  ),
+                ],
               ),
             ),
           ),
           Padding(
-            padding: EdgeInsetsDirectional.fromSTEB(0.0, 5.0, 0.0, 0.0),
-            child: InkWell(
-              splashColor: Colors.transparent,
-              focusColor: Colors.transparent,
-              hoverColor: Colors.transparent,
-              highlightColor: Colors.transparent,
-              onTap: () async {
-                context.pushNamed(ContratoParceiroWidget.routeName);
-
-                FFAppState().indexPage = 4;
-                safeSetState(() {});
-              },
-              child: Container(
-                width: MediaQuery.sizeOf(context).width * 0.23,
-                height: 55.0,
-                decoration: BoxDecoration(
-                  color: valueOrDefault<Color>(
-                    FFAppState().indexPage != 4
-                        ? FlutterFlowTheme.of(context).primary
-                        : FlutterFlowTheme.of(context).secondaryBackground,
-                    FlutterFlowTheme.of(context).primary,
-                  ),
-                  borderRadius: BorderRadius.circular(8.0),
-                ),
-                child: Padding(
-                  padding: EdgeInsetsDirectional.fromSTEB(30.0, 0.0, 0.0, 0.0),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.max,
-                    children: [
-                      Icon(
-                        Icons.edit_document,
-                        color: valueOrDefault<Color>(
-                          FFAppState().indexPage != 4
-                              ? FlutterFlowTheme.of(context).secondary
-                              : FlutterFlowTheme.of(context).tertiary,
-                          FlutterFlowTheme.of(context).secondary,
-                        ),
-                      ),
-                      Padding(
-                        padding:
-                            EdgeInsetsDirectional.fromSTEB(7.0, 0.0, 0.0, 0.0),
-                        child: Text(
-                          'Contrato',
-                          style: FlutterFlowTheme.of(context)
-                              .bodyMedium
-                              .override(
-                                font: GoogleFonts.openSans(
-                                  fontWeight: FontWeight.w500,
-                                  fontStyle: FlutterFlowTheme.of(context)
-                                      .bodyMedium
-                                      .fontStyle,
-                                ),
-                                color: valueOrDefault<Color>(
-                                  FFAppState().indexPage != 4
-                                      ? FlutterFlowTheme.of(context).secondary
-                                      : FlutterFlowTheme.of(context).tertiary,
-                                  FlutterFlowTheme.of(context).secondary,
-                                ),
-                                fontSize: 15.0,
-                                letterSpacing: 0.0,
-                                fontWeight: FontWeight.w500,
-                                fontStyle: FlutterFlowTheme.of(context)
-                                    .bodyMedium
-                                    .fontStyle,
-                              ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
+            padding: const EdgeInsets.symmetric(vertical: 10.0),
+            child: Divider(
+              color: theme.alternate,
+              thickness: 1.0,
             ),
           ),
           Padding(
-            padding: EdgeInsetsDirectional.fromSTEB(0.0, 5.0, 0.0, 0.0),
+            padding: const EdgeInsetsDirectional.fromSTEB(0.0, 5.0, 0.0, 15.0),
             child: InkWell(
               splashColor: Colors.transparent,
               focusColor: Colors.transparent,
@@ -384,62 +257,47 @@ class _MenuParceiroWidgetState extends State<MenuParceiroWidget> {
                 context.goNamedAuth(LoginWidget.routeName, context.mounted);
               },
               child: Container(
-                width: MediaQuery.sizeOf(context).width * 0.23,
+                width: double.infinity,
                 height: 55.0,
                 decoration: BoxDecoration(
                   color: valueOrDefault<Color>(
                     FFAppState().indexPage != 10
-                        ? FlutterFlowTheme.of(context).primary
-                        : FlutterFlowTheme.of(context).secondaryBackground,
-                    FlutterFlowTheme.of(context).primary,
+                        ? theme.primary
+                        : theme.secondaryBackground,
+                    theme.primary,
                   ),
                   borderRadius: BorderRadius.circular(8.0),
                 ),
-                child: Padding(
-                  padding: EdgeInsetsDirectional.fromSTEB(30.0, 0.0, 0.0, 0.0),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.max,
-                    children: [
-                      Icon(
-                        Icons.logout,
-                        color: valueOrDefault<Color>(
-                          FFAppState().indexPage != 10
-                              ? FlutterFlowTheme.of(context).secondary
-                              : FlutterFlowTheme.of(context).tertiary,
-                          FlutterFlowTheme.of(context).secondary,
-                        ),
-                      ),
+                child: Row(
+                  mainAxisAlignment: isCollapsed
+                      ? MainAxisAlignment.center
+                      : MainAxisAlignment.start,
+                  children: [
+                    if (!isCollapsed)
+                      const SizedBox(width: 24.0),
+                    const Icon(
+                      Icons.logout,
+                      color: Color(0xFFE57373),
+                    ),
+                    if (!isCollapsed)
                       Padding(
-                        padding:
-                            EdgeInsetsDirectional.fromSTEB(7.0, 0.0, 0.0, 0.0),
+                        padding: const EdgeInsetsDirectional.fromSTEB(8.0, 0.0, 0.0, 0.0),
                         child: Text(
                           'Sair',
-                          style: FlutterFlowTheme.of(context)
-                              .bodyMedium
-                              .override(
-                                font: GoogleFonts.openSans(
-                                  fontWeight: FontWeight.w500,
-                                  fontStyle: FlutterFlowTheme.of(context)
-                                      .bodyMedium
-                                      .fontStyle,
-                                ),
-                                color: valueOrDefault<Color>(
-                                  FFAppState().indexPage != 10
-                                      ? FlutterFlowTheme.of(context).secondary
-                                      : FlutterFlowTheme.of(context).tertiary,
-                                  FlutterFlowTheme.of(context).secondary,
-                                ),
-                                fontSize: 15.0,
-                                letterSpacing: 0.0,
-                                fontWeight: FontWeight.w500,
-                                fontStyle: FlutterFlowTheme.of(context)
-                                    .bodyMedium
-                                    .fontStyle,
-                              ),
+                          style: theme.bodyMedium.override(
+                            font: GoogleFonts.openSans(
+                              fontWeight: FontWeight.w500,
+                              fontStyle: theme.bodyMedium.fontStyle,
+                            ),
+                            color: const Color(0xFFE57373),
+                            fontSize: 15.0,
+                            letterSpacing: 0.0,
+                            fontWeight: FontWeight.w500,
+                            fontStyle: theme.bodyMedium.fontStyle,
+                          ),
                         ),
                       ),
-                    ],
-                  ),
+                  ],
                 ),
               ),
             ),
