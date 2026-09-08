@@ -172,17 +172,17 @@ class _PreCadastroWidgetState extends State<PreCadastroWidget> {
             Container(
               width: double.infinity,
               height: double.infinity,
-              decoration: const BoxDecoration(
-                image: DecorationImage(
-                  image: AssetImage('assets/images/fundo_login.jpg'),
-                  fit: BoxFit.cover,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    const Color(0xFF111111),
+                    FlutterFlowTheme.of(context).primary,
+                    const Color(0xFF1A1813),
+                  ],
+                  begin: const AlignmentDirectional(-1.0, -1.0),
+                  end: const AlignmentDirectional(1.0, 1.0),
                 ),
               ),
-            ),
-            Container(
-              width: double.infinity,
-              height: double.infinity,
-              color: Colors.black.withOpacity(0.68),
             ),
             SafeArea(
               child: Column(

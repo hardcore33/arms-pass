@@ -1,18 +1,9 @@
-import '/backend/api_requests/api_calls.dart';
-import '/components/fonte_dados_tabela/fonte_dados_tabela_widget.dart';
-import '/components/fonte_titulo_tabela/fonte_titulo_tabela_widget.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:ui';
-import '/custom_code/actions/index.dart' as actions;
-import '/flutter_flow/custom_functions.dart' as functions;
 import 'package:easy_debounce/easy_debounce.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'listagem_de_trocas_model.dart';
 export 'listagem_de_trocas_model.dart';
 
@@ -30,13 +21,15 @@ class ListagemDeTrocasWidget extends StatefulWidget {
 
 class _ListagemDeTrocasWidgetState extends State<ListagemDeTrocasWidget> {
   late ListagemDeTrocasModel _model;
-  String sortField = 'data';
-  bool sortAscending = false;
+  String sortField = 'id';
+  bool sortAscending = true;
+  int _paginaAtual = 1;
+  static const int _itensPorPagina = 10;
 
   @override
   void setState(VoidCallback callback) {
     super.setState(callback);
-    _model.onUpdate();
+    // Paginação e filtros locais são instantâneos em memória (0ms).
   }
 
   double _parseDouble(dynamic value) {
@@ -52,10 +45,10 @@ class _ListagemDeTrocasWidgetState extends State<ListagemDeTrocasWidget> {
       final customer = item['customer'];
       if (customer == null) continue;
       final customerId = customer['id']?.toString() ?? 'unknown';
-      
+
       final points = _parseDouble(item['qtd_point']);
       final savings = _parseDouble(item['total_saving']);
-      
+
       if (!grouped.containsKey(customerId)) {
         grouped[customerId] = {
           'id': customerId,
@@ -66,10 +59,13 @@ class _ListagemDeTrocasWidgetState extends State<ListagemDeTrocasWidget> {
           'data': item['data'],
         };
       } else {
-        grouped[customerId]!['total_cupons'] = (grouped[customerId]!['total_cupons'] as int) + 1;
-        grouped[customerId]!['qtd_point'] = (grouped[customerId]!['qtd_point'] as double) + points;
-        grouped[customerId]!['total_saving'] = (grouped[customerId]!['total_saving'] as double) + savings;
-        
+        grouped[customerId]!['total_cupons'] =
+            (grouped[customerId]!['total_cupons'] as int) + 1;
+        grouped[customerId]!['qtd_point'] =
+            (grouped[customerId]!['qtd_point'] as double) + points;
+        grouped[customerId]!['total_saving'] =
+            (grouped[customerId]!['total_saving'] as double) + savings;
+
         final existingDate = grouped[customerId]!['data']?.toString() ?? '';
         final newDate = item['data']?.toString() ?? '';
         if (newDate.compareTo(existingDate) > 0) {
@@ -92,7 +88,6 @@ class _ListagemDeTrocasWidgetState extends State<ListagemDeTrocasWidget> {
       _model.trocasLocal = [];
     }
 
-    // On component load action.
     SchedulerBinding.instance.addPostFrameCallback((_) async {
       final list = widget.trocas;
       if (list is List) {
@@ -119,110 +114,86 @@ class _ListagemDeTrocasWidgetState extends State<ListagemDeTrocasWidget> {
       } else {
         _model.trocasLocal = [];
       }
+      safeSetState(() {});
     }
   }
 
   @override
   void dispose() {
     _model.maybeDispose();
-
     super.dispose();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    Map<String, String> parseDescription(String desc, dynamic partnerRaw) {
-      // Try to get the partner name from the JSON object or just use the ID
-      String partnerLabel = 'Parceiro';
-      if (partnerRaw is Map) {
-        final n = partnerRaw['name'] ?? partnerRaw['nome'];
-        if (n != null && n.toString().trim().isNotEmpty) {
-          partnerLabel = n.toString().trim();
-        } else if (partnerRaw['id'] != null) {
-          partnerLabel = 'Parceiro (ID ${partnerRaw['id']})';
-        }
-      } else if (partnerRaw != null && partnerRaw.toString().isNotEmpty && partnerRaw.toString() != 'null') {
-        partnerLabel = 'Parceiro (ID $partnerRaw)';
-      }
+  List<dynamic> _filtrarEOrdenar(List<dynamic> input) {
+    final termoBusca = _model.textController?.text.toLowerCase().trim() ?? '';
 
-      try {
-        String beneficio = 'Cupom';
-        String empresa = partnerLabel;
-        final clean = desc.trim();
-        if (clean.contains('Desconto resgatado:')) {
-          final raw = clean.replaceAll('Desconto resgatado:', '').trim();
-          if (raw.contains(', valor do desconto:')) {
-            final p = raw.split(', valor do desconto:');
-            beneficio = p[0].trim();
-            if (p.length > 1) {
-              final rest = p[1];
-              if (rest.contains('na empresa:')) {
-                empresa = rest.split('na empresa:')[1].trim();
-              }
-            }
-          } else if (raw.contains('na empresa:')) {
-            final p = raw.split('na empresa:');
-            beneficio = p[0].trim();
-            if (p.length > 1) {
-              empresa = p[1].trim();
-            }
-          } else {
-            beneficio = raw;
-          }
-        } else if (clean.contains('Cupom validado com sucesso')) {
-          beneficio = 'Validação de Pontos';
-          if (clean.contains('na empresa:')) {
-            empresa = clean.split('na empresa:')[1].trim();
-          }
-        } else if (clean.contains('valor do desconto:')) {
-          final p = clean.split(', valor do desconto:');
-          beneficio = p[0].trim();
-          if (p.length > 1) {
-            final rest = p[1];
-            if (rest.contains('na empresa:')) {
-              empresa = rest.split('na empresa:')[1].trim();
-            }
-          }
-        } else {
-          beneficio = clean;
-        }
-        return {'beneficio': beneficio, 'empresa': empresa};
-      } catch (e) {
-        return {'beneficio': desc.isNotEmpty ? desc : 'Cupom', 'empresa': partnerLabel};
+    final filtrados = input.where((item) {
+      if (termoBusca.isEmpty) return true;
+
+      final id = (getJsonField(item, r'''$.id''') ?? '').toString().toLowerCase();
+      final nome =
+          (getJsonField(item, r'''$.customer.name''') ?? '').toString().toLowerCase();
+      final email =
+          (getJsonField(item, r'''$.customer.email''') ?? '').toString().toLowerCase();
+      final cpf =
+          (getJsonField(item, r'''$.customer.cpf''') ?? '').toString().toLowerCase();
+
+      return id.contains(termoBusca) ||
+          nome.contains(termoBusca) ||
+          email.contains(termoBusca) ||
+          cpf.contains(termoBusca);
+    }).toList();
+
+    dynamic keyOf(dynamic item) {
+      switch (sortField) {
+        case 'id':
+          final idRaw = getJsonField(item, r'''$.id''');
+          return idRaw is num
+              ? idRaw
+              : int.tryParse(idRaw?.toString() ?? '') ?? 0;
+        case 'total_cupons':
+          final raw = getJsonField(item, r'''$.total_cupons''');
+          return raw is num
+              ? raw
+              : int.tryParse(raw?.toString() ?? '') ?? 0;
+        case 'pontos':
+          return _parseDouble(getJsonField(item, r'''$.qtd_point'''));
+        case 'economia':
+          return _parseDouble(getJsonField(item, r'''$.total_saving'''));
+        case 'cliente':
+        default:
+          return (getJsonField(item, r'''$.customer.name''') ?? '')
+              .toString()
+              .toLowerCase();
       }
     }
 
-    String formatDate(String raw) {
-      if (raw.isEmpty) return '-';
-      // Try ISO 8601 first (e.g. 2025-09-24T21:21:11)
-      try {
-        final dt = DateTime.parse(raw);
-        final d = '${dt.day.toString().padLeft(2,'0')}/${dt.month.toString().padLeft(2,'0')}/${dt.year}';
-        final t = '${dt.hour.toString().padLeft(2,'0')}:${dt.minute.toString().padLeft(2,'0')}';
-        return '$d $t';
-      } catch (_) {}
-      // Try "Wed Sep 24 21:21:11 BRT 2025" format
-      final monthMap = <String, int>{'Jan': 1,'Feb': 2,'Mar': 3,'Apr': 4,'May': 5,'Jun': 6,'Jul': 7,'Aug': 8,'Sep': 9,'Oct': 10,'Nov': 11,'Dec': 12};
-      final regex = RegExp(r'\w{3} (\w{3}) (\d{1,2}) (\d{2}):(\d{2}):(\d{2}) \w+ (\d{4})');
-      final m = regex.firstMatch(raw);
-      if (m != null) {
-        final month = monthMap[m.group(1)] ?? 1;
-        final day = int.tryParse(m.group(2)!) ?? 1;
-        final hour = int.tryParse(m.group(3)!) ?? 0;
-        final minute = int.tryParse(m.group(4)!) ?? 0;
-        final year = int.tryParse(m.group(6)!) ?? 0;
-        return '${day.toString().padLeft(2,'0')}/${month.toString().padLeft(2,'0')}/$year ${hour.toString().padLeft(2,'0')}:${minute.toString().padLeft(2,'0')}';
+    filtrados.sort((a, b) {
+      final valA = keyOf(a);
+      final valB = keyOf(b);
+      int cmp;
+      if (valA is num && valB is num) {
+        cmp = valA.compareTo(valB);
+      } else {
+        cmp = valA.toString().compareTo(valB.toString());
       }
-      return raw;
-    }
+      return sortAscending ? cmp : -cmp;
+    });
 
-    Widget _buildSortableHeader(
-      BuildContext context,
-      String field,
-      Widget label,
-    ) {
-      final isActive = sortField == field;
-      return InkWell(
+    return filtrados;
+  }
+
+  Widget _buildSortableHeader(
+    BuildContext context,
+    String field,
+    String label,
+    FlutterFlowTheme theme, {
+    Alignment alignment = Alignment.centerLeft,
+  }) {
+    final isActive = sortField == field;
+    return Align(
+      alignment: alignment,
+      child: InkWell(
         onTap: () {
           safeSetState(() {
             if (sortField == field) {
@@ -231,577 +202,397 @@ class _ListagemDeTrocasWidgetState extends State<ListagemDeTrocasWidget> {
               sortField = field;
               sortAscending = true;
             }
+            _paginaAtual = 1;
           });
         },
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            label,
-            const SizedBox(width: 2.0),
-            Icon(
-              isActive
-                  ? (sortAscending
-                      ? Icons.arrow_upward_rounded
-                      : Icons.arrow_downward_rounded)
-                  : Icons.unfold_more_rounded,
-              size: 12.0,
-              color: isActive
-                  ? FlutterFlowTheme.of(context).primary
-                  : FlutterFlowTheme.of(context).secondaryText.withOpacity(0.5),
-            ),
-          ],
-        ),
-      );
-    }
-
-    List<dynamic> sortedList(List<dynamic> input) {
-      final result = input.toList();
-      result.sort((a, b) {
-        dynamic valA;
-        dynamic valB;
-        switch (sortField) {
-          case 'id':
-            valA = getJsonField(a, r'''$.id''');
-            valB = getJsonField(b, r'''$.id''');
-            break;
-          case 'total_cupons':
-            final rawA = getJsonField(a, r'''$.total_cupons''');
-            final rawB = getJsonField(b, r'''$.total_cupons''');
-            valA = rawA is num ? rawA.toInt() : 0;
-            valB = rawB is num ? rawB.toInt() : 0;
-            break;
-          case 'cliente':
-          case 'data':
-            valA = getJsonField(a, r'''$.data''')?.toString() ?? '';
-            valB = getJsonField(b, r'''$.data''')?.toString() ?? '';
-            break;
-          case 'pontos':
-            final rawA = getJsonField(a, r'''$.qtd_point''');
-            final rawB = getJsonField(b, r'''$.qtd_point''');
-            double parsedPA = 0.0;
-            double parsedPB = 0.0;
-            if (rawA is num) parsedPA = rawA.toDouble();
-            if (rawA is String) parsedPA = double.tryParse(rawA) ?? 0.0;
-            if (rawB is num) parsedPB = rawB.toDouble();
-            if (rawB is String) parsedPB = double.tryParse(rawB) ?? 0.0;
-            valA = parsedPA;
-            valB = parsedPB;
-            break;
-          case 'economia':
-            final rawEA = getJsonField(a, r'''$.total_saving''');
-            final rawEB = getJsonField(b, r'''$.total_saving''');
-            double parsedEA = 0.0;
-            double parsedEB = 0.0;
-            if (rawEA is num) parsedEA = rawEA.toDouble();
-            if (rawEA is String) parsedEA = double.tryParse(rawEA) ?? 0.0;
-            if (rawEB is num) parsedEB = rawEB.toDouble();
-            if (rawEB is String) parsedEB = double.tryParse(rawEB) ?? 0.0;
-            valA = parsedEA;
-            valB = parsedEB;
-            break;
-          default:
-            valA = '';
-            valB = '';
-        }
-        int cmp;
-        if (valA is num && valB is num) {
-          cmp = valA.compareTo(valB);
-        } else {
-          cmp = valA.toString().compareTo(valB.toString());
-        }
-        return sortAscending ? cmp : -cmp;
-      });
-      return result;
-    }
-
-    return Container(
-      width: MediaQuery.sizeOf(context).width * 0.74,
-      child: Stack(
-        children: [
-          Align(
-            alignment: AlignmentDirectional(0.0, -1.0),
-            child: Padding(
-              padding: EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
-              child: Material(
-                color: Colors.transparent,
-                elevation: 3.0,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(6.0),
-                ),
-                child: Container(
-                  width: MediaQuery.sizeOf(context).width * 0.74,
-                  height: MediaQuery.sizeOf(context).height * 0.8,
-                  decoration: BoxDecoration(
-                    color: FlutterFlowTheme.of(context).secondaryBackground,
-                    borderRadius: BorderRadius.circular(6.0),
-                  ),
+        borderRadius: BorderRadius.circular(4.0),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 2.0),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                label,
+                style: GoogleFonts.readexPro(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 12.0,
+                  color: isActive ? theme.primary : theme.secondaryText,
+                  letterSpacing: 0.3,
                 ),
               ),
-            ),
+              const SizedBox(width: 4.0),
+              Icon(
+                isActive
+                    ? (sortAscending
+                        ? Icons.arrow_upward_rounded
+                        : Icons.arrow_downward_rounded)
+                    : Icons.unfold_more_rounded,
+                size: 13.0,
+                color: isActive
+                    ? theme.secondary
+                    : theme.secondaryText.withValues(alpha: 0.5),
+              ),
+            ],
           ),
-          Align(
-            alignment: AlignmentDirectional(0.0, 0.0),
-            child: Column(
-              mainAxisSize: MainAxisSize.max,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
+        ),
+      ),
+    );
+  }
 
-                Row(
-                  mainAxisSize: MainAxisSize.max,
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Align(
-                      alignment: AlignmentDirectional(-1.0, 0.0),
-                      child: Padding(
-                        padding: EdgeInsetsDirectional.fromSTEB(
-                            35.0, 30.0, 0.0, 0.0),
-                        child: Container(
-                          width: 250.0,
-                          child: TextFormField(
-                            controller: _model.textController,
-                            focusNode: _model.textFieldFocusNode,
-                            onChanged: (_) => EasyDebounce.debounce(
-                              '_model.textController',
-                              Duration(milliseconds: 2000),
-                              () async {
-                                final list = widget.trocas;
-                                _model.trocasFiltradas =
-                                    await actions.filtrarPorNome(
-                                  (list is List ? list.toList() : []),
-                                  _model.textController.text,
-                                  3,
-                                  true,
-                                );
-                                _model.trocasLocal =
-                                    (_model.trocasFiltradas ?? [])
-                                        .toList()
-                                        .cast<dynamic>();
-                                safeSetState(() {});
-                              },
-                            ),
-                            autofocus: false,
-                            obscureText: false,
-                            decoration: InputDecoration(
-                              isDense: true,
-                              labelText: 'Procurar',
-                              labelStyle: FlutterFlowTheme.of(context)
-                                  .labelMedium
-                                  .override(
-                                    font: GoogleFonts.readexPro(
-                                      fontWeight: FlutterFlowTheme.of(context)
-                                          .labelMedium
-                                          .fontWeight,
-                                      fontStyle: FlutterFlowTheme.of(context)
-                                          .labelMedium
-                                          .fontStyle,
-                                    ),
-                                    color: Color(0xFF909090),
-                                    letterSpacing: 0.0,
-                                    fontWeight: FlutterFlowTheme.of(context)
-                                        .labelMedium
-                                        .fontWeight,
-                                    fontStyle: FlutterFlowTheme.of(context)
-                                        .labelMedium
-                                        .fontStyle,
-                                  ),
-                              hintStyle: FlutterFlowTheme.of(context)
-                                  .labelMedium
-                                  .override(
-                                    font: GoogleFonts.readexPro(
-                                      fontWeight: FlutterFlowTheme.of(context)
-                                          .labelMedium
-                                          .fontWeight,
-                                      fontStyle: FlutterFlowTheme.of(context)
-                                          .labelMedium
-                                          .fontStyle,
-                                    ),
-                                    letterSpacing: 0.0,
-                                    fontWeight: FlutterFlowTheme.of(context)
-                                        .labelMedium
-                                        .fontWeight,
-                                    fontStyle: FlutterFlowTheme.of(context)
-                                        .labelMedium
-                                        .fontStyle,
-                                  ),
-                              enabledBorder: OutlineInputBorder(
-                                borderSide: BorderSide(
-                                  color: Color(0xFFCCCCCC),
-                                  width: 1.0,
-                                ),
-                                borderRadius: BorderRadius.circular(24.0),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderSide: BorderSide(
-                                  color: FlutterFlowTheme.of(context).primary,
-                                  width: 1.5,
-                                ),
-                                borderRadius: BorderRadius.circular(24.0),
-                              ),
-                              errorBorder: OutlineInputBorder(
-                                borderSide: BorderSide(
-                                  color: FlutterFlowTheme.of(context).error,
-                                  width: 1.0,
-                                ),
-                                borderRadius: BorderRadius.circular(24.0),
-                              ),
-                              focusedErrorBorder: OutlineInputBorder(
-                                borderSide: BorderSide(
-                                  color: FlutterFlowTheme.of(context).error,
-                                  width: 1.5,
-                                ),
-                                borderRadius: BorderRadius.circular(24.0),
-                              ),
-                              filled: true,
-                              fillColor: FlutterFlowTheme.of(context)
-                                  .secondaryBackground,
-                              contentPadding: EdgeInsetsDirectional.fromSTEB(
-                                  20.0, 10.0, 20.0, 10.0),
-                              prefixIcon: Icon(
-                                Icons.search_rounded,
-                                color: Color(0xFF9A9A9A),
-                                size: 21.0,
-                              ),
-                            ),
-                            style: FlutterFlowTheme.of(context)
-                                .bodyMedium
-                                .override(
-                                  font: GoogleFonts.readexPro(
-                                    fontWeight: FlutterFlowTheme.of(context)
-                                        .bodyMedium
-                                        .fontWeight,
-                                    fontStyle: FlutterFlowTheme.of(context)
-                                        .bodyMedium
-                                        .fontStyle,
-                                  ),
-                                  letterSpacing: 0.0,
-                                  fontWeight: FlutterFlowTheme.of(context)
-                                      .bodyMedium
-                                      .fontWeight,
-                                  fontStyle: FlutterFlowTheme.of(context)
-                                      .bodyMedium
-                                      .fontStyle,
-                                ),
-                            cursorColor:
-                                FlutterFlowTheme.of(context).primaryText,
-                            validator: _model.textControllerValidator
-                                .asValidator(context),
-                          ),
+  @override
+  Widget build(BuildContext context) {
+    final theme = FlutterFlowTheme.of(context);
+    final todasTrocas = _filtrarEOrdenar(_model.trocasLocal);
+    final totalItens = todasTrocas.length;
+    final totalPaginas = (totalItens / _itensPorPagina).ceil().clamp(1, 9999);
+    final paginaSegura = _paginaAtual.clamp(1, totalPaginas);
+    final startIndex = (paginaSegura - 1) * _itensPorPagina;
+    final endIndex = (startIndex + _itensPorPagina).clamp(0, totalItens);
+    final itemTrocas =
+        totalItens > 0 ? todasTrocas.sublist(startIndex, endIndex) : <dynamic>[];
+
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: theme.secondaryBackground,
+        borderRadius: BorderRadius.circular(16.0),
+        border: Border.all(color: theme.alternate, width: 1.0),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Barra Superior: Busca e Contagem
+          Padding(
+            padding: const EdgeInsets.fromLTRB(24.0, 20.0, 24.0, 16.0),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Registro de Trocas & Resgates',
+                        style: GoogleFonts.readexPro(
+                          fontSize: 16.5,
+                          fontWeight: FontWeight.bold,
+                          color: theme.primaryText,
                         ),
                       ),
+                      Text(
+                        totalItens > 0
+                            ? '$totalItens resgates encontrados'
+                            : 'Nenhum resgate encontrado',
+                        style: GoogleFonts.readexPro(
+                          fontSize: 12.5,
+                          color: theme.secondaryText,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(
+                  width: 320.0,
+                  height: 42.0,
+                  child: TextFormField(
+                    controller: _model.textController,
+                    focusNode: _model.textFieldFocusNode,
+                    onChanged: (_) => EasyDebounce.debounce(
+                      '_model.textController',
+                      const Duration(milliseconds: 200),
+                      () {
+                        setState(() {
+                          _paginaAtual = 1;
+                        });
+                      },
+                    ),
+                    decoration: InputDecoration(
+                      isDense: true,
+                      hintText: 'Buscar por usuário, ID ou cupom...',
+                      hintStyle: GoogleFonts.readexPro(
+                        fontSize: 12.5,
+                        color: theme.secondaryText.withValues(alpha: 0.7),
+                      ),
+                      prefixIcon: Icon(
+                        Icons.search_rounded,
+                        color: theme.secondary,
+                        size: 18.0,
+                      ),
+                      suffixIcon: (_model.textController?.text.isNotEmpty ?? false)
+                          ? IconButton(
+                              icon: const Icon(Icons.close_rounded, size: 16.0),
+                              onPressed: () {
+                                _model.textController?.clear();
+                                setState(() {
+                                  _paginaAtual = 1;
+                                });
+                              },
+                            )
+                          : null,
+                      filled: true,
+                      fillColor: theme.primaryBackground,
+                      contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 14.0, vertical: 0.0),
+                      enabledBorder: OutlineInputBorder(
+                        borderSide:
+                            BorderSide(color: theme.alternate, width: 1.0),
+                        borderRadius: BorderRadius.circular(8.0),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderSide:
+                            BorderSide(color: theme.secondary, width: 1.5),
+                        borderRadius: BorderRadius.circular(8.0),
+                      ),
+                    ),
+                    style: GoogleFonts.readexPro(
+                        fontSize: 13.0, color: theme.primaryText),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // Cabeçalho da Tabela
+          Container(
+            padding:
+                const EdgeInsets.symmetric(horizontal: 24.0, vertical: 10.0),
+            decoration: BoxDecoration(
+              color: theme.primaryBackground,
+              border: Border(
+                top: BorderSide(color: theme.alternate, width: 1.0),
+                bottom: BorderSide(color: theme.alternate, width: 1.0),
+              ),
+            ),
+            child: Row(
+              children: [
+                SizedBox(
+                  width: 80.0,
+                  child: _buildSortableHeader(context, 'id', 'ID', theme,
+                      alignment: Alignment.center),
+                ),
+                Expanded(
+                  flex: 3,
+                  child: _buildSortableHeader(
+                      context, 'total_cupons', 'TOTAL DE CUPONS', theme,
+                      alignment: Alignment.center),
+                ),
+                Expanded(
+                  flex: 6,
+                  child: _buildSortableHeader(
+                      context, 'cliente', 'USUÁRIO', theme,
+                      alignment: Alignment.centerLeft),
+                ),
+                Expanded(
+                  flex: 3,
+                  child: _buildSortableHeader(
+                      context, 'pontos', 'PONTOS', theme,
+                      alignment: Alignment.center),
+                ),
+                Expanded(
+                  flex: 3,
+                  child: _buildSortableHeader(
+                      context, 'economia', 'ECONOMIA', theme,
+                      alignment: Alignment.center),
+                ),
+              ],
+            ),
+          ),
+
+          // Linhas dos Resgates
+          if (itemTrocas.isEmpty)
+            Padding(
+              padding: const EdgeInsets.all(40.0),
+              child: Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.search_off_rounded,
+                        size: 36.0,
+                        color: theme.secondaryText.withValues(alpha: 0.5)),
+                    const SizedBox(height: 8.0),
+                    Text(
+                      'Nenhum resgate encontrado.',
+                      style: GoogleFonts.readexPro(
+                          color: theme.secondaryText, fontSize: 13.5),
                     ),
                   ],
                 ),
-                Padding(
-                  padding: const EdgeInsetsDirectional.fromSTEB(0.0, 40.0, 0.0, 0.0),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: FlutterFlowTheme.of(context).alternate,
-                      borderRadius: BorderRadius.circular(
-                          FlutterFlowTheme.of(context)
-                              .designToken
-                              .radius
-                              .sm),
-                    ),
-                    padding: const EdgeInsetsDirectional.fromSTEB(
-                        16.0, 12.0, 16.0, 12.0),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.max,
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        Expanded(
-                          flex: 1,
-                          child: Container(
-                            decoration: const BoxDecoration(),
-                            child: Align(
-                              alignment: const AlignmentDirectional(0.0, 0.0),
-                              child: _buildSortableHeader(
-                                context,
-                                'id',
-                                Text(
-                                  'ID',
-                                  style: FlutterFlowTheme.of(context).bodyMedium.override(
-                                        font: GoogleFonts.openSans(
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                        fontSize: 13.5,
-                                      ),
-                                ),
-                              ),
-                            ),
+              ),
+            )
+          else
+            ListView.separated(
+              padding: EdgeInsets.zero,
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: itemTrocas.length,
+              separatorBuilder: (context, index) => Divider(
+                height: 1.0,
+                thickness: 1.0,
+                color: theme.alternate,
+              ),
+              itemBuilder: (context, index) {
+                final item = itemTrocas[index];
+                final id = getJsonField(item, r'''$.id''')?.toString() ?? '';
+                final cuponsCount = getJsonField(item, r'''$.total_cupons''');
+                final customerName =
+                    (getJsonField(item, r'''$.customer.name''') ?? '').toString();
+
+                final rawPoints = getJsonField(item, r'''$.qtd_point''');
+                String pointsStr = '0 pts';
+                if (rawPoints != null) {
+                  double? v;
+                  if (rawPoints is num) {
+                    v = rawPoints.toDouble();
+                  } else if (rawPoints is String) {
+                    v = double.tryParse(rawPoints);
+                  }
+                  if (v != null && v > 0) {
+                    pointsStr = '${v.toInt()} pts';
+                  }
+                }
+
+                final rawSaving = getJsonField(item, r'''$.total_saving''');
+                String savingStr = 'R\$ 0,00';
+                if (rawSaving != null) {
+                  double? v;
+                  if (rawSaving is num) {
+                    v = rawSaving.toDouble();
+                  } else if (rawSaving is String) {
+                    v = double.tryParse(rawSaving);
+                  }
+                  if (v != null && v > 0) {
+                    savingStr =
+                        'R\$ ${v.toStringAsFixed(2).replaceAll('.', ',')}';
+                  }
+                }
+
+                return Padding(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 24.0, vertical: 14.0),
+                  child: Row(
+                    children: [
+                      SizedBox(
+                        width: 80.0,
+                        child: Text(
+                          id,
+                          textAlign: TextAlign.center,
+                          style: GoogleFonts.readexPro(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 13.0,
+                            color: theme.primaryText,
                           ),
                         ),
-                        Expanded(
-                          flex: 3,
-                          child: Container(
-                            decoration: const BoxDecoration(),
-                            child: Align(
-                              alignment: const AlignmentDirectional(0.0, 0.0),
-                              child: _buildSortableHeader(
-                                context,
-                                'total_cupons',
-                                Text(
-                                  'TOTAL DE CUPONS',
-                                  style: FlutterFlowTheme.of(context).bodyMedium.override(
-                                        font: GoogleFonts.openSans(
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                        fontSize: 13.5,
-                                      ),
-                                ),
-                              ),
-                            ),
+                      ),
+                      Expanded(
+                        flex: 3,
+                        child: Text(
+                          cuponsCount == null
+                              ? '0 cupons'
+                              : '$cuponsCount ${cuponsCount == 1 ? 'cupom' : 'cupons'}',
+                          textAlign: TextAlign.center,
+                          style: GoogleFonts.readexPro(
+                            fontSize: 13.0,
+                            color: theme.secondaryText,
                           ),
                         ),
-                        Expanded(
-                          flex: 8,
-                          child: Container(
-                            decoration: const BoxDecoration(),
-                            child: Align(
-                              alignment: const AlignmentDirectional(0.0, 0.0),
-                              child: _buildSortableHeader(
-                                context,
-                                'cliente',
-                                Text(
-                                  'USUÁRIO',
-                                  style: FlutterFlowTheme.of(context).bodyMedium.override(
-                                        font: GoogleFonts.openSans(
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                        fontSize: 13.5,
-                                      ),
-                                ),
-                              ),
-                            ),
+                      ),
+                      Expanded(
+                        flex: 6,
+                        child: Text(
+                          customerName.toUpperCase(),
+                          style: GoogleFonts.readexPro(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 13.0,
+                            color: theme.primaryText,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      Expanded(
+                        flex: 3,
+                        child: Text(
+                          pointsStr,
+                          textAlign: TextAlign.center,
+                          style: GoogleFonts.readexPro(
+                            fontSize: 13.0,
+                            color: theme.secondaryText,
                           ),
                         ),
-                        Expanded(
-                          flex: 3,
-                          child: Container(
-                            decoration: const BoxDecoration(),
-                            child: Align(
-                              alignment: const AlignmentDirectional(0.0, 0.0),
-                              child: _buildSortableHeader(
-                                context,
-                                'pontos',
-                                Text(
-                                  'PONTOS',
-                                  style: FlutterFlowTheme.of(context).bodyMedium.override(
-                                        font: GoogleFonts.openSans(
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                        fontSize: 13.5,
-                                      ),
-                                ),
-                              ),
-                            ),
+                      ),
+                      Expanded(
+                        flex: 3,
+                        child: Text(
+                          savingStr,
+                          textAlign: TextAlign.center,
+                          style: GoogleFonts.readexPro(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 13.0,
+                            color: theme.primaryText,
                           ),
                         ),
-                        Expanded(
-                          flex: 3,
-                          child: Container(
-                            decoration: const BoxDecoration(),
-                            child: Align(
-                              alignment: const AlignmentDirectional(0.0, 0.0),
-                              child: _buildSortableHeader(
-                                context,
-                                'economia',
-                                Text(
-                                  'ECONOMIA',
-                                  style: FlutterFlowTheme.of(context).bodyMedium.override(
-                                        font: GoogleFonts.openSans(
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                        fontSize: 13.5,
-                                      ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+
+          // Rodapé Conectado de Paginação
+          Container(
+            padding:
+                const EdgeInsets.symmetric(horizontal: 24.0, vertical: 14.0),
+            decoration: BoxDecoration(
+              border:
+                  Border(top: BorderSide(color: theme.alternate, width: 1.0)),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  totalItens > 0
+                      ? 'Exibindo ${startIndex + 1}–$endIndex de $totalItens resgates'
+                      : 'Nenhum registro',
+                  style: GoogleFonts.readexPro(
+                    fontSize: 12.0,
+                    color: theme.secondaryText,
                   ),
                 ),
-                Container(
-                  height: MediaQuery.sizeOf(context).height * 0.54,
-                  decoration: const BoxDecoration(),
-                  child: Builder(
-                    builder: (context) {
-                      final itemTrocas = sortedList(_model.trocasLocal);
-
-                      return ListView.builder(
-                        padding: EdgeInsets.zero,
-                        shrinkWrap: true,
-                        scrollDirection: Axis.vertical,
-                        itemCount: itemTrocas.length,
-                        itemBuilder: (context, itemTrocasIndex) {
-                          final itemTrocasItem = itemTrocas[itemTrocasIndex];
-                          final parsed = parseDescription(
-                            (getJsonField(itemTrocasItem, r'''$.description''') ?? '').toString(),
-                            getJsonField(itemTrocasItem, r'''$.partner''')?.toString() ?? '',
-                          );
-                          return Column(
-                            mainAxisSize: MainAxisSize.max,
-                            children: [
-                              Row(
-                                mainAxisSize: MainAxisSize.max,
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                children: [
-                                  Expanded(
-                                    flex: 1,
-                                    child: Container(
-                                      decoration: BoxDecoration(),
-                                      child: Align(
-                                        alignment:
-                                            AlignmentDirectional(0.0, 0.0),
-                                        child: wrapWithModel(
-                                          model: _model.fonteDadosTabelaModels1
-                                              .getModel(
-                                            itemTrocasItem.toString(),
-                                            itemTrocasIndex,
-                                          ),
-                                          updateCallback: () =>
-                                              safeSetState(() {}),
-                                          child: FonteDadosTabelaWidget(
-                                            key: Key(
-                                              'Key9h0_${itemTrocasItem.toString()}',
-                                            ),
-                                            text: getJsonField(
-                                              itemTrocasItem,
-                                              r'''$.id''',
-                                            ).toString(),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                    Expanded(
-                                      flex: 3,
-                                      child: Container(
-                                        decoration: BoxDecoration(),
-                                        child: Align(
-                                          alignment:
-                                              AlignmentDirectional(0.0, 0.0),
-                                          child: wrapWithModel(
-                                            model: _model.fonteDadosTabelaModels2
-                                                .getModel(
-                                              itemTrocasItem.toString(),
-                                              itemTrocasIndex,
-                                            ),
-                                            updateCallback: () =>
-                                                safeSetState(() {}),
-                                            child: FonteDadosTabelaWidget(
-                                              key: Key(
-                                                'Key_desc_${itemTrocasItem.toString()}',
-                                              ),
-                                              text: () {
-                                                final count = getJsonField(itemTrocasItem, r'''$.total_cupons''');
-                                                if (count == null) return '0 cupons';
-                                                return '$count ${count == 1 ? 'cupom' : 'cupons'}';
-                                              }(),
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                    Expanded(
-                                      flex: 8,
-                                      child: Container(
-                                        decoration: BoxDecoration(),
-                                        child: Align(
-                                          alignment:
-                                              AlignmentDirectional(0.0, 0.0),
-                                          child: wrapWithModel(
-                                            model: _model.fonteDadosTabelaModels3
-                                                .getModel(
-                                              itemTrocasItem.toString(),
-                                              itemTrocasIndex,
-                                            ),
-                                            updateCallback: () =>
-                                                safeSetState(() {}),
-                                            child: FonteDadosTabelaWidget(
-                                              key: Key(
-                                                'Key_cust_${itemTrocasItem.toString()}',
-                                              ),
-                                              text: (getJsonField(itemTrocasItem, r'''$.customer.name''') ?? '').toString(),
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-
-                                    Expanded(
-                                      flex: 3,
-                                      child: Container(
-                                        decoration: const BoxDecoration(),
-                                        child: Align(
-                                          alignment: const AlignmentDirectional(0.0, 0.0),
-                                          child: Text(
-                                            () {
-                                              final raw = getJsonField(itemTrocasItem, r'''$.qtd_point''');
-                                              if (raw == null) return '0 pts';
-                                              double? v;
-                                              if (raw is num) v = raw.toDouble();
-                                              else if (raw is String) v = double.tryParse(raw);
-                                              if (v == null || v <= 0) return '0 pts';
-                                              return '${v.toInt()} pts';
-                                            }(),
-                                            textAlign: TextAlign.center,
-                                            style: FlutterFlowTheme.of(context).bodyMedium.override(
-                                                  font: GoogleFonts.openSans(),
-                                                  fontSize: 13.5,
-                                                ),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                    Expanded(
-                                      flex: 3,
-                                      child: Container(
-                                        decoration: const BoxDecoration(),
-                                        child: Align(
-                                          alignment: const AlignmentDirectional(0.0, 0.0),
-                                          child: Text(
-                                            () {
-                                              final raw = getJsonField(itemTrocasItem, r'''$.total_saving''');
-                                              if (raw == null) return 'R\$ 0,00';
-                                              double? v;
-                                              if (raw is num) v = raw.toDouble();
-                                              else if (raw is String) v = double.tryParse(raw);
-                                              if (v == null || v <= 0) return 'R\$ 0,00';
-                                              return 'R\$ ' + v.toStringAsFixed(2).replaceAll('.', ',');
-                                            }(),
-                                            textAlign: TextAlign.center,
-                                            style: FlutterFlowTheme.of(context).bodyMedium.override(
-                                                  font: GoogleFonts.openSans(),
-                                                  fontSize: 13.5,
-                                                ),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                ],
-                              ),
-                              Padding(
-                                padding: EdgeInsetsDirectional.fromSTEB(
-                                    0.0, 6.0, 0.0, 6.0),
-                                child: Container(
-                                  width: MediaQuery.sizeOf(context).width * 1.0,
-                                  height: 1.0,
-                                  decoration: BoxDecoration(
-                                    color: Color(0xFFC7C7C7),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          );
-                        },
-                      );
-                    },
-                  ),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.chevron_left_rounded, size: 20.0),
+                      color: paginaSegura > 1
+                          ? theme.primary
+                          : theme.secondaryText.withValues(alpha: 0.3),
+                      onPressed: paginaSegura > 1
+                          ? () =>
+                              setState(() => _paginaAtual = paginaSegura - 1)
+                          : null,
+                    ),
+                    Text(
+                      'Página $paginaSegura de $totalPaginas',
+                      style: GoogleFonts.readexPro(
+                        fontSize: 12.0,
+                        fontWeight: FontWeight.w600,
+                        color: theme.primaryText,
+                      ),
+                    ),
+                    IconButton(
+                      icon:
+                          const Icon(Icons.chevron_right_rounded, size: 20.0),
+                      color: paginaSegura < totalPaginas
+                          ? theme.primary
+                          : theme.secondaryText.withValues(alpha: 0.3),
+                      onPressed: paginaSegura < totalPaginas
+                          ? () =>
+                              setState(() => _paginaAtual = paginaSegura + 1)
+                          : null,
+                    ),
+                  ],
                 ),
-            ],
+              ],
             ),
           ),
         ],

@@ -146,269 +146,173 @@ class _ListagemDeSegmentosWidgetState extends State<ListagemDeSegmentosWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: MediaQuery.sizeOf(context).width * 0.74,
-      height: MediaQuery.sizeOf(context).height * 0.82,
-      child: Stack(
-        children: [
-          Align(
-            alignment: AlignmentDirectional(0.0, -1.0),
-            child: Padding(
-              padding: EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
-              child: Material(
-                color: Colors.transparent,
-                elevation: 3.0,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(
-                      FlutterFlowTheme.of(context).designToken.radius.md),
-                ),
-                child: Container(
-                  width: MediaQuery.sizeOf(context).width * 0.74,
-                  height: MediaQuery.sizeOf(context).height * 0.8,
-                  decoration: BoxDecoration(
-                    color: FlutterFlowTheme.of(context).secondaryBackground,
-                    borderRadius: BorderRadius.circular(
-                        FlutterFlowTheme.of(context).designToken.radius.md),
-                  ),
-                ),
-              ),
-            ),
+    final theme = FlutterFlowTheme.of(context);
+    final count = _model.cuponsLocal.length;
+
+    return Material(
+      color: Colors.transparent,
+      elevation: 3.0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16.0),
+      ),
+      child: Container(
+        width: double.infinity,
+        decoration: BoxDecoration(
+          color: theme.secondaryBackground,
+          borderRadius: BorderRadius.circular(16.0),
+          border: Border.all(
+            color: theme.alternate,
+            width: 1.0,
           ),
-          Align(
-            alignment: AlignmentDirectional(0.0, 0.0),
-            child: Padding(
-              padding: EdgeInsetsDirectional.fromSTEB(10.0, 0.0, 10.0, 0.0),
-              child: Column(
-                mainAxisSize: MainAxisSize.max,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisSize: MainAxisSize.max,
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Align(
-                        alignment: AlignmentDirectional(-1.0, 0.0),
-                        child: Padding(
-                          padding: EdgeInsetsDirectional.fromSTEB(
-                              35.0, 30.0, 0.0, 0.0),
-                          child: Container(
-                            width: MediaQuery.sizeOf(context).width * 0.2,
-                            child: TextFormField(
-                              controller: _model.textController,
-                              focusNode: _model.textFieldFocusNode,
-                              onChanged: (_) => EasyDebounce.debounce(
-                                '_model.textController',
-                                Duration(milliseconds: 2000),
-                                () async {
-                                  _model.cuponsFiltrados =
-                                      await actions.filtrarPorNome(
-                                    widget!.cupons!.toList(),
-                                    _model.textController.text,
-                                    1,
-                                    true,
-                                  );
-                                  _model.cuponsLocal = _model.cuponsFiltrados!
-                                      .toList()
-                                      .cast<dynamic>();
-                                  safeSetState(() {});
-
-                                  safeSetState(() {});
-                                },
-                              ),
-                              autofocus: false,
-                              obscureText: false,
-                              decoration: InputDecoration(
-                                isDense: true,
-                                labelText: 'Procurar',
-                                labelStyle: FlutterFlowTheme.of(context)
-                                    .labelMedium
-                                    .override(
-                                      font: GoogleFonts.readexPro(
-                                        fontWeight: FlutterFlowTheme.of(context)
-                                            .labelMedium
-                                            .fontWeight,
-                                        fontStyle: FlutterFlowTheme.of(context)
-                                            .labelMedium
-                                            .fontStyle,
-                                      ),
-                                      color: Color(0xFF909090),
-                                      letterSpacing: 0.0,
-                                      fontWeight: FlutterFlowTheme.of(context)
-                                          .labelMedium
-                                          .fontWeight,
-                                      fontStyle: FlutterFlowTheme.of(context)
-                                          .labelMedium
-                                          .fontStyle,
-                                    ),
-                                hintStyle: FlutterFlowTheme.of(context)
-                                    .labelMedium
-                                    .override(
-                                      font: GoogleFonts.readexPro(
-                                        fontWeight: FlutterFlowTheme.of(context)
-                                            .labelMedium
-                                            .fontWeight,
-                                        fontStyle: FlutterFlowTheme.of(context)
-                                            .labelMedium
-                                            .fontStyle,
-                                      ),
-                                      letterSpacing: 0.0,
-                                      fontWeight: FlutterFlowTheme.of(context)
-                                          .labelMedium
-                                          .fontWeight,
-                                      fontStyle: FlutterFlowTheme.of(context)
-                                          .labelMedium
-                                          .fontStyle,
-                                    ),
-                                enabledBorder: OutlineInputBorder(
-                                  borderSide: BorderSide(
-                                    color: Color(0xFFCCCCCC),
-                                    width: 1.0,
-                                  ),
-                                  borderRadius: BorderRadius.circular(24.0),
-                                ),
-                                focusedBorder: OutlineInputBorder(
-                                  borderSide: BorderSide(
-                                    color: FlutterFlowTheme.of(context).primary,
-                                    width: 1.5,
-                                  ),
-                                  borderRadius: BorderRadius.circular(24.0),
-                                ),
-                                errorBorder: OutlineInputBorder(
-                                  borderSide: BorderSide(
-                                    color: FlutterFlowTheme.of(context).error,
-                                    width: 1.0,
-                                  ),
-                                  borderRadius: BorderRadius.circular(24.0),
-                                ),
-                                focusedErrorBorder: OutlineInputBorder(
-                                  borderSide: BorderSide(
-                                    color: FlutterFlowTheme.of(context).error,
-                                    width: 1.5,
-                                  ),
-                                  borderRadius: BorderRadius.circular(24.0),
-                                ),
-                                filled: true,
-                                fillColor: FlutterFlowTheme.of(context)
-                                    .secondaryBackground,
-                                contentPadding: EdgeInsetsDirectional.fromSTEB(
-                                    20.0, 10.0, 20.0, 10.0),
-                                prefixIcon: Icon(
-                                  Icons.search_rounded,
-                                  color: Color(0xFF9A9A9A),
-                                  size: 21.0,
-                                ),
-                              ),
-                              style: FlutterFlowTheme.of(context)
-                                  .bodyMedium
-                                  .override(
-                                    font: GoogleFonts.readexPro(
-                                      fontWeight: FlutterFlowTheme.of(context)
-                                          .bodyMedium
-                                          .fontWeight,
-                                      fontStyle: FlutterFlowTheme.of(context)
-                                          .bodyMedium
-                                          .fontStyle,
-                                    ),
-                                    letterSpacing: 0.0,
-                                    fontWeight: FlutterFlowTheme.of(context)
-                                        .bodyMedium
-                                        .fontWeight,
-                                    fontStyle: FlutterFlowTheme.of(context)
-                                        .bodyMedium
-                                        .fontStyle,
-                                  ),
-                              cursorColor:
-                                  FlutterFlowTheme.of(context).primaryText,
-                              validator: _model.textControllerValidator
-                                  .asValidator(context),
-                            ),
-                          ),
-                        ),
+        ),
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Top Bar: Title & Count, Search Bar, Register Button
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'Segmentos de Atuação',
+                      style: GoogleFonts.readexPro(
+                        fontSize: 18.0,
+                        fontWeight: FontWeight.bold,
+                        color: theme.primaryText,
                       ),
-                      Align(
-                        alignment: AlignmentDirectional(-1.0, 0.0),
-                        child: Builder(
-                          builder: (context) => Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
-                                20.0, 30.0, 0.0, 0.0),
-                            child: FFButtonWidget(
-                            onPressed: () async {
-                              await showDialog(
-                                context: context,
-                                builder: (dialogContext) {
-                                  return Dialog(
-                                    elevation: 0,
-                                    insetPadding: EdgeInsets.zero,
-                                    backgroundColor: Colors.transparent,
-                                    alignment: AlignmentDirectional(0.0, 0.0)
-                                        .resolve(Directionality.of(context)),
-                                    child: ModalAdicionarSegmentoWidget(),
-                                  );
-                                },
-                              );
-
-                              _model.apiResult230s =
-                                  await ObterSegmentosCall.call();
-
-                              if ((_model.apiResult230s?.succeeded ?? true)) {
-                                final body = _model.apiResult230s?.jsonBody;
-                                if (body is List) {
-                                  _model.cuponsLocal = body.cast<dynamic>();
-                                } else if (body is Map && body['data'] is List) {
-                                  _model.cuponsLocal = (body['data'] as List).cast<dynamic>();
-                                }
-                                safeSetState(() {});
-                              }
-
-                              safeSetState(() {});
-                            },
-                            text: 'Cadastrar',
-                            icon: Icon(
-                              Icons.discount,
-                              size: 15.0,
-                            ),
-                            options: FFButtonOptions(
-                              width: MediaQuery.sizeOf(context).width * 0.14,
-                              height: 50.0,
-                              padding: EdgeInsetsDirectional.fromSTEB(
-                                  16.0, 0.0, 16.0, 0.0),
-                              iconPadding: EdgeInsetsDirectional.fromSTEB(
-                                  0.0, 0.0, 0.0, 0.0),
-                              color: FlutterFlowTheme.of(context).primary,
-                              textStyle: FlutterFlowTheme.of(context)
-                                  .titleSmall
-                                  .override(
-                                    font: GoogleFonts.readexPro(
-                                      fontWeight: FlutterFlowTheme.of(context)
-                                          .titleSmall
-                                          .fontWeight,
-                                      fontStyle: FlutterFlowTheme.of(context)
-                                          .titleSmall
-                                          .fontStyle,
-                                    ),
-                                    color: FlutterFlowTheme.of(context)
-                                        .secondaryBackground,
-                                    letterSpacing: 0.0,
-                                    fontWeight: FlutterFlowTheme.of(context)
-                                        .titleSmall
-                                        .fontWeight,
-                                    fontStyle: FlutterFlowTheme.of(context)
-                                        .titleSmall
-                                        .fontStyle,
-                                  ),
-                              elevation: 0.0,
-                              borderRadius: BorderRadius.circular(6.0),
-                            ),
-                          ),
+                    ),
+                    const SizedBox(width: 10.0),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 3.0),
+                      decoration: BoxDecoration(
+                        color: theme.primary.withOpacity(0.08),
+                        borderRadius: BorderRadius.circular(12.0),
+                      ),
+                      child: Text(
+                        '$count categorias',
+                        style: GoogleFonts.readexPro(
+                          fontSize: 12.0,
+                          fontWeight: FontWeight.w600,
+                          color: theme.primary,
                         ),
                       ),
                     ),
                   ],
                 ),
-                Padding(
-                  padding: const EdgeInsetsDirectional.fromSTEB(0.0, 40.0, 0.0, 0.0),
-                  child: Container(
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 250.0,
+                      child: TextFormField(
+                        controller: _model.textController,
+                        focusNode: _model.textFieldFocusNode,
+                        onChanged: (_) => EasyDebounce.debounce(
+                          '_model.textController',
+                          const Duration(milliseconds: 300),
+                          () async {
+                            _model.cuponsFiltrados = await actions.filtrarPorNome(
+                              widget.cupons?.toList() ?? [],
+                              _model.textController.text,
+                              1,
+                              true,
+                            );
+                            _model.cuponsLocal = _model.cuponsFiltrados?.toList().cast<dynamic>() ?? [];
+                            safeSetState(() {});
+                          },
+                        ),
+                        decoration: InputDecoration(
+                          isDense: true,
+                          hintText: 'Buscar segmento...',
+                          hintStyle: GoogleFonts.readexPro(
+                            color: const Color(0xFF909090),
+                            fontSize: 13.5,
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderSide: BorderSide(
+                              color: theme.alternate,
+                              width: 1.0,
+                            ),
+                            borderRadius: BorderRadius.circular(10.0),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderSide: BorderSide(
+                              color: theme.primary,
+                              width: 1.5,
+                            ),
+                            borderRadius: BorderRadius.circular(10.0),
+                          ),
+                          filled: true,
+                          fillColor: theme.secondaryBackground,
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 12.0),
+                          prefixIcon: const Icon(
+                            Icons.search_rounded,
+                            color: Color(0xFF9A9A9A),
+                            size: 20.0,
+                          ),
+                        ),
+                        style: GoogleFonts.readexPro(
+                          color: theme.primaryText,
+                          fontSize: 13.5,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 16.0),
+                    FFButtonWidget(
+                      onPressed: () async {
+                        await showDialog(
+                          context: context,
+                          builder: (dialogContext) {
+                            return Dialog(
+                              elevation: 0,
+                              insetPadding: EdgeInsets.zero,
+                              backgroundColor: Colors.transparent,
+                              alignment: AlignmentDirectional(0.0, 0.0)
+                                  .resolve(Directionality.of(context)),
+                              child: ModalAdicionarSegmentoWidget(),
+                            );
+                          },
+                        );
+                        _model.apiResult230s = await ObterSegmentosCall.call();
+                        if ((_model.apiResult230s?.succeeded ?? true)) {
+                          final body = _model.apiResult230s?.jsonBody;
+                          if (body is List) {
+                            _model.cuponsLocal = body.cast<dynamic>();
+                          } else if (body is Map && body['data'] is List) {
+                            _model.cuponsLocal = (body['data'] as List).cast<dynamic>();
+                          }
+                          safeSetState(() {});
+                        }
+                      },
+                      text: 'Cadastrar Segmento',
+                      icon: const Icon(
+                        Icons.category_outlined,
+                        size: 18.0,
+                      ),
+                      options: FFButtonOptions(
+                        height: 44.0,
+                        padding: const EdgeInsets.symmetric(horizontal: 18.0),
+                        color: theme.primary,
+                        textStyle: GoogleFonts.readexPro(
+                          color: Colors.white,
+                          fontSize: 13.5,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        elevation: 1.0,
+                        borderRadius: BorderRadius.circular(10.0),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            const SizedBox(height: 20.0),
+            Padding(
+              padding: EdgeInsets.zero,
+              child: Container(
                     decoration: BoxDecoration(
                       color: FlutterFlowTheme.of(context).alternate,
                       borderRadius: BorderRadius.circular(
@@ -736,11 +640,8 @@ class _ListagemDeSegmentosWidgetState extends State<ListagemDeSegmentosWidget> {
                 ),
               ),
             ],
-              ),
-            ),
           ),
-        ],
-      ),
-    );
+        ),
+      );
+    }
   }
-}

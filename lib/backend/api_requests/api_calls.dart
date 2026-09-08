@@ -5,6 +5,7 @@ import '../schema/structs/index.dart';
 import 'package:flutter/foundation.dart';
 
 import '/flutter_flow/flutter_flow_util.dart';
+import '/auth/custom_auth/auth_util.dart';
 import 'api_manager.dart';
 
 export 'api_manager.dart' show ApiCallResponse;
@@ -176,11 +177,15 @@ class DeletarBannersCall {
 
 class ObterUsuariosCall {
   static Future<ApiCallResponse> call() async {
+    final token = currentAuthenticationToken;
     return ApiManager.instance.makeApiCall(
       callName: 'obterUsuarios',
       apiUrl: 'https://codeflowbr.online:8080/api/v1/customer',
       callType: ApiCallType.GET,
-      headers: {},
+      headers: {
+        if (token != null && token.isNotEmpty)
+          'Authorization': 'Bearer $token',
+      },
       params: {},
       returnBody: true,
       encodeBodyUtf8: false,
@@ -671,23 +676,25 @@ class AdicionarDescontoCall {
     String? data = '',
     String? idTenant = '',
     String? idSegmento = '',
+    String? rules = '',
   }) async {
     final ffApiRequestBody = '''
 {
- "description": "${descricao}",
- "discount": "${porcentagem}",
- "isActive": true,
- "canDelete": true,
- "partner": {
-   "id": "${idParceiro}"
- },
- "validity": "${data}",
- "tenant": {
-   "id": "${idTenant}"
- },
- "segment": {
-  "id": "${idSegmento}"
- }
+  "description": "${descricao}",
+  "discount": "${porcentagem}",
+  "isActive": true,
+  "canDelete": true,
+  "partner": {
+    "id": "${idParceiro}"
+  },
+  "validity": "${data}",
+  "tenant": {
+    "id": "${idTenant}"
+  },
+  "segment": {
+    "id": "${idSegmento}"
+  },
+  "rules": "${rules}"
 }''';
     return ApiManager.instance.makeApiCall(
       callName: 'adicionarDesconto',
@@ -720,24 +727,26 @@ class EditarDescontoCall {
     String? data = '',
     String? idTenant = '',
     String? idSegmento = '',
+    String? rules = '',
   }) async {
     final ffApiRequestBody = '''
 {
- "id": "${id}",
- "description": "${descricao}",
- "discount": "${porcentagem}",
- "isActive": true,
- "canDelete": true,
- "partner": {
-   "id": "${idParceiro}"
- },
- "validity": "${data}",
- "tenant": {
-   "id": "${idTenant}"
- },
- "segment": {
-  "id": "${idSegmento}"
- }
+  "id": "${id}",
+  "description": "${descricao}",
+  "discount": "${porcentagem}",
+  "isActive": true,
+  "canDelete": true,
+  "partner": {
+    "id": "${idParceiro}"
+  },
+  "validity": "${data}",
+  "tenant": {
+    "id": "${idTenant}"
+  },
+  "segment": {
+    "id": "${idSegmento}"
+  },
+  "rules": "${rules}"
 }''';
     return ApiManager.instance.makeApiCall(
       callName: 'editarDesconto',
@@ -998,19 +1007,21 @@ class AtualizarParceiroCall {
     String? idUser = '',
     String? instagram = '',
     String? filial = '',
+    bool? isActive = true,
   }) async {
     // Só inclui a senha no payload se o admin realmente digitou uma nova —
     // campo vazio/nulo nunca deve sobrescrever a senha existente do parceiro.
     final senhaField = (senha != null && senha.trim().isNotEmpty)
         ? '"password": "${senha}",'
         : '';
+    final statusAtivo = isActive ?? true;
     final ffApiRequestBody = '''
 {
   "id": "${idCustomer}",
   "name": "${razao}",
   "cardNumber": "${cpf}",
   "cpf": "${cpf}",
-  "isActive": true,
+  "isActive": ${statusAtivo},
   "tenant": {
     "id": ${idTenant}
   },
@@ -1019,7 +1030,7 @@ class AtualizarParceiroCall {
   },
   "user": {
     "id": "${idUser}",
-    "isActive": true,
+    "isActive": ${statusAtivo},
     "inviteCode": "",
     "login": "${email}",
     ${senhaField}
@@ -1031,7 +1042,7 @@ class AtualizarParceiroCall {
     "segment": {
       "id": "${idSegmento}"
     },
-    "isActive": true,
+    "isActive": ${statusAtivo},
     "isSelected": ${selecionado},
     "razao": "${razao}",
     "fantasia": "${fantasia}",

@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:async';
 
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
@@ -427,33 +428,339 @@ void setAppLanguage(BuildContext context, String language) =>
 void setDarkModeSetting(BuildContext context, ThemeMode themeMode) =>
     MyApp.of(context).setThemeMode(themeMode);
 
+enum ToastType { success, error, warning, info }
+
+class _CenteredToastManager {
+  static OverlayEntry? _toastOverlay;
+  static Timer? _toastTimer;
+  static GlobalKey<_CenteredToastOverlayState>? _toastKey;
+
+  static void dismiss() {
+    _toastTimer?.cancel();
+    _toastTimer = null;
+    if (_toastKey?.currentState != null && _toastKey!.currentState!.mounted) {
+      _toastKey!.currentState!._dismiss();
+    } else {
+      _removeEntry();
+    }
+  }
+
+  static void _removeEntry() {
+    if (_toastOverlay != null && _toastOverlay!.mounted) {
+      _toastOverlay!.remove();
+    }
+    _toastOverlay = null;
+    _toastKey = null;
+  }
+
+  static void show(
+    BuildContext context, {
+    required String message,
+    String? title,
+    ToastType type = ToastType.success,
+    Duration duration = const Duration(milliseconds: 3200),
+  }) {
+    dismiss();
+
+    final overlay = Overlay.maybeOf(context, rootOverlay: true) ?? Overlay.maybeOf(context);
+    if (overlay == null) return;
+
+    _toastKey = GlobalKey<_CenteredToastOverlayState>();
+    _toastOverlay = OverlayEntry(
+      builder: (overlayContext) => _CenteredToastOverlay(
+        key: _toastKey,
+        title: title,
+        message: message,
+        type: type,
+        onDismiss: _removeEntry,
+      ),
+    );
+
+    overlay.insert(_toastOverlay!);
+
+    _toastTimer = Timer(duration, () {
+      dismiss();
+    });
+  }
+}
+
+class _CenteredToastOverlay extends StatefulWidget {
+  const _CenteredToastOverlay({
+    Key? key,
+    this.title,
+    required this.message,
+    required this.type,
+    required this.onDismiss,
+  }) : super(key: key);
+
+  final String? title;
+  final String message;
+  final ToastType type;
+  final VoidCallback onDismiss;
+
+  @override
+  State<_CenteredToastOverlay> createState() => _CenteredToastOverlayState();
+}
+
+class _CenteredToastOverlayState extends State<_CenteredToastOverlay>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _scaleAnimation;
+  late Animation<double> _fadeAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 240),
+    );
+    _scaleAnimation = CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeOutBack,
+    );
+    _fadeAnimation = CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeOut,
+    );
+    _controller.forward();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  Future<void> _dismiss() async {
+    if (mounted) {
+      await _controller.reverse();
+    }
+    widget.onDismiss();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // Brand Colors (Arms Gym / Procard)
+    const brandPrimary = Color(0xFF14120E); // Deep Obsidian / Black
+    const brandSecondary = Color(0xFFA49C88); // Brand Champagne Sand / Gold
+    const brandSecondaryLight = Color(0xFFDCD6CA); // Soft champagne text
+
+    Color accentColor;
+    IconData iconData;
+    String defaultTitle;
+
+    switch (widget.type) {
+      case ToastType.success:
+        accentColor = brandSecondary;
+        iconData = Icons.check_circle_rounded;
+        defaultTitle = 'Sucesso';
+        break;
+      case ToastType.error:
+        accentColor = const Color(0xFFEF4444);
+        iconData = Icons.error_rounded;
+        defaultTitle = 'Atenção';
+        break;
+      case ToastType.warning:
+        accentColor = const Color(0xFFF59E0B);
+        iconData = Icons.warning_rounded;
+        defaultTitle = 'Aviso';
+        break;
+      case ToastType.info:
+        accentColor = brandSecondary;
+        iconData = Icons.info_rounded;
+        defaultTitle = 'Informação';
+        break;
+    }
+
+    return Material(
+      color: Colors.transparent,
+      child: Center(
+        child: FadeTransition(
+          opacity: _fadeAnimation,
+          child: ScaleTransition(
+            scale: _scaleAnimation,
+            child: Container(
+              width: (MediaQuery.sizeOf(context).width * 0.9).clamp(320.0, 430.0),
+              margin: const EdgeInsets.all(20.0),
+              padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
+              decoration: BoxDecoration(
+                color: brandPrimary,
+                borderRadius: BorderRadius.circular(16.0),
+                border: Border.all(
+                  color: brandSecondary.withValues(alpha: 0.55),
+                  width: 1.5,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.50),
+                    blurRadius: 36.0,
+                    offset: const Offset(0, 12),
+                  ),
+                  BoxShadow(
+                    color: brandSecondary.withValues(alpha: 0.18),
+                    blurRadius: 22.0,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Container(
+                    width: 44.0,
+                    height: 44.0,
+                    decoration: BoxDecoration(
+                      color: accentColor.withValues(alpha: 0.18),
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: accentColor.withValues(alpha: 0.45),
+                        width: 1.2,
+                      ),
+                    ),
+                    child: Icon(
+                      iconData,
+                      color: accentColor,
+                      size: 24.0,
+                    ),
+                  ),
+                  const SizedBox(width: 16.0),
+                  Expanded(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          widget.title ?? defaultTitle,
+                          style: const TextStyle(
+                            fontFamily: 'Outfit',
+                            fontSize: 14.5,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white,
+                            letterSpacing: 0.2,
+                          ),
+                        ),
+                        const SizedBox(height: 3.0),
+                        Text(
+                          widget.message,
+                          style: const TextStyle(
+                            fontFamily: 'Outfit',
+                            fontSize: 13.0,
+                            fontWeight: FontWeight.normal,
+                            color: brandSecondaryLight,
+                            height: 1.3,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 12.0),
+                  InkWell(
+                    onTap: _dismiss,
+                    borderRadius: BorderRadius.circular(20.0),
+                    child: Padding(
+                      padding: const EdgeInsets.all(6.0),
+                      child: Icon(
+                        Icons.close_rounded,
+                        size: 18.0,
+                        color: brandSecondary.withValues(alpha: 0.7),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+void showAppToast(
+  BuildContext context, {
+  required String message,
+  String? title,
+  ToastType type = ToastType.success,
+  Duration duration = const Duration(milliseconds: 3200),
+}) {
+  _CenteredToastManager.show(
+    context,
+    message: message,
+    title: title,
+    type: type,
+    duration: duration,
+  );
+}
+
+void showSuccessToast(
+  BuildContext context,
+  String message, {
+  String title = 'Sucesso',
+  Duration duration = const Duration(milliseconds: 3200),
+}) =>
+    showAppToast(
+      context,
+      message: message,
+      title: title,
+      type: ToastType.success,
+      duration: duration,
+    );
+
+void showErrorToast(
+  BuildContext context,
+  String message, {
+  String title = 'Atenção',
+  Duration duration = const Duration(milliseconds: 4000),
+}) =>
+    showAppToast(
+      context,
+      message: message,
+      title: title,
+      type: ToastType.error,
+      duration: duration,
+    );
+
+void showWarningToast(
+  BuildContext context,
+  String message, {
+  String title = 'Aviso',
+  Duration duration = const Duration(milliseconds: 3500),
+}) =>
+    showAppToast(
+      context,
+      message: message,
+      title: title,
+      type: ToastType.warning,
+      duration: duration,
+    );
+
+void showInfoToast(
+  BuildContext context,
+  String message, {
+  String title = 'Informação',
+  Duration duration = const Duration(milliseconds: 3200),
+}) =>
+    showAppToast(
+      context,
+      message: message,
+      title: title,
+      type: ToastType.info,
+      duration: duration,
+    );
+
 void showSnackbar(
   BuildContext context,
   String message, {
   bool loading = false,
   int duration = 4,
 }) {
-  ScaffoldMessenger.of(context).hideCurrentSnackBar();
-  ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(
-      content: Row(
-        children: [
-          if (loading)
-            Padding(
-              padding: EdgeInsetsDirectional.only(end: 10.0),
-              child: Container(
-                height: 20,
-                width: 20,
-                child: const CircularProgressIndicator(
-                  color: Colors.white,
-                ),
-              ),
-            ),
-          Text(message),
-        ],
-      ),
-      duration: Duration(seconds: duration),
-    ),
+  showAppToast(
+    context,
+    message: message,
+    duration: Duration(seconds: duration),
+    type: ToastType.info,
   );
 }
 

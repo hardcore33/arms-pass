@@ -1,6 +1,7 @@
 import '/auth/custom_auth/auth_util.dart';
 import '/backend/api_requests/api_calls.dart';
 import '/components/modal_adicionar_desconto_parceiro/modal_adicionar_desconto_parceiro_widget.dart';
+import '/components/modal_alterar_desconto/modal_alterar_desconto_widget.dart';
 import '/components/modal_solicitar_banner/modal_solicitar_banner_widget.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
@@ -33,11 +34,13 @@ class ListagemDeCuponsParceiroWidget extends StatefulWidget {
 class _ListagemDeCuponsParceiroWidgetState
     extends State<ListagemDeCuponsParceiroWidget> {
   late ListagemDeCuponsParceiroModel _model;
+  int _paginaAtual = 1;
+  static const int _itensPorPagina = 10;
 
   @override
   void setState(VoidCallback callback) {
     super.setState(callback);
-    _model.onUpdate();
+    // Paginação e filtros locais são instantâneos em memória (0ms).
   }
 
   @override
@@ -55,6 +58,15 @@ class _ListagemDeCuponsParceiroWidgetState
     _model.textFieldFocusNode ??= FocusNode();
 
     WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));
+  }
+
+  @override
+  void didUpdateWidget(covariant ListagemDeCuponsParceiroWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.cupons != widget.cupons) {
+      _model.cuponsLocais = widget.cupons?.toList().cast<dynamic>() ?? [];
+      safeSetState(() {});
+    }
   }
 
   @override
@@ -186,6 +198,7 @@ class _ListagemDeCuponsParceiroWidgetState
                             _model.cuponsLocais = _model.usuariosFiltrados!
                                 .toList()
                                 .cast<dynamic>();
+                            _paginaAtual = 1;
                             safeSetState(() {});
                           },
                         ),
@@ -290,10 +303,10 @@ class _ListagemDeCuponsParceiroWidgetState
                     ),
                   ),
                   const Expanded(
-                    flex: 1,
+                    flex: 2,
                     child: Center(
                       child: Text(
-                        'AÇÃO',
+                        'AÇÕES',
                         style: TextStyle(
                           color: Colors.grey,
                           fontWeight: FontWeight.bold,
@@ -307,30 +320,45 @@ class _ListagemDeCuponsParceiroWidgetState
             ),
             const SizedBox(height: 10.0),
             // Table Body
-            Expanded(
-              child: _model.cuponsLocais.isEmpty
-                  ? Center(
-                      child: Text(
-                        'Nenhuma promoção cadastrada',
-                        style: TextStyle(
-                          color: FlutterFlowTheme.of(context).secondaryText,
-                          fontSize: 14.0,
-                        ),
-                      ),
-                    )
-                  : ListView.separated(
-                      padding: EdgeInsets.zero,
-                      itemCount: _model.cuponsLocais.length,
-                      separatorBuilder: (context, index) => Divider(
-                        color: borderColor,
-                        height: 1.0,
-                      ),
-                      itemBuilder: (context, index) {
-                        final item = _model.cuponsLocais[index];
-                        final idCupom = getJsonField(item, r'''$.id''').toString();
+            Builder(
+              builder: (context) {
+                final totalItens = _model.cuponsLocais.length;
+                final totalPaginas = (totalItens / _itensPorPagina).ceil().clamp(1, 9999);
+                final paginaSegura = _paginaAtual.clamp(1, totalPaginas);
+                final startIndex = (paginaSegura - 1) * _itensPorPagina;
+                final endIndex = (startIndex + _itensPorPagina).clamp(0, totalItens);
+                final itemCupons = totalItens > 0 ? _model.cuponsLocais.sublist(startIndex, endIndex) : <dynamic>[];
+
+                return Expanded(
+                  child: _model.cuponsLocais.isEmpty
+                      ? Center(
+                          child: Text(
+                            'Nenhuma promoção cadastrada',
+                            style: TextStyle(
+                              color: FlutterFlowTheme.of(context).secondaryText,
+                              fontSize: 14.0,
+                            ),
+                          ),
+                        )
+                      : ListView.separated(
+                          padding: EdgeInsets.zero,
+                          itemCount: itemCupons.length,
+                          separatorBuilder: (context, index) => Divider(
+                            color: borderColor,
+                            height: 1.0,
+                          ),
+                          itemBuilder: (context, index) {
+                            final item = itemCupons[index];
+                            final idCupom = getJsonField(item, r'''$.id''').toString();
                         final description = getJsonField(item, r'''$.description''')?.toString() ?? '';
                         final discount = getJsonField(item, r'''$.discount''')?.toString() ?? '0';
                         final validity = getJsonField(item, r'''$.validity''')?.toString() ?? '';
+                        final rules = (getJsonField(item, r'''$.rules''') ?? '').toString();
+
+                        final isArmsPro = rules.contains('[ARMS_PRO]') || description.contains('[ARMS_PRO]');
+                        final matchLimite = RegExp(r'\[LIMITE:(\d+)\]').firstMatch(rules) ?? RegExp(r'\[LIMITE:(\d+)\]').firstMatch(description);
+                        final limiteStr = matchLimite != null ? matchLimite.group(1) : null;
+                        final cleanDesc = description.replaceAll('[ARMS_PRO]', '').replaceAll(RegExp(r'\[LIMITE:\d+\]'), '').trim();
 
                         return Padding(
                           padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 8.0),
@@ -354,13 +382,76 @@ class _ListagemDeCuponsParceiroWidgetState
                                 flex: 5,
                                 child: Padding(
                                   padding: const EdgeInsets.only(left: 12.0),
-                                  child: Text(
-                                    description,
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 14.0,
-                                    ),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text(
+                                        cleanDesc.isNotEmpty ? cleanDesc : 'Sem descrição',
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 14.0,
+                                        ),
+                                      ),
+                                      if (isArmsPro || limiteStr != null) ...[
+                                        const SizedBox(height: 5.0),
+                                        Wrap(
+                                          spacing: 6.0,
+                                          runSpacing: 4.0,
+                                          children: [
+                                            if (isArmsPro)
+                                              Container(
+                                                padding: const EdgeInsets.symmetric(horizontal: 7.0, vertical: 2.0),
+                                                decoration: BoxDecoration(
+                                                  color: const Color(0x25FFD700),
+                                                  borderRadius: BorderRadius.circular(4.0),
+                                                  border: Border.all(color: highlightColor, width: 0.8),
+                                                ),
+                                                child: Row(
+                                                  mainAxisSize: MainAxisSize.min,
+                                                  children: [
+                                                    Icon(Icons.star_rounded, color: highlightColor, size: 12.0),
+                                                    const SizedBox(width: 3.0),
+                                                    Text(
+                                                      'Arms Pró VIP',
+                                                      style: TextStyle(
+                                                        color: highlightColor,
+                                                        fontSize: 10.5,
+                                                        fontWeight: FontWeight.bold,
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            if (limiteStr != null)
+                                              Container(
+                                                padding: const EdgeInsets.symmetric(horizontal: 7.0, vertical: 2.0),
+                                                decoration: BoxDecoration(
+                                                  color: const Color(0x20FFFFFF),
+                                                  borderRadius: BorderRadius.circular(4.0),
+                                                  border: Border.all(color: Colors.white30, width: 0.8),
+                                                ),
+                                                child: Row(
+                                                  mainAxisSize: MainAxisSize.min,
+                                                  children: [
+                                                    const Icon(Icons.inventory_2_outlined, color: Colors.white70, size: 11.0),
+                                                    const SizedBox(width: 3.0),
+                                                    Text(
+                                                      'Estoque: $limiteStr un.',
+                                                      style: const TextStyle(
+                                                        color: Colors.white70,
+                                                        fontSize: 10.5,
+                                                        fontWeight: FontWeight.w600,
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                          ],
+                                        ),
+                                      ],
+                                    ],
                                   ),
                                 ),
                               ),
@@ -401,58 +492,99 @@ class _ListagemDeCuponsParceiroWidgetState
                                   ),
                                 ),
                               ),
-                              // Action (Delete)
+                              // Actions (Edit & Delete)
                               Expanded(
-                                flex: 1,
-                                child: Center(
-                                  child: IconButton(
-                                    icon: const Icon(
-                                      Icons.delete_outline_rounded,
-                                      color: Color(0xFFFF5252),
-                                      size: 20.0,
-                                    ),
-                                    onPressed: () async {
-                                      final confirm = await showDialog<bool>(
-                                        context: context,
-                                        builder: (ctx) => AlertDialog(
-                                          title: const Text('Excluir Cupom'),
-                                          content: const Text(
-                                              'Tem certeza que deseja excluir essa promoção? Esta ação não pode ser desfeita.'),
-                                          actions: [
-                                            TextButton(
-                                              onPressed: () => Navigator.pop(ctx, false),
-                                              child: const Text('Cancelar'),
+                                flex: 2,
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    IconButton(
+                                      icon: Icon(
+                                        Icons.edit_rounded,
+                                        color: highlightColor,
+                                        size: 19.0,
+                                      ),
+                                      tooltip: 'Editar Promoção',
+                                      onPressed: () async {
+                                        final res = await showDialog<bool>(
+                                          context: context,
+                                          builder: (ctx) => Dialog(
+                                            elevation: 0,
+                                            backgroundColor: Colors.transparent,
+                                            child: ModalAlterarDescontoWidget(
+                                              titulo: 'cupom',
+                                              desconto: item,
+                                              nomeParceiros: const [],
+                                              parceiros: const [],
+                                              nomeSegmentos: const [],
+                                              segmentos: const [],
                                             ),
-                                            TextButton(
-                                              onPressed: () => Navigator.pop(ctx, true),
-                                              child: const Text(
-                                                'Excluir',
-                                                style: TextStyle(color: Colors.red),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      );
-
-                                      if (confirm == true) {
-                                        final deleteRes = await DeletarCuponsCall.call(
-                                          idDiscount: idCupom,
+                                          ),
                                         );
-                                        if (deleteRes.succeeded) {
-                                          setState(() {
-                                            _model.cuponsLocais.removeAt(index);
-                                          });
-                                          if (widget.onChanged != null) {
-                                            await widget.onChanged!();
-                                          }
-                                        } else {
-                                          ScaffoldMessenger.of(context).showSnackBar(
-                                            const SnackBar(content: Text('Erro ao excluir cupom')),
-                                          );
+                                        if (res == true && widget.onChanged != null) {
+                                          await widget.onChanged!();
                                         }
-                                      }
-                                    },
-                                  ),
+                                      },
+                                    ),
+                                    IconButton(
+                                      icon: const Icon(
+                                        Icons.delete_outline_rounded,
+                                        color: Color(0xFFFF5252),
+                                        size: 19.0,
+                                      ),
+                                      tooltip: 'Excluir Promoção',
+                                      onPressed: () async {
+                                        final confirm = await showDialog<bool>(
+                                          context: context,
+                                          builder: (ctx) => AlertDialog(
+                                            title: const Text('Excluir Cupom'),
+                                            content: const Text(
+                                                'Tem certeza que deseja excluir essa promoção? Esta ação não pode ser desfeita.'),
+                                            actions: [
+                                              TextButton(
+                                                onPressed: () => Navigator.pop(ctx, false),
+                                                child: const Text('Cancelar'),
+                                              ),
+                                              TextButton(
+                                                onPressed: () => Navigator.pop(ctx, true),
+                                                child: const Text(
+                                                  'Excluir',
+                                                  style: TextStyle(color: Colors.red),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        );
+                                        if (confirm == true) {
+                                          final deleteRes = await DeletarCuponsCall.call(
+                                            idDiscount: idCupom,
+                                          );
+                                          if (deleteRes.succeeded) {
+                                            setState(() {
+                                              _model.cuponsLocais.removeWhere((c) => getJsonField(c, r'''$.id''')?.toString() == idCupom);
+                                            });
+                                            if (context.mounted) {
+                                              showSuccessToast(
+                                                context,
+                                                'Cupom excluído com sucesso!',
+                                                title: 'Cupom Excluído',
+                                              );
+                                            }
+                                            if (widget.onChanged != null) {
+                                              await widget.onChanged!();
+                                            }
+                                          } else {
+                                            if (context.mounted) {
+                                              showErrorToast(
+                                                context,
+                                                'Erro ao excluir cupom.',
+                                              );
+                                            }
+                                          }
+                                        }
+                                      },
+                                    ),
+                                  ],
                                 ),
                               ),
                             ],
@@ -460,6 +592,66 @@ class _ListagemDeCuponsParceiroWidgetState
                         );
                       },
                     ),
+                );
+              },
+            ),
+            // Rodapé Conectado de Paginação
+            Builder(
+              builder: (context) {
+                final totalItens = _model.cuponsLocais.length;
+                final totalPaginas = (totalItens / _itensPorPagina).ceil().clamp(1, 9999);
+                final paginaSegura = _paginaAtual.clamp(1, totalPaginas);
+                final startIndex = (paginaSegura - 1) * _itensPorPagina;
+                final endIndex = (startIndex + _itensPorPagina).clamp(0, totalItens);
+
+                return Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+                  decoration: BoxDecoration(
+                    border: Border(top: BorderSide(color: borderColor, width: 1.0)),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        totalItens > 0
+                            ? 'Exibindo ${startIndex + 1}–$endIndex de $totalItens promoções'
+                            : 'Nenhum registro',
+                        style: TextStyle(
+                          fontSize: 12.0,
+                          color: FlutterFlowTheme.of(context).secondaryText,
+                        ),
+                      ),
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.chevron_left_rounded, size: 20.0),
+                            color: paginaSegura > 1 ? highlightColor : Colors.white24,
+                            onPressed: paginaSegura > 1
+                                ? () => setState(() => _paginaAtual = paginaSegura - 1)
+                                : null,
+                          ),
+                          Text(
+                            'Página $paginaSegura de $totalPaginas',
+                            style: const TextStyle(
+                              fontSize: 12.0,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white,
+                            ),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.chevron_right_rounded, size: 20.0),
+                            color: paginaSegura < totalPaginas ? highlightColor : Colors.white24,
+                            onPressed: paginaSegura < totalPaginas
+                                ? () => setState(() => _paginaAtual = paginaSegura + 1)
+                                : null,
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                );
+              },
             ),
           ],
         ),

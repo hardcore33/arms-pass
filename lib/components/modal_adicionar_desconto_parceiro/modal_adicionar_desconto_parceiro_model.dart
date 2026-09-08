@@ -14,6 +14,15 @@ class ModalAdicionarDescontoParceiroModel extends FlutterFlowModel<ModalAdiciona
   TextEditingController? porcentagemTextController;
   String? Function(BuildContext, String?)? porcentagemTextControllerValidator;
 
+  // Arms Pró & Limite de Quantidade
+  bool isArmsPro = false;
+
+  FocusNode? limiteQuantidadeFocusNode;
+  TextEditingController? limiteQuantidadeTextController;
+
+  FocusNode? regrasFocusNode;
+  TextEditingController? regrasTextController;
+
   // State to store selected date
   DateTime? dataSelecionada;
   
@@ -43,5 +52,9 @@ class ModalAdicionarDescontoParceiroModel extends FlutterFlowModel<ModalAdiciona
     descricaoTextController?.dispose();
     porcentagemFocusNode?.dispose();
     porcentagemTextController?.dispose();
+    limiteQuantidadeFocusNode?.dispose();
+    limiteQuantidadeTextController?.dispose();
+    regrasFocusNode?.dispose();
+    regrasTextController?.dispose();
   }
 }

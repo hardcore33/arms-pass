@@ -6,11 +6,13 @@ import '/components/box_indicadores/box_indicadores_widget.dart';
 import '/components/box_indicadores_mobile/box_indicadores_mobile_widget.dart';
 import '/components/menu_mobile/menu_mobile_widget.dart';
 import '/components/menu_parceiro/menu_parceiro_widget.dart';
+import '/components/modal_adicionar_desconto_parceiro/modal_adicionar_desconto_parceiro_widget.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
 import '/flutter_flow/custom_functions.dart' as functions;
 import '/pages/cupons_parceiro/cupons_parceiro_widget.dart';
+import '/components/loading_table_shimmer/loading_table_shimmer_widget.dart';
 import '/pages/validar_parceiro/validar_parceiro_widget.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
 import 'dart:ui';
@@ -260,17 +262,9 @@ class _DashboardParceiroWidgetState extends State<DashboardParceiroWidget> {
       ),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
-          return Container(
-            height: isMobile ? 220.0 : 340.0,
-            alignment: Alignment.center,
-            child: SizedBox(
-              width: 30.0,
-              height: 30.0,
-              child: SpinKitFadingFour(
-                color: highlightColor,
-                size: 30.0,
-              ),
-            ),
+          return const LoadingTableShimmerWidget(
+            titulo: 'Métricas do Parceiro',
+            rowCount: 4,
           );
         }
 
@@ -1006,6 +1000,49 @@ class _DashboardParceiroWidgetState extends State<DashboardParceiroWidget> {
                           fontSize: 14.0,
                         ),
                       ),
+                      const Spacer(),
+                      InkWell(
+                        onTap: () async {
+                          final res = await showDialog<bool>(
+                            context: context,
+                            builder: (dialogContext) =>
+                                ModalAdicionarDescontoParceiroWidget(
+                              partnerId: currentUserUid,
+                            ),
+                          );
+                          if (res == true) {
+                            safeSetState(() {});
+                          }
+                        },
+                        borderRadius: BorderRadius.circular(6.0),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 10.0, vertical: 5.0),
+                          decoration: BoxDecoration(
+                            color: highlight,
+                            borderRadius: BorderRadius.circular(6.0),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.add_rounded,
+                                size: 16.0,
+                                color: FlutterFlowTheme.of(context).primary,
+                              ),
+                              const SizedBox(width: 4.0),
+                              Text(
+                                'Nova Promoção',
+                                style: TextStyle(
+                                  color: FlutterFlowTheme.of(context).primary,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 11.5,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -1086,6 +1123,12 @@ class _DashboardParceiroWidgetState extends State<DashboardParceiroWidget> {
                                 getJsonField(item, r'''$.validity''')
                                         ?.toString() ??
                                     '';
+                            final rules = (getJsonField(item, r'''$.rules''') ?? '').toString();
+
+                            final isArmsPro = rules.contains('[ARMS_PRO]') || description.contains('[ARMS_PRO]');
+                            final matchLimite = RegExp(r'\[LIMITE:(\d+)\]').firstMatch(rules) ?? RegExp(r'\[LIMITE:(\d+)\]').firstMatch(description);
+                            final limiteStr = matchLimite != null ? matchLimite.group(1) : null;
+                            final cleanDesc = description.replaceAll('[ARMS_PRO]', '').replaceAll(RegExp(r'\[LIMITE:\d+\]'), '').trim();
 
                             // Status do cupom derivado da data de validade
                             // (o backend não retorna um campo de status —
@@ -1114,12 +1157,72 @@ class _DashboardParceiroWidgetState extends State<DashboardParceiroWidget> {
                                         CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                        description,
+                                        cleanDesc.isNotEmpty ? cleanDesc : 'Desconto',
                                         style: const TextStyle(
                                             color: Colors.white,
                                             fontWeight: FontWeight.bold,
                                             fontSize: 13.0),
                                       ),
+                                      if (isArmsPro || limiteStr != null) ...[
+                                        const SizedBox(height: 3.0),
+                                        Wrap(
+                                          spacing: 4.0,
+                                          runSpacing: 2.0,
+                                          children: [
+                                            if (isArmsPro)
+                                              Container(
+                                                padding: const EdgeInsets.symmetric(
+                                                    horizontal: 5.0, vertical: 1.0),
+                                                decoration: BoxDecoration(
+                                                  color: const Color(0x25FFD700),
+                                                  borderRadius: BorderRadius.circular(3.0),
+                                                  border: Border.all(color: highlight, width: 0.6),
+                                                ),
+                                                child: Row(
+                                                  mainAxisSize: MainAxisSize.min,
+                                                  children: [
+                                                    Icon(Icons.star_rounded, color: highlight, size: 10.0),
+                                                    const SizedBox(width: 2.0),
+                                                    Text(
+                                                      'Arms Pró VIP',
+                                                      style: TextStyle(
+                                                        color: highlight,
+                                                        fontSize: 9.5,
+                                                        fontWeight: FontWeight.bold,
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            if (limiteStr != null)
+                                              Container(
+                                                padding: const EdgeInsets.symmetric(
+                                                    horizontal: 5.0, vertical: 1.0),
+                                                decoration: BoxDecoration(
+                                                  color: const Color(0x20FFFFFF),
+                                                  borderRadius: BorderRadius.circular(3.0),
+                                                  border: Border.all(color: Colors.white24, width: 0.6),
+                                                ),
+                                                child: Row(
+                                                  mainAxisSize: MainAxisSize.min,
+                                                  children: [
+                                                    const Icon(Icons.inventory_2_outlined, color: Colors.white70, size: 9.0),
+                                                    const SizedBox(width: 2.0),
+                                                    Text(
+                                                      'Estoque: $limiteStr un.',
+                                                      style: const TextStyle(
+                                                        color: Colors.white70,
+                                                        fontSize: 9.5,
+                                                        fontWeight: FontWeight.w600,
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                          ],
+                                        ),
+                                      ],
+                                      const SizedBox(height: 3.0),
                                       Row(
                                         children: [
                                           Text(

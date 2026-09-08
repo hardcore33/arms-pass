@@ -148,245 +148,194 @@ class _ListagemDeBannersWidgetState extends State<ListagemDeBannersWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      height: double.infinity,
-      child: Stack(
-        children: [
-          Align(
-            alignment: AlignmentDirectional(0.0, -1.0),
-            child: Padding(
-              padding: const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
-              child: Material(
-                color: Colors.transparent,
-                elevation: 3.0,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(
-                      FlutterFlowTheme.of(context).designToken.radius.md),
-                ),
-                child: Container(
-                  width: double.infinity,
-                  height: double.infinity,
-                  decoration: BoxDecoration(
-                    color: FlutterFlowTheme.of(context).secondaryBackground,
-                    borderRadius: BorderRadius.circular(
-                        FlutterFlowTheme.of(context).designToken.radius.md),
-                  ),
-                ),
-              ),
-            ),
+    final theme = FlutterFlowTheme.of(context);
+    final count = _model.bannersLocal.length;
+
+    return Material(
+      color: Colors.transparent,
+      elevation: 3.0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16.0),
+      ),
+      child: Container(
+        width: double.infinity,
+        decoration: BoxDecoration(
+          color: theme.secondaryBackground,
+          borderRadius: BorderRadius.circular(16.0),
+          border: Border.all(
+            color: theme.alternate,
+            width: 1.0,
           ),
-          Positioned.fill(
-            child: Column(
-              mainAxisSize: MainAxisSize.max,
-              crossAxisAlignment: CrossAxisAlignment.start,
+        ),
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Top Bar: Title & Count, Search Bar, Action Button
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Row(
-                  mainAxisSize: MainAxisSize.max,
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.end,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Align(
-                      alignment: AlignmentDirectional(-1.0, 0.0),
-                      child: Padding(
-                        padding: const EdgeInsetsDirectional.fromSTEB(
-                            35.0, 30.0, 0.0, 0.0),
-                        child: Container(
-                          width: 250.0,
-                          child: TextFormField(
-                            controller: _model.textController,
-                            focusNode: _model.textFieldFocusNode,
-                            onChanged: (_) => EasyDebounce.debounce(
-                              '_model.textController',
-                              const Duration(milliseconds: 300),
-                              () async {
-                                final rawBanners = widget.banners is List
-                                    ? widget.banners!.toList()
-                                    : [];
-                                _model.bannersFiltrados =
-                                    await actions.filtrarPorNome(
-                                  rawBanners,
-                                  _model.textController.text,
-                                  5,
-                                  true,
-                                );
-                                _model.bannersLocal = _model.bannersFiltrados != null
-                                    ? _model.bannersFiltrados!.toList().cast<dynamic>()
-                                    : rawBanners.cast<dynamic>();
-                                safeSetState(() {});
-                              },
-                            ),
-                            autofocus: false,
-                            obscureText: false,
-                            decoration: InputDecoration(
-                              isDense: true,
-                              labelText: 'Procurar',
-                              labelStyle: FlutterFlowTheme.of(context)
-                                  .labelMedium
-                                  .override(
-                                    font: GoogleFonts.readexPro(
-                                      fontWeight: FlutterFlowTheme.of(context)
-                                          .labelMedium
-                                          .fontWeight,
-                                      fontStyle: FlutterFlowTheme.of(context)
-                                          .labelMedium
-                                          .fontStyle,
-                                    ),
-                                    color: Color(0xFF909090),
-                                    letterSpacing: 0.0,
-                                  ),
-                              hintStyle: FlutterFlowTheme.of(context)
-                                  .labelMedium
-                                  .override(
-                                    font: GoogleFonts.readexPro(
-                                      fontWeight: FlutterFlowTheme.of(context)
-                                          .labelMedium
-                                          .fontWeight,
-                                      fontStyle: FlutterFlowTheme.of(context)
-                                          .labelMedium
-                                          .fontStyle,
-                                    ),
-                                    letterSpacing: 0.0,
-                                  ),
-                              enabledBorder: OutlineInputBorder(
-                                borderSide: BorderSide(
-                                  color: Color(0xFFCCCCCC),
-                                  width: 1.0,
-                                ),
-                                borderRadius: BorderRadius.circular(24.0),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderSide: BorderSide(
-                                  color: FlutterFlowTheme.of(context).primary,
-                                  width: 1.5,
-                                ),
-                                borderRadius: BorderRadius.circular(24.0),
-                              ),
-                              errorBorder: OutlineInputBorder(
-                                borderSide: BorderSide(
-                                  color: FlutterFlowTheme.of(context).error,
-                                  width: 1.0,
-                                ),
-                                borderRadius: BorderRadius.circular(24.0),
-                              ),
-                              focusedErrorBorder: OutlineInputBorder(
-                                borderSide: BorderSide(
-                                  color: FlutterFlowTheme.of(context).error,
-                                  width: 1.5,
-                                ),
-                                borderRadius: BorderRadius.circular(24.0),
-                              ),
-                              filled: true,
-                              fillColor: FlutterFlowTheme.of(context)
-                                  .secondaryBackground,
-                              contentPadding: EdgeInsetsDirectional.fromSTEB(
-                                  20.0, 10.0, 20.0, 10.0),
-                              prefixIcon: const Icon(
-                                Icons.search_rounded,
-                                color: Color(0xFF9A9A9A),
-                                size: 20.0,
-                              ),
-                            ),
-                            style: FlutterFlowTheme.of(context)
-                                .bodyMedium
-                                .override(
-                                  font: GoogleFonts.readexPro(
-                                    fontWeight: FlutterFlowTheme.of(context)
-                                        .bodyMedium
-                                        .fontWeight,
-                                    fontStyle: FlutterFlowTheme.of(context)
-                                        .bodyMedium
-                                        .fontStyle,
-                                  ),
-                                  letterSpacing: 0.0,
-                                ),
-                            cursorColor:
-                                FlutterFlowTheme.of(context).primaryText,
-                            validator: _model.textControllerValidator
-                                .asValidator(context),
-                          ),
-                        ),
+                    Text(
+                      'Gerenciamento de Banners',
+                      style: GoogleFonts.readexPro(
+                        fontSize: 18.0,
+                        fontWeight: FontWeight.bold,
+                        color: theme.primaryText,
                       ),
                     ),
-                    const Spacer(),
-                    Align(
-                      alignment: AlignmentDirectional(-1.0, 0.0),
-                      child: Builder(
-                        builder: (context) => Padding(
-                          padding: const EdgeInsetsDirectional.fromSTEB(
-                              0.0, 30.0, 35.0, 0.0),
-                          child: FFButtonWidget(
-                            onPressed: () async {
-                              await showDialog(
-                                context: context,
-                                builder: (dialogContext) {
-                                  return Dialog(
-                                    elevation: 0,
-                                    insetPadding: EdgeInsets.zero,
-                                    backgroundColor: Colors.transparent,
-                                    alignment: AlignmentDirectional(0.0, 0.0)
-                                        .resolve(Directionality.of(context)),
-                                    child: ModalAdicionarBannerWidget(
-                                      titulo: 'banner',
-                                    ),
-                                  );
-                                },
-                              );
-
-                              _model.apiResultdku =
-                                  await ObterBannersCall.call();
-
-                              if ((_model.apiResultdku?.succeeded ?? true)) {
-                                final updated = _model.apiResultdku?.jsonBody;
-                                if (updated is List) {
-                                  _model.bannersLocal =
-                                      updated.toList().cast<dynamic>();
-                                }
-                                safeSetState(() {});
-                              }
-
-                              safeSetState(() {});
-                            },
-                            text: 'Cadastrar',
-                            icon: Icon(
-                              Icons.add_circle_outline,
-                              size: 15.0,
-                            ),
-                            options: FFButtonOptions(
-                              width: 130.0,
-                              height: 45.0,
-                              padding: EdgeInsetsDirectional.fromSTEB(
-                                  16.0, 0.0, 16.0, 0.0),
-                              iconPadding: EdgeInsetsDirectional.fromSTEB(
-                                  0.0, 0.0, 0.0, 0.0),
-                              color: FlutterFlowTheme.of(context).primary,
-                              textStyle: FlutterFlowTheme.of(context)
-                                  .titleSmall
-                                  .override(
-                                    font: GoogleFonts.readexPro(
-                                      fontWeight: FlutterFlowTheme.of(context)
-                                          .titleSmall
-                                          .fontWeight,
-                                      fontStyle: FlutterFlowTheme.of(context)
-                                          .titleSmall
-                                          .fontStyle,
-                                    ),
-                                    color: FlutterFlowTheme.of(context)
-                                        .secondaryBackground,
-                                    letterSpacing: 0.0,
-                                  ),
-                              elevation: 0.0,
-                              borderRadius: BorderRadius.circular(6.0),
-                            ),
-                          ),
+                    const SizedBox(width: 10.0),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 3.0),
+                      decoration: BoxDecoration(
+                        color: theme.primary.withOpacity(0.08),
+                        borderRadius: BorderRadius.circular(12.0),
+                        border: Border.all(
+                          color: theme.primary.withOpacity(0.2),
+                          width: 1.0,
+                        ),
+                      ),
+                      child: Text(
+                        '$count banners',
+                        style: GoogleFonts.readexPro(
+                          fontSize: 12.0,
+                          fontWeight: FontWeight.w600,
+                          color: theme.primary,
                         ),
                       ),
                     ),
                   ],
                 ),
-                Padding(
-                  padding: const EdgeInsetsDirectional.fromSTEB(0.0, 30.0, 0.0, 0.0),
-                  child: Container(
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    SizedBox(
+                      width: 280.0,
+                      height: 42.0,
+                      child: TextFormField(
+                        controller: _model.textController,
+                        focusNode: _model.textFieldFocusNode,
+                        onChanged: (_) => EasyDebounce.debounce(
+                          '_model.textController',
+                          const Duration(milliseconds: 300),
+                          () async {
+                            final rawBanners = widget.banners is List
+                                ? widget.banners!.toList()
+                                : [];
+                            _model.bannersFiltrados =
+                                await actions.filtrarPorNome(
+                              rawBanners,
+                              _model.textController.text,
+                              5,
+                              true,
+                            );
+                            _model.bannersLocal = _model.bannersFiltrados != null
+                                ? _model.bannersFiltrados!.toList().cast<dynamic>()
+                                : rawBanners.cast<dynamic>();
+                            safeSetState(() {});
+                          },
+                        ),
+                        autofocus: false,
+                        obscureText: false,
+                        decoration: InputDecoration(
+                          isDense: true,
+                          hintText: 'Pesquisar banners...',
+                          hintStyle: GoogleFonts.readexPro(
+                            color: theme.secondaryText,
+                            fontSize: 13.0,
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderSide: BorderSide(
+                              color: theme.alternate,
+                              width: 1.0,
+                            ),
+                            borderRadius: BorderRadius.circular(8.0),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderSide: BorderSide(
+                              color: theme.primary,
+                              width: 1.5,
+                            ),
+                            borderRadius: BorderRadius.circular(8.0),
+                          ),
+                          filled: true,
+                          fillColor: theme.primaryBackground,
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 10.0),
+                          prefixIcon: Icon(
+                            Icons.search_rounded,
+                            color: theme.secondaryText,
+                            size: 18.0,
+                          ),
+                        ),
+                        style: GoogleFonts.readexPro(
+                          fontSize: 13.0,
+                          color: theme.primaryText,
+                        ),
+                        cursorColor: theme.primary,
+                        validator: _model.textControllerValidator.asValidator(context),
+                      ),
+                    ),
+                    const SizedBox(width: 12.0),
+                    Builder(
+                      builder: (context) => FFButtonWidget(
+                        onPressed: () async {
+                          await showDialog(
+                            context: context,
+                            builder: (dialogContext) {
+                              return Dialog(
+                                elevation: 0,
+                                insetPadding: EdgeInsets.zero,
+                                backgroundColor: Colors.transparent,
+                                alignment: AlignmentDirectional(0.0, 0.0)
+                                    .resolve(Directionality.of(context)),
+                                child: ModalAdicionarBannerWidget(
+                                  titulo: 'banner',
+                                ),
+                              );
+                            },
+                          );
+
+                          _model.apiResultdku =
+                              await ObterBannersCall.call();
+
+                          if ((_model.apiResultdku?.succeeded ?? true)) {
+                            final updated = _model.apiResultdku?.jsonBody;
+                            if (updated is List) {
+                              _model.bannersLocal =
+                                  updated.toList().cast<dynamic>();
+                            }
+                            safeSetState(() {});
+                          }
+
+                          safeSetState(() {});
+                        },
+                        text: 'Novo Banner',
+                        icon: const Icon(
+                          Icons.add_rounded,
+                          size: 18.0,
+                        ),
+                        options: FFButtonOptions(
+                          height: 42.0,
+                          padding: const EdgeInsets.symmetric(horizontal: 18.0),
+                          color: theme.primary,
+                          textStyle: GoogleFonts.readexPro(
+                            color: Colors.white,
+                            fontSize: 13.0,
+                            fontWeight: FontWeight.w600,
+                          ),
+                          elevation: 0.0,
+                          borderRadius: BorderRadius.circular(8.0),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            const SizedBox(height: 20.0),
+            Container(
                     decoration: BoxDecoration(
                       color: FlutterFlowTheme.of(context).alternate,
                       borderRadius: BorderRadius.circular(
@@ -484,8 +433,6 @@ class _ListagemDeBannersWidgetState extends State<ListagemDeBannersWidget> {
                       ],
                     ),
                   ),
-                ),
-
                 Expanded(
                   child: Container(
                     decoration: const BoxDecoration(),
@@ -699,11 +646,9 @@ class _ListagemDeBannersWidgetState extends State<ListagemDeBannersWidget> {
                   ),
                 ),
               ),
-              ],
-            ),
+            ],
           ),
-        ],
-      ),
-    );
+        ),
+      );
   }
 }

@@ -78,10 +78,20 @@ class _ModalSolicitarBannerWidgetState
 
       // Fechar modal
       Navigator.pop(context);
+      if (mounted) {
+        showSuccessToast(
+          context,
+          'Solicitação enviada com sucesso!',
+          title: 'Banner Solicitado',
+        );
+      }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erro ao processar solicitação: $e')),
-      );
+      if (mounted) {
+        showErrorToast(
+          context,
+          'Erro ao processar solicitação: $e',
+        );
+      }
     } finally {
       setState(() {
         _loading = false;

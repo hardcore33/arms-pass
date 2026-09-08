@@ -4,9 +4,9 @@ import '/components/menu/menu_widget.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:ui';
+import '/components/header_pagina/header_pagina_widget.dart';
+import '/components/loading_table_shimmer/loading_table_shimmer_widget.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'propostas_model.dart';
@@ -24,6 +24,7 @@ class PropostasWidget extends StatefulWidget {
 
 class _PropostasWidgetState extends State<PropostasWidget> {
   late PropostasModel _model;
+  Future<ApiCallResponse>? _propostasFuture;
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
@@ -31,106 +32,82 @@ class _PropostasWidgetState extends State<PropostasWidget> {
   void initState() {
     super.initState();
     _model = createModel(context, () => PropostasModel());
-
+    _propostasFuture = ObterPropostasCall.call();
     WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));
+  }
+
+  void _recarregar() {
+    setState(() {
+      _propostasFuture = ObterPropostasCall.call();
+    });
   }
 
   @override
   void dispose() {
     _model.dispose();
-
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     context.watch<FFAppState>();
-    return FutureBuilder<ApiCallResponse>(
-      future: ObterPropostasCall.call(),
-      builder: (context, snapshot) {
-        // Customize what your widget looks like when it's loading.
-        if (!snapshot.hasData) {
-          return Scaffold(
-            backgroundColor: FlutterFlowTheme.of(context).primary,
-            body: Center(
-              child: SizedBox(
-                width: 30.0,
-                height: 30.0,
-                child: SpinKitFadingFour(
+
+    return GestureDetector(
+      onTap: () {
+        FocusScope.of(context).unfocus();
+        FocusManager.instance.primaryFocus?.unfocus();
+      },
+      child: Scaffold(
+        key: scaffoldKey,
+        backgroundColor: FlutterFlowTheme.of(context).primary,
+        body: SafeArea(
+          top: true,
+          child: Row(
+            mainAxisSize: MainAxisSize.max,
+            children: [
+              Container(
+                width: FFAppState().sidebarCollapsed
+                    ? 80.0
+                    : (MediaQuery.sizeOf(context).width * 0.22).clamp(220.0, 320.0),
+                height: MediaQuery.sizeOf(context).height * 1.0,
+                decoration: BoxDecoration(
                   color: FlutterFlowTheme.of(context).secondary,
-                  size: 30.0,
+                ),
+                child: wrapWithModel(
+                  model: _model.menuModel,
+                  updateCallback: () => safeSetState(() {}),
+                  child: const MenuWidget(activeIndex: 5),
                 ),
               ),
-            ),
-          );
-        }
-        final propostasObterPropostasResponse = snapshot.data!;
-
-        return GestureDetector(
-          onTap: () {
-            FocusScope.of(context).unfocus();
-            FocusManager.instance.primaryFocus?.unfocus();
-          },
-          child: Scaffold(
-            key: scaffoldKey,
-            backgroundColor: FlutterFlowTheme.of(context).primary,
-            body: SafeArea(
-              top: true,
-              child: Row(
-                mainAxisSize: MainAxisSize.max,
-                children: [
-                  Container(
-                    width: FFAppState().sidebarCollapsed
-                        ? 80.0
-                        : (MediaQuery.sizeOf(context).width * 0.22).clamp(220.0, 320.0),
-                    height: MediaQuery.sizeOf(context).height * 1.0,
-                    decoration: BoxDecoration(
-                      color: FlutterFlowTheme.of(context).secondary,
-                    ),
-                    child: wrapWithModel(
-                      model: _model.menuModel,
-                      updateCallback: () => safeSetState(() {}),
-                      child: const MenuWidget(),
-                    ),
+              Expanded(
+                child: Container(
+                  height: MediaQuery.sizeOf(context).height * 1.0,
+                  decoration: BoxDecoration(
+                    color: FlutterFlowTheme.of(context).primary,
                   ),
-                  Expanded(
-                    child: Container(
-                    
-                    height: MediaQuery.sizeOf(context).height * 1.0,
-                    decoration: BoxDecoration(
-                      color: FlutterFlowTheme.of(context).primary,
-                    ),
-                    child: Padding(
-                      padding:
-                          EdgeInsetsDirectional.fromSTEB(50.0, 30.0, 0.0, 0.0),
+                  child: Padding(
+                    padding:
+                        const EdgeInsetsDirectional.fromSTEB(24.0, 20.0, 24.0, 30.0),
+                    child: SingleChildScrollView(
                       child: Column(
-                        mainAxisSize: MainAxisSize.max,
+                        mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            'Propostas',
-                            style: FlutterFlowTheme.of(context)
-                                .bodyMedium
-                                .override(
-                                  font: GoogleFonts.openSans(
-                                    fontWeight: FontWeight.w600,
-                                    fontStyle: FlutterFlowTheme.of(context)
-                                        .bodyMedium
-                                        .fontStyle,
-                                  ),
-                                  color: FlutterFlowTheme.of(context).secondary,
-                                  fontSize: 16.0,
-                                  letterSpacing: 0.0,
-                                  fontWeight: FontWeight.w600,
-                                  fontStyle: FlutterFlowTheme.of(context)
-                                      .bodyMedium
-                                      .fontStyle,
-                                ),
+                          const HeaderPaginaWidget(
+                            titulo: 'Propostas de Parceria',
+                            breadcrumb: 'Painel',
                           ),
-                          Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
-                                0.0, 50.0, 50.0, 0.0),
-                            child: () {
+                          const SizedBox(height: 20.0),
+                          FutureBuilder<ApiCallResponse>(
+                            future: _propostasFuture,
+                            builder: (context, snapshot) {
+                              if (!snapshot.hasData) {
+                                return const LoadingTableShimmerWidget(
+                                  titulo: 'Propostas',
+                                  rowCount: 5,
+                                );
+                              }
+                              final propostasObterPropostasResponse = snapshot.data!;
                               final propostasList = propostasObterPropostasResponse.jsonBody is List
                                   ? (propostasObterPropostasResponse.jsonBody as List)
                                   : [];
@@ -176,19 +153,18 @@ class _PropostasWidgetState extends State<PropostasWidget> {
                                   propostas: propostasList,
                                 ),
                               );
-                            }(),
+                            },
                           ),
                         ],
                       ),
                     ),
-                  )
                   ),
-                ],
+                ),
               ),
-            ),
+            ],
           ),
-        );
-      },
+        ),
+      ),
     );
   }
 }

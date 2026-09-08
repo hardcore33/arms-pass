@@ -29,6 +29,7 @@ class FFAppState extends ChangeNotifier {
   int get indexPage => _indexPage;
   set indexPage(int value) {
     _indexPage = value;
+    notifyListeners();
   }
 
   dynamic _parceiro;

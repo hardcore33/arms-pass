@@ -49,6 +49,7 @@ class ModalEditarParceiroModel
   late FonteTituloModalModel fonteTituloModalModel2;
   // State field(s) for Switch widget.
   bool? switchValue;
+  bool? isActiveValue;
   // State field(s) for cnpj widget.
   FocusNode? cnpjFocusNode;
   TextEditingController? cnpjTextController;

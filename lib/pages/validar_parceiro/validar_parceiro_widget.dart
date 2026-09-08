@@ -13,6 +13,7 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '/components/header_pagina/header_pagina_widget.dart';
+import '/components/loading_table_shimmer/loading_table_shimmer_widget.dart';
 import 'validar_parceiro_model.dart';
 export 'validar_parceiro_model.dart';
 
@@ -634,11 +635,9 @@ class _ValidarParceiroWidgetState extends State<ValidarParceiroWidget> {
       ),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
-          return const Center(
-            child: Padding(
-              padding: EdgeInsets.all(20.0),
-              child: CircularProgressIndicator(),
-            ),
+          return const LoadingTableShimmerWidget(
+            titulo: 'Histórico Recente',
+            rowCount: 3,
           );
         }
 

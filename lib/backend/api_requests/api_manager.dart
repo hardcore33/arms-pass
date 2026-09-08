@@ -229,11 +229,18 @@ class ApiCallResponse {
       );
 }
 
+class _CacheEntry {
+  final ApiCallResponse response;
+  final DateTime timestamp;
+  _CacheEntry(this.response, this.timestamp);
+}
+
 class ApiManager {
   ApiManager._();
 
   // Cache that will ensure identical calls are not repeatedly made.
   static Map<ApiCallOptions, ApiCallResponse> _apiCache = {};
+  static final Map<String, _CacheEntry> _smartCache = {};
 
   static ApiManager? _instance;
   static ApiManager get instance => _instance ??= ApiManager._();
@@ -265,9 +272,17 @@ class ApiManager {
   // You may want to call this if, for example, you make a change to the
   // database and no longer want the cached result of a call that may
   // have changed.
-  static void clearCache(String callName) => _apiCache.keys
-      .toSet()
-      .forEach((k) => k.callName == callName ? _apiCache.remove(k) : null);
+  static void clearCache([String? callName]) {
+    if (callName == null || callName.isEmpty) {
+      _apiCache.clear();
+      _smartCache.clear();
+    } else {
+      _apiCache.keys
+          .toSet()
+          .forEach((k) => k.callName == callName ? _apiCache.remove(k) : null);
+      _smartCache.removeWhere((key, _) => key.contains(callName));
+    }
+  }
 
   static Map<String, String> toStringMap(Map map) =>
       map.map((key, value) => MapEntry(key.toString(), value.toString()));
@@ -534,6 +549,20 @@ class ApiManager {
       apiUrl = 'https://$apiUrl';
     }
 
+    // In-memory smart cache check for GET requests (60-second TTL)
+    final cacheKey = '$callName:$apiUrl:${params.toString()}';
+    if (callType == ApiCallType.GET) {
+      final cached = _smartCache[cacheKey];
+      if (cached != null &&
+          DateTime.now().difference(cached.timestamp).inSeconds < 60) {
+        return cached.response;
+      }
+    } else {
+      // Invalidate cache on any mutation (POST, PUT, DELETE, PATCH)
+      _smartCache.clear();
+      _apiCache.clear();
+    }
+
     // If we've already made this exact call before and caching is on,
     // return the cached result.
     if (cache && _apiCache.containsKey(callOptions)) {
@@ -602,7 +631,10 @@ class ApiManager {
           break;
       }
 
-      // If caching is on, cache the result (if present).
+      // If caching is on or request succeeded for GET, cache the result
+      if (callType == ApiCallType.GET && result.succeeded) {
+        _smartCache[cacheKey] = _CacheEntry(result, DateTime.now());
+      }
       if (cache) {
         _apiCache[callOptions] = result;
       }

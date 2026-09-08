@@ -10,6 +10,7 @@ import 'place.dart';
 import 'uploaded_file.dart';
 import '/backend/schema/structs/index.dart';
 import '/auth/custom_auth/auth_util.dart';
+import '/backend/plans_and_subscriptions_service.dart';
 
 String? formataDataDeExibicao(String? date) {
   if (date != null) {
@@ -184,5 +185,60 @@ dynamic jsonOrNull(dynamic json) {
 List<dynamic>? obterClientes(List<dynamic>? clientes) {
   if (clientes == null) return [];
   return clientes.where((cliente) => cliente['partner'] == null).toList();
+}
+
+/// Retorna os nomes dos planos Arms Pró em que o parceiro está credenciado
+List<String> obterNomesPlanosDoParceiro(int? partnerId) {
+  if (partnerId == null || partnerId <= 0) return [];
+  return PlansAndSubscriptionsService()
+      .getPlansForPartner(partnerId)
+      .map((p) => p.name)
+      .toList();
+}
+
+/// Verifica se o parceiro possui elegibilidade em um plano Arms Pró específico
+bool parceiroElegivelNoPlano(int? partnerId, String? planId) {
+  if (partnerId == null || planId == null) return false;
+  return PlansAndSubscriptionsService().isPartnerEligibleInPlan(partnerId, planId);
+}
+
+/// Retorna o número de assinantes ativos com acesso àquele parceiro
+int totalAssinantesAtivosDoParceiro(int? partnerId) {
+  if (partnerId == null || partnerId <= 0) return 0;
+  return PlansAndSubscriptionsService().getPartnerSubscribersCount(partnerId);
+}
+
+/// Verifica se o parceiro está vinculado a pelo menos um plano Arms Pró
+bool parceiroTemPlanoAtivo(int? partnerId) {
+  if (partnerId == null || partnerId <= 0) return false;
+  return PlansAndSubscriptionsService().getPlansForPartner(partnerId).isNotEmpty;
+}
+
+/// Retorna um resumo em Map do parceiro no ecossistema Arms Pró
+dynamic obterResumoParceiroPlanos(int? partnerId) {
+  if (partnerId == null || partnerId <= 0) {
+    return {
+      'partnerId': 0,
+      'isLinkedToArmsPro': false,
+      'plansCount': 0,
+      'planNames': [],
+      'activeSubscribers': 0,
+    };
+  }
+  return PlansAndSubscriptionsService().getPartnerSummary(partnerId);
+}
+
+/// Extrai tags e regras de um cupom de desconto (isArmsPro, limite, cleanRules)
+dynamic extrairRegrasDescontoParceiro(String? rules) {
+  return PlansAndSubscriptionsService.parseArmsProDiscountRules(rules);
+}
+
+/// Verifica se um cupom/desconto é elegível para um plano de usuário específico
+bool descontoElegivelParaPlano(String? rules, String? planId) {
+  if (planId == null || planId.isEmpty) return false;
+  return PlansAndSubscriptionsService.isDiscountApplicableForPlan(
+    discountRules: rules,
+    userPlanId: planId,
+  );
 }
 

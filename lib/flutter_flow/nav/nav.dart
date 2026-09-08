@@ -177,6 +177,16 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           name: SegmentosWidget.routeName,
           path: SegmentosWidget.routePath,
           builder: (context, params) => SegmentosWidget(),
+        ),
+        FFRoute(
+          name: PlanosWidget.routeName,
+          path: PlanosWidget.routePath,
+          builder: (context, params) => PlanosWidget(),
+        ),
+        FFRoute(
+          name: AssinaturasWidget.routeName,
+          path: AssinaturasWidget.routePath,
+          builder: (context, params) => AssinaturasWidget(),
         )
       ].map((r) => r.toRoute(appStateNotifier)).toList(),
     );

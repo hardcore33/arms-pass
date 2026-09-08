@@ -10,6 +10,7 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '/components/header_pagina/header_pagina_widget.dart';
+import '/components/loading_table_shimmer/loading_table_shimmer_widget.dart';
 import 'mensagens_model.dart';
 export 'mensagens_model.dart';
 
@@ -976,11 +977,9 @@ class _MensagensWidgetState extends State<MensagensWidget> {
 
         // Tabela de Histórico
         if (_isLoadingHistory)
-          const Center(
-            child: Padding(
-              padding: EdgeInsets.all(40.0),
-              child: SpinKitRing(color: Color(0xFFD6A43B), size: 40.0),
-            ),
+          const LoadingTableShimmerWidget(
+            titulo: 'Histórico de Disparos',
+            rowCount: 4,
           )
         else if (filteredList.isEmpty)
           Container(
@@ -1560,7 +1559,7 @@ class _MensagensWidgetState extends State<MensagensWidget> {
                 child: wrapWithModel(
                   model: _model.menuModel,
                   updateCallback: () => safeSetState(() {}),
-                  child: const MenuWidget(),
+                  child: const MenuWidget(activeIndex: 9),
                 ),
               ),
               Expanded(

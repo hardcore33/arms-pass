@@ -13,8 +13,14 @@ Future<int?> obterIdDoParceiroPorNome(
   List<dynamic> parceiros,
 ) async {
   for (var element in parceiros) {
-    if (element['razao'] == nome) {
-      return element['id'] as int;
+    if (element is Map) {
+      final matchRazao = element['razao']?.toString() == nome;
+      final matchFantasia = element['fantasia']?.toString() == nome;
+      final matchCnpj = element['cnpj']?.toString() == nome;
+      if (matchRazao || matchFantasia || matchCnpj) {
+        if (element['id'] is int) return element['id'] as int;
+        if (element['id'] != null) return int.tryParse(element['id'].toString());
+      }
     }
   }
 

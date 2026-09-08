@@ -1,16 +1,12 @@
 import '/backend/api_requests/api_calls.dart';
-import '/components/fonte_titulo_modal/fonte_titulo_modal_widget.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
 import '/flutter_flow/upload_data.dart';
-import 'dart:ui';
 import '/custom_code/actions/index.dart' as actions;
-import '/flutter_flow/custom_functions.dart' as functions;
 import 'package:flutter/material.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'modal_adicionar_segmento_model.dart';
 export 'modal_adicionar_segmento_model.dart';
 
@@ -25,6 +21,12 @@ class ModalAdicionarSegmentoWidget extends StatefulWidget {
 class _ModalAdicionarSegmentoWidgetState
     extends State<ModalAdicionarSegmentoWidget> {
   late ModalAdicionarSegmentoModel _model;
+  List<dynamic> _segmentosList = [];
+  bool _carregandoLista = true;
+  bool _salvando = false;
+  String? _idEditando;
+  String _buscaSegmento = '';
+  final TextEditingController _buscaController = TextEditingController();
 
   @override
   void setState(VoidCallback callback) {
@@ -40,413 +42,621 @@ class _ModalAdicionarSegmentoWidgetState
     _model.textController ??= TextEditingController();
     _model.textFieldFocusNode ??= FocusNode();
 
-    WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));
+    SchedulerBinding.instance.addPostFrameCallback((_) async {
+      await _carregarSegmentos();
+    });
+  }
+
+  Future<void> _carregarSegmentos() async {
+    setState(() => _carregandoLista = true);
+    try {
+      final response = await ObterSegmentosCall.call();
+      if (response.succeeded) {
+        final body = response.jsonBody;
+        if (body is List) {
+          _segmentosList = body;
+        } else if (body is Map && body['data'] is List) {
+          _segmentosList = body['data'];
+        }
+      }
+    } catch (e) {
+      debugPrint('Erro ao carregar segmentos: $e');
+    } finally {
+      if (mounted) {
+        setState(() => _carregandoLista = false);
+      }
+    }
   }
 
   @override
   void dispose() {
+    _buscaController.dispose();
     _model.maybeDispose();
-
     super.dispose();
+  }
+
+  Future<void> _salvarSegmento() async {
+    final nome = _model.textController?.text.trim() ?? '';
+    if (nome.isEmpty) {
+      showWarningToast(context, 'Por favor, informe o nome do segmento.');
+      return;
+    }
+
+    setState(() => _salvando = true);
+
+    try {
+      if (_idEditando != null) {
+        // Editando
+        final res = await EditarSegmentoCall.call(
+          id: _idEditando,
+          nome: nome,
+          url: _model.imageUrl ?? '',
+        );
+        if (res.succeeded) {
+          if (mounted) {
+            showSuccessToast(
+              context,
+              'Segmento atualizado com sucesso!',
+              title: 'Segmento Atualizado',
+            );
+          }
+          _limparFormulario();
+          await _carregarSegmentos();
+        } else {
+          if (mounted) {
+            showErrorToast(
+              context,
+              'Erro ao atualizar segmento.',
+            );
+          }
+        }
+      } else {
+        // Criando novo
+        final res = await AdicionarSegmentoCall.call(
+          nome: nome,
+          url: _model.imageUrl ?? '',
+        );
+        if (res.succeeded) {
+          if (mounted) {
+            showSuccessToast(
+              context,
+              'Segmento cadastrado com sucesso!',
+              title: 'Segmento Cadastrado',
+            );
+          }
+          _limparFormulario();
+          await _carregarSegmentos();
+        } else {
+          if (mounted) {
+            showErrorToast(
+              context,
+              'Erro ao cadastrar segmento.',
+            );
+          }
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        showErrorToast(
+          context,
+          'Erro: $e',
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _salvando = false);
+      }
+    }
+  }
+
+  void _selecionarParaEdicao(dynamic segmento) {
+    setState(() {
+      _idEditando = segmento['id']?.toString();
+      _model.textController?.text = segmento['name']?.toString() ?? '';
+      _model.imageUrl = (segmento['photo'] ?? segmento['url'])?.toString();
+      _model.hasUploadedFile = _model.imageUrl != null && _model.imageUrl!.isNotEmpty;
+    });
+  }
+
+  void _limparFormulario() {
+    setState(() {
+      _idEditando = null;
+      _model.textController?.clear();
+      _model.imageUrl = null;
+      _model.hasUploadedFile = false;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: MediaQuery.sizeOf(context).width * 0.4,
-      height: 315.0,
-      decoration: BoxDecoration(
-        color: FlutterFlowTheme.of(context).secondaryBackground,
-        borderRadius: BorderRadius.circular(6.0),
-      ),
-      child: Form(
-        key: _model.formKey,
-        autovalidateMode: AutovalidateMode.disabled,
+    final theme = FlutterFlowTheme.of(context);
+
+    final listaFiltrada = _segmentosList.where((seg) {
+      if (_buscaSegmento.isEmpty) return true;
+      final nome = (seg['name'] ?? '').toString().toLowerCase();
+      return nome.contains(_buscaSegmento.toLowerCase().trim());
+    }).toList();
+
+    return Dialog(
+      backgroundColor: Colors.transparent,
+      insetPadding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 24.0),
+      child: Container(
+        width: (MediaQuery.sizeOf(context).width * 0.7).clamp(620.0, 800.0),
+        height: 520.0,
+        decoration: BoxDecoration(
+          color: theme.secondaryBackground,
+          borderRadius: BorderRadius.circular(16.0),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.25),
+              blurRadius: 24.0,
+              offset: const Offset(0, 8),
+            ),
+          ],
+        ),
         child: Column(
-          mainAxisSize: MainAxisSize.max,
           children: [
+            // Header do Modal
             Padding(
-              padding: EdgeInsetsDirectional.fromSTEB(0.0, 10.0, 0.0, 0.0),
-              child: wrapWithModel(
-                model: _model.fonteTituloModalModel,
-                updateCallback: () => safeSetState(() {}),
-                child: FonteTituloModalWidget(
-                  text: 'Adicionar segmento',
-                ),
-              ),
-            ),
-            Padding(
-              padding: EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
-              child: Column(
-                mainAxisSize: MainAxisSize.max,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Nome',
-                    style: FlutterFlowTheme.of(context).bodyMedium.override(
-                          font: GoogleFonts.readexPro(
-                            fontWeight: FlutterFlowTheme.of(context)
-                                .bodyMedium
-                                .fontWeight,
-                            fontStyle: FlutterFlowTheme.of(context)
-                                .bodyMedium
-                                .fontStyle,
-                          ),
-                          color: FlutterFlowTheme.of(context).secondary,
-                          fontSize: 16.0,
-                          letterSpacing: 0.0,
-                          fontWeight: FlutterFlowTheme.of(context)
-                              .bodyMedium
-                              .fontWeight,
-                          fontStyle:
-                              FlutterFlowTheme.of(context).bodyMedium.fontStyle,
-                        ),
-                  ),
-                  Padding(
-                    padding:
-                        EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 10.0),
-                    child: Container(
-                      width: MediaQuery.sizeOf(context).width * 0.35,
-                      child: TextFormField(
-                        controller: _model.textController,
-                        focusNode: _model.textFieldFocusNode,
-                        autofocus: false,
-                        obscureText: false,
-                        decoration: InputDecoration(
-                          isDense: true,
-                          labelStyle:
-                              FlutterFlowTheme.of(context).labelMedium.override(
-                                    font: GoogleFonts.readexPro(
-                                      fontWeight: FlutterFlowTheme.of(context)
-                                          .labelMedium
-                                          .fontWeight,
-                                      fontStyle: FlutterFlowTheme.of(context)
-                                          .labelMedium
-                                          .fontStyle,
-                                    ),
-                                    letterSpacing: 0.0,
-                                    fontWeight: FlutterFlowTheme.of(context)
-                                        .labelMedium
-                                        .fontWeight,
-                                    fontStyle: FlutterFlowTheme.of(context)
-                                        .labelMedium
-                                        .fontStyle,
-                                  ),
-                          hintStyle:
-                              FlutterFlowTheme.of(context).labelMedium.override(
-                                    font: GoogleFonts.readexPro(
-                                      fontWeight: FlutterFlowTheme.of(context)
-                                          .labelMedium
-                                          .fontWeight,
-                                      fontStyle: FlutterFlowTheme.of(context)
-                                          .labelMedium
-                                          .fontStyle,
-                                    ),
-                                    letterSpacing: 0.0,
-                                    fontWeight: FlutterFlowTheme.of(context)
-                                        .labelMedium
-                                        .fontWeight,
-                                    fontStyle: FlutterFlowTheme.of(context)
-                                        .labelMedium
-                                        .fontStyle,
-                                  ),
-                          enabledBorder: OutlineInputBorder(
-                            borderSide: BorderSide(
-                              color: Color(0xFFC5C4C4),
-                              width: 0.5,
-                            ),
-                            borderRadius: BorderRadius.only(),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderSide: BorderSide(
-                              color: Color(0xFFC5C4C4),
-                              width: 0.5,
-                            ),
-                            borderRadius: BorderRadius.only(),
-                          ),
-                          errorBorder: OutlineInputBorder(
-                            borderSide: BorderSide(
-                              color: FlutterFlowTheme.of(context).error,
-                              width: 0.5,
-                            ),
-                            borderRadius: BorderRadius.only(),
-                          ),
-                          focusedErrorBorder: OutlineInputBorder(
-                            borderSide: BorderSide(
-                              color: FlutterFlowTheme.of(context).error,
-                              width: 0.5,
-                            ),
-                            borderRadius: BorderRadius.only(),
-                          ),
-                          filled: true,
-                          fillColor:
-                              FlutterFlowTheme.of(context).secondaryBackground,
-                          contentPadding: EdgeInsetsDirectional.fromSTEB(
-                              10.0, 25.0, 10.0, 25.0),
-                        ),
-                        style: FlutterFlowTheme.of(context).bodyMedium.override(
-                              font: GoogleFonts.readexPro(
-                                fontWeight: FlutterFlowTheme.of(context)
-                                    .bodyMedium
-                                    .fontWeight,
-                                fontStyle: FlutterFlowTheme.of(context)
-                                    .bodyMedium
-                                    .fontStyle,
-                              ),
-                              letterSpacing: 0.0,
-                              fontWeight: FlutterFlowTheme.of(context)
-                                  .bodyMedium
-                                  .fontWeight,
-                              fontStyle: FlutterFlowTheme.of(context)
-                                  .bodyMedium
-                                  .fontStyle,
-                            ),
-                        cursorColor: FlutterFlowTheme.of(context).primaryText,
-                        validator:
-                            _model.textControllerValidator.asValidator(context),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Container(
-              width: MediaQuery.sizeOf(context).width * 0.35,
-              decoration: const BoxDecoration(),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisSize: MainAxisSize.max,
-                    children: [
-                      FFButtonWidget(
-                        onPressed: () async {
-                          final selectedMedia = await selectMedia(
-                            imageQuality: 100,
-                            mediaSource: MediaSource.photoGallery,
-                            multiImage: false,
-                          );
-                          if (selectedMedia != null &&
-                              selectedMedia.every((m) =>
-                                  validateFileFormat(m.storagePath, context))) {
-                            safeSetState(() =>
-                                _model.isDataUploading_uploadData3m9 = true);
-                            var selectedUploadedFiles = <FFUploadedFile>[];
-
-                            try {
-                              showUploadMessage(
-                                context,
-                                'Uploading file...',
-                                showLoading: true,
-                              );
-                              selectedUploadedFiles = selectedMedia
-                                  .map((m) => FFUploadedFile(
-                                        name: m.storagePath.split('/').last,
-                                        bytes: m.bytes,
-                                        height: m.dimensions?.height,
-                                        width: m.dimensions?.width,
-                                        blurHash: m.blurHash,
-                                        originalFilename: m.originalFilename,
-                                      ))
-                                  .toList();
-                            } finally {
-                              ScaffoldMessenger.of(context)
-                                  .hideCurrentSnackBar();
-                              _model.isDataUploading_uploadData3m9 = false;
-                            }
-                            if (selectedUploadedFiles.length ==
-                                selectedMedia.length) {
-                              safeSetState(() {
-                                _model.uploadedLocalFile_uploadData3m9 =
-                                    selectedUploadedFiles.first;
-                              });
-                              showUploadMessage(context, 'Success!');
-                            } else {
-                              safeSetState(() {});
-                              showUploadMessage(
-                                  context, 'Failed to upload data');
-                              return;
-                            }
-                          }
-
-                          _model.hasUploadedFile = true;
-                          safeSetState(() {});
-                          _model.imageUrl = await actions.uploadPhoto(
-                            _model.uploadedLocalFile_uploadData3m9,
-                          );
-
-                          safeSetState(() {});
-                        },
-                        text: 'Enviar imagem',
-                        options: FFButtonOptions(
-                          width: MediaQuery.sizeOf(context).width * 0.12,
-                          height: 40.0,
-                          padding: EdgeInsetsDirectional.fromSTEB(
-                              16.0, 0.0, 16.0, 0.0),
-                          iconPadding: EdgeInsetsDirectional.fromSTEB(
-                              0.0, 0.0, 0.0, 0.0),
-                          color: FlutterFlowTheme.of(context).secondary,
-                          textStyle:
-                              FlutterFlowTheme.of(context).titleSmall.override(
-                                    font: GoogleFonts.readexPro(
-                                      fontWeight: FlutterFlowTheme.of(context)
-                                          .titleSmall
-                                          .fontWeight,
-                                      fontStyle: FlutterFlowTheme.of(context)
-                                          .titleSmall
-                                          .fontStyle,
-                                    ),
-                                    color: FlutterFlowTheme.of(context).primary,
-                                    letterSpacing: 0.0,
-                                    fontWeight: FlutterFlowTheme.of(context)
-                                        .titleSmall
-                                        .fontWeight,
-                                    fontStyle: FlutterFlowTheme.of(context)
-                                        .titleSmall
-                                        .fontStyle,
-                                  ),
-                          elevation: 0.0,
-                          borderRadius: BorderRadius.circular(8.0),
-                        ),
-                      ),
-                    ],
-                  ),
-                  if (_model.hasUploadedFile)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 8.0, left: 4.0),
-                      child: Text(
-                        valueOrDefault<String>(
-                          functions.obterNomeDoArquivo(
-                              _model.uploadedLocalFile_uploadData3m9),
-                          'Carregando...',
-                        ),
-                        style: FlutterFlowTheme.of(context).bodyMedium.override(
-                              font: GoogleFonts.readexPro(),
-                              color: const Color(0xFFD4D4D4),
-                              fontSize: 12.0,
-                            ),
-                      ),
-                    ),
-                ],
-              ),
-            ),
-            Padding(
-              padding: EdgeInsetsDirectional.fromSTEB(20.0, 15.0, 20.0, 15.0),
+              padding: const EdgeInsets.fromLTRB(22.0, 18.0, 18.0, 14.0),
               child: Row(
-                mainAxisSize: MainAxisSize.max,
-                mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  FFButtonWidget(
-                    onPressed: () async {
-                      Navigator.pop(context);
-                    },
-                    text: 'Cancelar',
-                    options: FFButtonOptions(
-                      width: 120.0,
-                      height: 50.0,
-                      padding:
-                          EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
-                      iconPadding:
-                          EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
-                      color: Colors.transparent,
-                      textStyle: FlutterFlowTheme.of(context)
-                          .titleSmall
-                          .override(
-                            font: GoogleFonts.readexPro(),
-                            color: FlutterFlowTheme.of(context).secondaryText,
-                            fontSize: 14.0,
-                          ),
-                      borderSide: BorderSide(
-                        color: FlutterFlowTheme.of(context).alternate,
-                        width: 1.0,
-                      ),
+                  Container(
+                    width: 38.0,
+                    height: 38.0,
+                    decoration: BoxDecoration(
+                      color: theme.primary,
                       borderRadius: BorderRadius.circular(8.0),
                     ),
+                    child: Icon(
+                      Icons.category_rounded,
+                      color: theme.secondary,
+                      size: 20.0,
+                    ),
                   ),
-                  const SizedBox(width: 16.0),
-                  FFButtonWidget(
-                    onPressed: () async {
-                      if (_model.formKey.currentState == null ||
-                          !_model.formKey.currentState!.validate()) {
-                        return;
-                      }
-                      _model.apiResultdcr = await AdicionarSegmentoCall.call(
-                        nome: _model.textController.text,
-                        url: _model.imageUrl,
-                      );
+                  const SizedBox(width: 12.0),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Gerenciar Segmentos',
+                          style: GoogleFonts.readexPro(
+                            fontSize: 16.5,
+                            fontWeight: FontWeight.bold,
+                            color: theme.primaryText,
+                          ),
+                        ),
+                        Text(
+                          'Cadastre novas categorias comerciais ou consulte as já existentes.',
+                          style: GoogleFonts.readexPro(
+                            fontSize: 12.0,
+                            color: theme.secondaryText,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.close_rounded, color: theme.secondaryText, size: 22.0),
+                    onPressed: () => Navigator.pop(context, true),
+                  ),
+                ],
+              ),
+            ),
+            const Divider(height: 1.0),
 
-                      if ((_model.apiResultdcr?.succeeded ?? true)) {
-                        await showDialog(
-                          context: context,
-                          builder: (alertDialogContext) {
-                            return AlertDialog(
-                              title: Text('Segmento cadastrado'),
-                              content: Text(
-                                  'O segmentado foi cadastrado com sucesso.'),
-                              actions: [
-                                TextButton(
-                                  onPressed: () =>
-                                      Navigator.pop(alertDialogContext),
-                                  child: Text('Ok'),
+            // Corpo Dividido em 2 Colunas: Formulário (Esq) e Lista de Existentes (Dir)
+            Expanded(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // Coluna Esquerda: Formulário de Adicionar / Editar
+                  Expanded(
+                    flex: 5,
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.all(20.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Text(
+                                _idEditando != null ? 'Editar Segmento' : 'Novo Segmento',
+                                style: GoogleFonts.readexPro(
+                                  fontSize: 14.0,
+                                  fontWeight: FontWeight.bold,
+                                  color: theme.primaryText,
                                 ),
-                              ],
-                            );
-                          },
-                        );
-                        Navigator.pop(context);
-                      } else {
-                        await showDialog(
-                          context: context,
-                          builder: (alertDialogContext) {
-                            return AlertDialog(
-                              title: Text('Algo deu errado'),
-                              content: Text(
-                                  'Não foi possível cadastrar o segmento.'),
-                              actions: [
-                                TextButton(
-                                  onPressed: () =>
-                                      Navigator.pop(alertDialogContext),
-                                  child: Text('Ok'),
-                                ),
-                              ],
-                            );
-                          },
-                        );
-                      }
-
-                      safeSetState(() {});
-                    },
-                    text: 'Cadastrar segmento',
-                    options: FFButtonOptions(
-                      width: 200.0,
-                      height: 50.0,
-                      padding:
-                          EdgeInsetsDirectional.fromSTEB(16.0, 0.0, 16.0, 0.0),
-                      iconPadding:
-                          EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
-                      color: FlutterFlowTheme.of(context).secondary,
-                      textStyle:
-                          FlutterFlowTheme.of(context).titleSmall.override(
-                                font: GoogleFonts.readexPro(
-                                  fontWeight: FlutterFlowTheme.of(context)
-                                      .titleSmall
-                                      .fontWeight,
-                                  fontStyle: FlutterFlowTheme.of(context)
-                                      .titleSmall
-                                      .fontStyle,
-                                ),
-                                color: FlutterFlowTheme.of(context).primary,
-                                letterSpacing: 0.0,
-                                fontWeight: FlutterFlowTheme.of(context)
-                                    .titleSmall
-                                    .fontWeight,
-                                fontStyle: FlutterFlowTheme.of(context)
-                                    .titleSmall
-                                    .fontStyle,
                               ),
-                      elevation: 0.0,
-                      borderRadius: BorderRadius.circular(8.0),
+                              if (_idEditando != null) ...[
+                                const Spacer(),
+                                InkWell(
+                                  onTap: _limparFormulario,
+                                  child: Text(
+                                    '+ Criar Novo',
+                                    style: GoogleFonts.readexPro(
+                                      fontSize: 12.0,
+                                      fontWeight: FontWeight.w600,
+                                      color: theme.secondary,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ],
+                          ),
+                          const SizedBox(height: 16.0),
+
+                          // Nome do Segmento
+                          Text(
+                            'Nome do Segmento *',
+                            style: GoogleFonts.readexPro(
+                              fontSize: 12.5,
+                              fontWeight: FontWeight.w600,
+                              color: theme.primaryText,
+                            ),
+                          ),
+                          const SizedBox(height: 6.0),
+                          TextFormField(
+                            controller: _model.textController,
+                            focusNode: _model.textFieldFocusNode,
+                            decoration: InputDecoration(
+                              hintText: 'Ex: Restaurante, Academia, Saúde...',
+                              hintStyle: GoogleFonts.readexPro(
+                                fontSize: 12.5,
+                                color: theme.secondaryText.withOpacity(0.6),
+                              ),
+                              isDense: true,
+                              filled: true,
+                              fillColor: theme.primaryBackground,
+                              contentPadding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 12.0),
+                              enabledBorder: OutlineInputBorder(
+                                borderSide: BorderSide(color: theme.alternate, width: 1.0),
+                                borderRadius: BorderRadius.circular(8.0),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderSide: BorderSide(color: theme.secondary, width: 1.5),
+                                borderRadius: BorderRadius.circular(8.0),
+                              ),
+                            ),
+                            style: GoogleFonts.readexPro(fontSize: 13.0, color: theme.primaryText),
+                          ),
+
+                          const SizedBox(height: 18.0),
+
+                          // Ícone / Foto do Segmento
+                          Text(
+                            'Ícone / Imagem do Segmento',
+                            style: GoogleFonts.readexPro(
+                              fontSize: 12.5,
+                              fontWeight: FontWeight.w600,
+                              color: theme.primaryText,
+                            ),
+                          ),
+                          const SizedBox(height: 8.0),
+                          Container(
+                            padding: const EdgeInsets.all(12.0),
+                            decoration: BoxDecoration(
+                              color: theme.primaryBackground,
+                              borderRadius: BorderRadius.circular(8.0),
+                              border: Border.all(color: theme.alternate),
+                            ),
+                            child: Row(
+                              children: [
+                                // Preview da Imagem
+                                Container(
+                                  width: 44.0,
+                                  height: 44.0,
+                                  decoration: BoxDecoration(
+                                    color: theme.primary.withOpacity(0.08),
+                                    borderRadius: BorderRadius.circular(8.0),
+                                    border: Border.all(color: theme.secondary.withOpacity(0.4)),
+                                  ),
+                                  child: (_model.imageUrl != null && _model.imageUrl!.isNotEmpty && _model.imageUrl != 'null')
+                                      ? ClipRRect(
+                                          borderRadius: BorderRadius.circular(7.0),
+                                          child: Image.network(
+                                            _model.imageUrl!,
+                                            fit: BoxFit.cover,
+                                            errorBuilder: (_, __, ___) => Icon(
+                                              Icons.category_outlined,
+                                              color: theme.secondary,
+                                              size: 20.0,
+                                            ),
+                                          ),
+                                        )
+                                      : Icon(
+                                          Icons.add_photo_alternate_outlined,
+                                          color: theme.secondary,
+                                          size: 22.0,
+                                        ),
+                                ),
+                                const SizedBox(width: 12.0),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      OutlinedButton.icon(
+                                        onPressed: () async {
+                                          final selectedMedia = await selectMediaWithSourceBottomSheet(
+                                            context: context,
+                                            allowPhoto: true,
+                                          );
+                                          if (selectedMedia != null && selectedMedia.every((m) => validateFileFormat(m.storagePath, context))) {
+                                            showUploadMessage(context, 'Enviando imagem...', showLoading: true);
+                                            _model.imageUrl = await actions.uploadPhoto(
+                                              FFUploadedFile(
+                                                name: selectedMedia.first.storagePath.split('/').last,
+                                                bytes: selectedMedia.first.bytes,
+                                              ),
+                                            );
+                                            ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                                            safeSetState(() {});
+                                          }
+                                        },
+                                        icon: Icon(
+                                          _model.imageUrl != null ? Icons.check_circle_rounded : Icons.upload_rounded,
+                                          size: 16.0,
+                                          color: _model.imageUrl != null ? theme.success : theme.secondary,
+                                        ),
+                                        label: Text(
+                                          _model.imageUrl != null ? 'Trocar Imagem' : 'Escolher Ícone',
+                                          style: GoogleFonts.readexPro(fontSize: 12.0, color: theme.primaryText),
+                                        ),
+                                        style: OutlinedButton.styleFrom(
+                                          padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+                                          side: BorderSide(color: theme.alternate),
+                                          backgroundColor: theme.secondaryBackground,
+                                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6.0)),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+
+                          const SizedBox(height: 24.0),
+
+                          // Botão de Ação
+                          Row(
+                            children: [
+                              if (_idEditando != null)
+                                OutlinedButton(
+                                  onPressed: _limparFormulario,
+                                  style: OutlinedButton.styleFrom(
+                                    padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 12.0),
+                                    side: BorderSide(color: theme.alternate),
+                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
+                                  ),
+                                  child: Text(
+                                    'Cancelar',
+                                    style: GoogleFonts.readexPro(
+                                      color: theme.secondaryText,
+                                      fontSize: 12.5,
+                                    ),
+                                  ),
+                                ),
+                              if (_idEditando != null) const SizedBox(width: 8.0),
+                              Expanded(
+                                child: FFButtonWidget(
+                                  onPressed: _salvando ? null : _salvarSegmento,
+                                  text: _salvando
+                                      ? 'Salvando...'
+                                      : (_idEditando != null ? 'Atualizar Segmento' : 'Cadastrar Segmento'),
+                                  icon: _salvando
+                                      ? null
+                                      : Icon(
+                                          Icons.check_rounded,
+                                          color: theme.secondary,
+                                          size: 17.0,
+                                        ),
+                                  options: FFButtonOptions(
+                                    height: 42.0,
+                                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                                    color: theme.primary,
+                                    textStyle: GoogleFonts.readexPro(
+                                      color: Colors.white,
+                                      fontSize: 13.0,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                    elevation: 0,
+                                    borderRadius: BorderRadius.circular(8.0),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  // Divisor Vertical
+                  VerticalDivider(width: 1.0, thickness: 1.0, color: theme.alternate),
+
+                  // Coluna Direita: Lista de Segmentos Existentes
+                  Expanded(
+                    flex: 6,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Cabeçalho da Lista & Busca
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 10.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Text(
+                                    'Segmentos Cadastrados',
+                                    style: GoogleFonts.readexPro(
+                                      fontSize: 13.5,
+                                      fontWeight: FontWeight.bold,
+                                      color: theme.primaryText,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 6.0),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 7.0, vertical: 2.0),
+                                    decoration: BoxDecoration(
+                                      color: theme.primary.withOpacity(0.08),
+                                      borderRadius: BorderRadius.circular(10.0),
+                                    ),
+                                    child: Text(
+                                      '${_segmentosList.length}',
+                                      style: GoogleFonts.readexPro(
+                                        fontSize: 11.0,
+                                        fontWeight: FontWeight.bold,
+                                        color: theme.secondary,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 10.0),
+                              // Campo de Busca
+                              SizedBox(
+                                height: 36.0,
+                                child: TextFormField(
+                                  controller: _buscaController,
+                                  onChanged: (val) => setState(() => _buscaSegmento = val),
+                                  decoration: InputDecoration(
+                                    hintText: 'Filtrar segmento...',
+                                    hintStyle: GoogleFonts.readexPro(
+                                      fontSize: 12.0,
+                                      color: theme.secondaryText.withOpacity(0.6),
+                                    ),
+                                    prefixIcon: Icon(
+                                      Icons.search_rounded,
+                                      size: 16.0,
+                                      color: theme.secondary,
+                                    ),
+                                    isDense: true,
+                                    filled: true,
+                                    fillColor: theme.primaryBackground,
+                                    contentPadding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 0.0),
+                                    enabledBorder: OutlineInputBorder(
+                                      borderSide: BorderSide(color: theme.alternate, width: 1.0),
+                                      borderRadius: BorderRadius.circular(6.0),
+                                    ),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderSide: BorderSide(color: theme.secondary, width: 1.5),
+                                      borderRadius: BorderRadius.circular(6.0),
+                                    ),
+                                  ),
+                                  style: GoogleFonts.readexPro(fontSize: 12.5, color: theme.primaryText),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const Divider(height: 1.0),
+
+                        // Lista
+                        Expanded(
+                          child: _carregandoLista
+                              ? Center(
+                                  child: CircularProgressIndicator(
+                                    color: theme.secondary,
+                                    strokeWidth: 2.0,
+                                  ),
+                                )
+                              : listaFiltrada.isEmpty
+                                  ? Center(
+                                      child: Text(
+                                        'Nenhum segmento encontrado.',
+                                        style: GoogleFonts.readexPro(
+                                          fontSize: 12.5,
+                                          color: theme.secondaryText,
+                                        ),
+                                      ),
+                                    )
+                                  : ListView.separated(
+                                      padding: const EdgeInsets.symmetric(vertical: 6.0),
+                                      itemCount: listaFiltrada.length,
+                                      separatorBuilder: (_, __) => Divider(
+                                        height: 1.0,
+                                        color: theme.alternate.withOpacity(0.5),
+                                      ),
+                                      itemBuilder: (context, index) {
+                                        final seg = listaFiltrada[index];
+                                        final name = (seg['name'] ?? '').toString();
+                                        final photo = (seg['photo'] ?? seg['url'])?.toString() ?? '';
+                                        final isEditingThis = _idEditando == seg['id']?.toString();
+
+                                        return Container(
+                                          color: isEditingThis
+                                              ? theme.primary.withOpacity(0.06)
+                                              : Colors.transparent,
+                                          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                                          child: Row(
+                                            children: [
+                                              // Ícone
+                                              Container(
+                                                width: 32.0,
+                                                height: 32.0,
+                                                decoration: BoxDecoration(
+                                                  color: theme.primary.withOpacity(0.06),
+                                                  borderRadius: BorderRadius.circular(6.0),
+                                                ),
+                                                child: photo.isNotEmpty && photo != 'null'
+                                                    ? ClipRRect(
+                                                        borderRadius: BorderRadius.circular(6.0),
+                                                        child: Image.network(
+                                                          photo,
+                                                          fit: BoxFit.cover,
+                                                          errorBuilder: (_, __, ___) => Icon(
+                                                            Icons.category_rounded,
+                                                            color: theme.secondary,
+                                                            size: 16.0,
+                                                          ),
+                                                        ),
+                                                      )
+                                                    : Icon(
+                                                        Icons.category_rounded,
+                                                        color: theme.secondary,
+                                                        size: 16.0,
+                                                      ),
+                                              ),
+                                              const SizedBox(width: 10.0),
+                                              Expanded(
+                                                child: Text(
+                                                  name,
+                                                  style: GoogleFonts.readexPro(
+                                                    fontSize: 12.5,
+                                                    fontWeight: isEditingThis ? FontWeight.bold : FontWeight.w500,
+                                                    color: theme.primaryText,
+                                                  ),
+                                                  maxLines: 1,
+                                                  overflow: TextOverflow.ellipsis,
+                                                ),
+                                              ),
+                                              InkWell(
+                                                onTap: () => _selecionarParaEdicao(seg),
+                                                borderRadius: BorderRadius.circular(4.0),
+                                                child: Container(
+                                                  padding: const EdgeInsets.all(5.0),
+                                                  decoration: BoxDecoration(
+                                                    color: theme.primary.withOpacity(0.06),
+                                                    borderRadius: BorderRadius.circular(4.0),
+                                                  ),
+                                                  child: Icon(
+                                                    Icons.edit_rounded,
+                                                    size: 14.0,
+                                                    color: theme.secondary,
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        );
+                                      },
+                                    ),
+                        ),
+                      ],
                     ),
                   ),
                 ],

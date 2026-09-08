@@ -13,7 +13,9 @@ import 'menu_model.dart';
 export 'menu_model.dart';
 
 class MenuWidget extends StatefulWidget {
-  const MenuWidget({super.key});
+  const MenuWidget({super.key, this.activeIndex});
+
+  final int? activeIndex;
 
   @override
   State<MenuWidget> createState() => _MenuWidgetState();
@@ -53,71 +55,67 @@ class _MenuWidgetState extends State<MenuWidget> {
     final theme = FlutterFlowTheme.of(context);
     final isCollapsed = FFAppState().sidebarCollapsed;
 
-    return MouseRegion(
-      cursor: SystemMouseCursors.click,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(8.0),
-        hoverColor:
-            isActive ? Colors.transparent : theme.primary.withOpacity(0.12),
-        splashColor: theme.primary.withOpacity(0.2),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 150),
-          width: double.infinity,
-          height: 48.0,
-          decoration: BoxDecoration(
-            color: isActive ? theme.secondaryBackground : Colors.transparent,
-            borderRadius: BorderRadius.circular(8.0),
-            boxShadow: isActive
-                ? [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.08),
-                      blurRadius: 4,
-                      offset: const Offset(0, 2),
-                    )
-                  ]
-                : null,
-          ),
-          child: Row(
-            mainAxisAlignment: isCollapsed
-                ? MainAxisAlignment.center
-                : MainAxisAlignment.start,
-            children: [
-              if (!isCollapsed) ...[
-                AnimatedContainer(
-                  duration: const Duration(milliseconds: 150),
-                  width: 4.0,
-                  height: isActive ? 24.0 : 0.0,
-                  decoration: BoxDecoration(
-                    color: theme.secondary,
-                    borderRadius: BorderRadius.circular(2.0),
-                  ),
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(8.0),
+      hoverColor:
+          isActive ? Colors.transparent : theme.primary.withValues(alpha: 0.12),
+      splashColor: theme.primary.withValues(alpha: 0.2),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
+        width: double.infinity,
+        height: 48.0,
+        decoration: BoxDecoration(
+          color: isActive ? theme.secondaryBackground : Colors.transparent,
+          borderRadius: BorderRadius.circular(8.0),
+          boxShadow: isActive
+              ? [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.08),
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
+                  )
+                ]
+              : null,
+        ),
+        child: Row(
+          mainAxisAlignment: isCollapsed
+              ? MainAxisAlignment.center
+              : MainAxisAlignment.start,
+          children: [
+            if (!isCollapsed) ...[
+              Container(
+                width: 4.0,
+                height: 24.0,
+                decoration: BoxDecoration(
+                  color: isActive ? theme.secondary : Colors.transparent,
+                  borderRadius: BorderRadius.circular(2.0),
                 ),
-                const SizedBox(width: 14.0),
-              ],
-              Icon(
-                icon,
-                size: 20.0,
-                color: isActive
-                    ? theme.primary
-                    : theme.primaryText.withOpacity(0.85),
               ),
-              if (!isCollapsed) ...[
-                const SizedBox(width: 10.0),
-                Text(
-                  title,
-                  style: theme.bodyMedium.override(
-                    fontFamily: 'Open Sans',
-                    fontSize: 14.0,
-                    fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
-                    color: isActive
-                        ? theme.primary
-                        : theme.primaryText.withOpacity(0.85),
-                  ),
-                ),
-              ],
+              const SizedBox(width: 14.0),
             ],
-          ),
+            Icon(
+              icon,
+              size: 20.0,
+              color: isActive
+                  ? theme.primary
+                  : theme.primaryText.withValues(alpha: 0.85),
+            ),
+            if (!isCollapsed) ...[
+              const SizedBox(width: 10.0),
+              Text(
+                title,
+                style: theme.bodyMedium.override(
+                  fontFamily: 'Open Sans',
+                  fontSize: 14.0,
+                  fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
+                  color: isActive
+                      ? theme.primary
+                      : theme.primaryText.withValues(alpha: 0.85),
+                ),
+              ),
+            ],
+          ],
         ),
       ),
     );
@@ -128,6 +126,38 @@ class _MenuWidgetState extends State<MenuWidget> {
     context.watch<FFAppState>();
     final theme = FlutterFlowTheme.of(context);
     final isCollapsed = FFAppState().sidebarCollapsed;
+
+    int activeIndex = widget.activeIndex ?? FFAppState().indexPage;
+    if (widget.activeIndex == null) {
+      try {
+        final routePath = GoRouterState.of(context).uri.path;
+        if (routePath.contains('planos')) {
+          activeIndex = 12;
+        } else if (routePath.contains('assinaturas')) {
+          activeIndex = 13;
+        } else if (routePath.contains('usuarios')) {
+          activeIndex = 3;
+        } else if (routePath.contains('parceiros')) {
+          activeIndex = 4;
+        } else if (routePath.contains('cupons')) {
+          activeIndex = 2;
+        } else if (routePath.contains('segmentos')) {
+          activeIndex = 11;
+        } else if (routePath.contains('propostas')) {
+          activeIndex = 5;
+        } else if (routePath.contains('produtos')) {
+          activeIndex = 6;
+        } else if (routePath.contains('trocas') || routePath.contains('validac')) {
+          activeIndex = 7;
+        } else if (routePath.contains('banners')) {
+          activeIndex = 8;
+        } else if (routePath.contains('mensagens')) {
+          activeIndex = 9;
+        } else if (routePath == '/' || routePath.contains('dashboard')) {
+          activeIndex = 1;
+        }
+      } catch (_) {}
+    }
 
     return Padding(
       padding: EdgeInsetsDirectional.fromSTEB(
@@ -189,7 +219,7 @@ class _MenuWidgetState extends State<MenuWidget> {
                     context: context,
                     title: 'Home',
                     icon: Icons.home_rounded,
-                    isActive: FFAppState().indexPage == 1,
+                    isActive: activeIndex == 1,
                     onTap: () {
                       context.pushNamed(DashboardWidget.routeName);
                       FFAppState().indexPage = 1;
@@ -199,9 +229,33 @@ class _MenuWidgetState extends State<MenuWidget> {
                   const SizedBox(height: 6.0),
                   _buildMenuItem(
                     context: context,
+                    title: 'Planos Arms Pró',
+                    icon: Icons.workspace_premium_rounded,
+                    isActive: activeIndex == 12,
+                    onTap: () {
+                      context.pushNamed(PlanosWidget.routeName);
+                      FFAppState().indexPage = 12;
+                      safeSetState(() {});
+                    },
+                  ),
+                  const SizedBox(height: 6.0),
+                  _buildMenuItem(
+                    context: context,
+                    title: 'Assinaturas & Membros',
+                    icon: Icons.card_membership_rounded,
+                    isActive: activeIndex == 13,
+                    onTap: () {
+                      context.pushNamed(AssinaturasWidget.routeName);
+                      FFAppState().indexPage = 13;
+                      safeSetState(() {});
+                    },
+                  ),
+                  const SizedBox(height: 6.0),
+                  _buildMenuItem(
+                    context: context,
                     title: 'Usuários',
                     icon: Icons.people_alt_outlined,
-                    isActive: FFAppState().indexPage == 3,
+                    isActive: activeIndex == 3,
                     onTap: () {
                       context.pushNamed(UsuariosWidget.routeName);
                       FFAppState().indexPage = 3;
@@ -213,7 +267,7 @@ class _MenuWidgetState extends State<MenuWidget> {
                     context: context,
                     title: 'Parceiros',
                     icon: Icons.person_outline,
-                    isActive: FFAppState().indexPage == 4,
+                    isActive: activeIndex == 4,
                     onTap: () {
                       context.pushNamed(ParceirosWidget.routeName);
                       FFAppState().indexPage = 4;
@@ -225,7 +279,7 @@ class _MenuWidgetState extends State<MenuWidget> {
                     context: context,
                     title: 'Cupons',
                     icon: Icons.confirmation_number_outlined,
-                    isActive: FFAppState().indexPage == 2,
+                    isActive: activeIndex == 2,
                     onTap: () {
                       context.pushNamed(CuponsWidget.routeName);
                       FFAppState().indexPage = 2;
@@ -237,7 +291,7 @@ class _MenuWidgetState extends State<MenuWidget> {
                     context: context,
                     title: 'Segmentos',
                     icon: Icons.apps_outage,
-                    isActive: FFAppState().indexPage == 11,
+                    isActive: activeIndex == 11,
                     onTap: () {
                       context.pushNamed(SegmentosWidget.routeName);
                       FFAppState().indexPage = 11;
@@ -249,7 +303,7 @@ class _MenuWidgetState extends State<MenuWidget> {
                     context: context,
                     title: 'Propostas',
                     icon: Icons.person_add_alt_1,
-                    isActive: FFAppState().indexPage == 5,
+                    isActive: activeIndex == 5,
                     onTap: () {
                       context.pushNamed(PropostasWidget.routeName);
                       FFAppState().indexPage = 5;
@@ -261,7 +315,7 @@ class _MenuWidgetState extends State<MenuWidget> {
                     context: context,
                     title: 'Produtos',
                     icon: Icons.shopping_cart_outlined,
-                    isActive: FFAppState().indexPage == 6,
+                    isActive: activeIndex == 6,
                     onTap: () {
                       context.pushNamed(ProdutosWidget.routeName);
                       FFAppState().indexPage = 6;
@@ -273,7 +327,7 @@ class _MenuWidgetState extends State<MenuWidget> {
                     context: context,
                     title: 'Validações',
                     icon: Icons.check_circle_outline,
-                    isActive: FFAppState().indexPage == 7,
+                    isActive: activeIndex == 7,
                     onTap: () {
                       context.pushNamed(TrocasWidget.routeName);
                       FFAppState().indexPage = 7;
@@ -285,7 +339,7 @@ class _MenuWidgetState extends State<MenuWidget> {
                     context: context,
                     title: 'Banners',
                     icon: Icons.layers,
-                    isActive: FFAppState().indexPage == 8,
+                    isActive: activeIndex == 8,
                     onTap: () {
                       context.pushNamed(BannersWidget.routeName);
                       FFAppState().indexPage = 8;
@@ -297,7 +351,7 @@ class _MenuWidgetState extends State<MenuWidget> {
                     context: context,
                     title: 'Mensagens',
                     icon: Icons.mail_outline_rounded,
-                    isActive: FFAppState().indexPage == 9,
+                    isActive: activeIndex == 9,
                     onTap: () {
                       context.pushNamed(MensagensWidget.routeName);
                       FFAppState().indexPage = 9;

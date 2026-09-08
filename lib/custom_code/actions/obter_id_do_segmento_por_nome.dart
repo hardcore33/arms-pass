@@ -13,8 +13,9 @@ Future<int?> obterIdDoSegmentoPorNome(
   String? nome,
 ) async {
   for (var element in segmentos) {
-    if (element['name'] == nome) {
-      return element['id'] as int;
+    if (element is Map && element['name'] == nome) {
+      if (element['id'] is int) return element['id'] as int;
+      if (element['id'] != null) return int.tryParse(element['id'].toString());
     }
   }
 

@@ -1,20 +1,10 @@
 import '/backend/api_requests/api_calls.dart';
-import '/components/fonte_titulo_modal/fonte_titulo_modal_widget.dart';
-import '/components/modal_adicionar_segmento/modal_adicionar_segmento_widget.dart';
-import '/flutter_flow/flutter_flow_drop_down.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
-import '/flutter_flow/form_field_controller.dart';
-import 'dart:ui';
-import '/custom_code/actions/index.dart' as actions;
-import '/flutter_flow/custom_functions.dart' as functions;
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'modal_alterar_desconto_model.dart';
 export 'modal_alterar_desconto_model.dart';
 
@@ -44,6 +34,8 @@ class ModalAlterarDescontoWidget extends StatefulWidget {
 class _ModalAlterarDescontoWidgetState
     extends State<ModalAlterarDescontoWidget> {
   late ModalAlterarDescontoModel _model;
+  bool _salvando = false;
+  dynamic _parceiroSelecionado;
 
   @override
   void setState(VoidCallback callback) {
@@ -56,46 +48,68 @@ class _ModalAlterarDescontoWidgetState
     super.initState();
     _model = createModel(context, () => ModalAlterarDescontoModel());
 
-    // On component load action.
     SchedulerBinding.instance.addPostFrameCallback((_) async {
-      _model.nomeSegmentos = widget!.nomeSegmentos!.toList().cast<String>();
+      _model.idSegmento = castToType<int>(getJsonField(widget.desconto, r'''$.segment.id'''));
+      _model.idParceiro = castToType<int>(getJsonField(widget.desconto, r'''$.partner.id'''));
 
-      _model.idSegmento =
-          castToType<int>(getJsonField(widget!.desconto, r'''$.segment.id'''));
-      _model.idParceiro =
-          castToType<int>(getJsonField(widget!.desconto, r'''$.partner.id'''));
+      // Tentar encontrar o parceiro na lista
+      if (widget.parceiros is List) {
+        for (final p in (widget.parceiros as List)) {
+          final pId = getJsonField(p, r'''$.id''') ?? getJsonField(p, r'''$.partner.id''');
+          if (pId != null && pId.toString() == _model.idParceiro?.toString()) {
+            _parceiroSelecionado = p;
+            break;
+          }
+        }
+      }
 
-      _model.parceirosfiltrados = _model.idSegmento != null
-          ? functions
-              .criarParceiros(widget!.parceiros!.toList(), _model.idSegmento!)
-              .toList()
-              .cast<String>()
-          : widget!.nomeParceiros!.toList().cast<String>();
       safeSetState(() {});
     });
 
     _model.descricaoTextController ??= TextEditingController(
-        text: getJsonField(widget!.desconto, r'''$.description''')?.toString());
+      text: getJsonField(widget.desconto, r'''$.description''')?.toString() ?? '',
+    );
     _model.descricaoFocusNode ??= FocusNode();
 
+    final regrasExistentes = (getJsonField(widget.desconto, r'''$.rules''') ??
+            getJsonField(widget.desconto, r'''$.rule''') ??
+            '')
+        .toString();
+
+    final bool armsProDetectado = regrasExistentes.contains('[ARMS_PRO]');
+    String? limiteDetectado;
+    final matchLimite = RegExp(r'\[LIMITE:(\d+)\]').firstMatch(regrasExistentes);
+    if (matchLimite != null) {
+      limiteDetectado = matchLimite.group(1);
+    }
+    final String regrasLimpas = regrasExistentes
+        .replaceAll('[ARMS_PRO]', '')
+        .replaceAll(RegExp(r'\[LIMITE:\d+\]'), '')
+        .trim();
+
+    _model.isArmsPro = armsProDetectado;
+    _model.limiteQuantidadeTextController ??= TextEditingController(text: limiteDetectado ?? '');
+    _model.limiteQuantidadeFocusNode ??= FocusNode();
+    _model.regrasTextController ??= TextEditingController(
+      text: (regrasLimpas != 'null') ? regrasLimpas : '',
+    );
+    _model.regrasFocusNode ??= FocusNode();
+
     _model.porcentagemTextController ??= TextEditingController(
-        text: getJsonField(widget!.desconto, r'''$.discount''')?.toString() ??
-            '0');
+      text: getJsonField(widget.desconto, r'''$.discount''')?.toString() ?? '0',
+    );
     _model.porcentagemFocusNode ??= FocusNode();
 
-    _model.segmentoValue =
-        getJsonField(widget!.desconto, r'''$.segment.name''')?.toString();
-    _model.parceiroValue =
-        getJsonField(widget!.desconto, r'''$.partner.fantasia''')?.toString();
+    _model.segmentoValue = getJsonField(widget.desconto, r'''$.segment.name''')?.toString();
+    _model.parceiroValue = getJsonField(widget.desconto, r'''$.partner.fantasia''')?.toString();
 
-    final validadeStr =
-        getJsonField(widget!.desconto, r'''$.validity''')?.toString();
-    final validadeData =
-        validadeStr != null ? DateTime.tryParse(validadeStr) : null;
+    final validadeStr = getJsonField(widget.desconto, r'''$.validity''')?.toString();
+    final validadeData = validadeStr != null ? DateTime.tryParse(validadeStr) : null;
     if (validadeData != null) {
-      _model.datePicked =
-          DateTime(validadeData.year, validadeData.month, validadeData.day);
+      _model.datePicked = DateTime(validadeData.year, validadeData.month, validadeData.day);
       _model.hasData = true;
+    } else {
+      _model.datePicked = DateTime.now().add(const Duration(days: 30));
     }
 
     WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));
@@ -104,918 +118,664 @@ class _ModalAlterarDescontoWidgetState
   @override
   void dispose() {
     _model.maybeDispose();
-
     super.dispose();
+  }
+
+  InputDecoration _buildInputDecoration(
+    String label,
+    FlutterFlowTheme theme, {
+    String? hint,
+    Widget? prefixIcon,
+    Widget? suffixIcon,
+  }) {
+    return InputDecoration(
+      labelText: label,
+      labelStyle: GoogleFonts.readexPro(fontSize: 12.5, color: theme.secondaryText),
+      hintText: hint,
+      hintStyle: GoogleFonts.readexPro(fontSize: 12.5, color: theme.secondaryText.withValues(alpha: 0.6)),
+      prefixIcon: prefixIcon,
+      suffixIcon: suffixIcon,
+      filled: true,
+      fillColor: theme.primaryBackground,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 12.0),
+      enabledBorder: OutlineInputBorder(
+        borderSide: BorderSide(color: theme.alternate, width: 1.0),
+        borderRadius: BorderRadius.circular(8.0),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderSide: BorderSide(color: theme.secondary, width: 1.5),
+        borderRadius: BorderRadius.circular(8.0),
+      ),
+    );
+  }
+
+  void _selecionarParceiro(dynamic p) {
+    setState(() {
+      _parceiroSelecionado = p;
+      if (p != null) {
+        final id = getJsonField(p, r'''$.id''') ?? getJsonField(p, r'''$.partner.id''');
+        if (id is int) {
+          _model.idParceiro = id;
+        } else if (id != null) {
+          _model.idParceiro = int.tryParse(id.toString());
+        }
+
+        final segId = getJsonField(p, r'''$.segment.id''') ?? getJsonField(p, r'''$.partner.segment.id''');
+        if (segId is int) {
+          _model.idSegmento = segId;
+        } else if (segId != null) {
+          _model.idSegmento = int.tryParse(segId.toString());
+        }
+      }
+    });
+  }
+
+  Future<void> _submeterEdicao() async {
+    if (_model.descricaoTextController?.text.trim().isEmpty ?? true) {
+      showWarningToast(context, 'Por favor, descreva o benefício ou título do cupom.');
+      return;
+    }
+    if (_model.datePicked == null) {
+      showWarningToast(context, 'Por favor, selecione a data de validade.');
+      return;
+    }
+
+    setState(() => _salvando = true);
+
+    try {
+      final idParceiroFinal = _parceiroSelecionado != null
+          ? (getJsonField(_parceiroSelecionado, r'''$.id''') ?? getJsonField(_parceiroSelecionado, r'''$.partner.id'''))?.toString()
+          : _model.idParceiro?.toString();
+
+      final idSegmentoFinal = _parceiroSelecionado != null
+          ? (getJsonField(_parceiroSelecionado, r'''$.segment.id''') ?? getJsonField(_parceiroSelecionado, r'''$.partner.segment.id'''))?.toString()
+          : _model.idSegmento?.toString();
+
+      String regrasFormatadas = _model.regrasTextController?.text.trim() ?? '';
+      final limite = _model.limiteQuantidadeTextController?.text.trim();
+      if (_model.isArmsPro) {
+        if (limite != null && limite.isNotEmpty) {
+          regrasFormatadas = '[ARMS_PRO][LIMITE:$limite] $regrasFormatadas'.trim();
+        } else {
+          regrasFormatadas = '[ARMS_PRO] $regrasFormatadas'.trim();
+        }
+      } else if (limite != null && limite.isNotEmpty) {
+        regrasFormatadas = '[LIMITE:$limite] $regrasFormatadas'.trim();
+      }
+
+      _model.apiResultEdicao = await EditarDescontoCall.call(
+        id: getJsonField(widget.desconto, r'''$.id''').toString(),
+        descricao: _model.descricaoTextController?.text.trim() ?? '',
+        porcentagem: _model.porcentagemTextController?.text.trim() ?? '',
+        idParceiro: idParceiroFinal,
+        data: DateFormat('yyyy-MM-dd').format(_model.datePicked!),
+        idTenant: FFAppConstants.tenantId,
+        idSegmento: idSegmentoFinal,
+        rules: regrasFormatadas,
+      );
+
+      if ((_model.apiResultEdicao?.succeeded ?? false)) {
+        if (mounted) {
+          showSuccessToast(
+            context,
+            'Cupom atualizado com sucesso!',
+            title: 'Cupom Atualizado',
+          );
+          Navigator.pop(context, true);
+        }
+      } else {
+        if (mounted) {
+          showErrorToast(
+            context,
+            'Erro ao atualizar cupom. Tente novamente.',
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        showErrorToast(
+          context,
+          'Erro: $e',
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _salvando = false);
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 550.0,
-      height: 692.0,
-      decoration: BoxDecoration(
-        color: FlutterFlowTheme.of(context).secondaryBackground,
-        borderRadius: BorderRadius.circular(6.0),
-      ),
-      child: Form(
-        key: _model.formKey,
-        autovalidateMode: AutovalidateMode.disabled,
+    final theme = FlutterFlowTheme.of(context);
+    final parceirosList = widget.parceiros ?? [];
+
+    final segNome = _parceiroSelecionado != null
+        ? (getJsonField(_parceiroSelecionado, r'''$.segment.name''') ?? getJsonField(_parceiroSelecionado, r'''$.partner.segment.name''') ?? _model.segmentoValue ?? 'Geral').toString()
+        : (_model.segmentoValue ?? 'Geral');
+    final segPhoto = _parceiroSelecionado != null
+        ? (getJsonField(_parceiroSelecionado, r'''$.segment.photo''') ?? getJsonField(_parceiroSelecionado, r'''$.partner.segment.photo''') ?? '').toString()
+        : '';
+
+    return Dialog(
+      backgroundColor: Colors.transparent,
+      insetPadding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 24.0),
+      child: Container(
+        width: (MediaQuery.sizeOf(context).width * 0.75).clamp(540.0, 720.0),
+        constraints: BoxConstraints(maxHeight: MediaQuery.sizeOf(context).height * 0.90),
+        decoration: BoxDecoration(
+          color: theme.secondaryBackground,
+          borderRadius: BorderRadius.circular(16.0),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.25),
+              blurRadius: 24.0,
+              offset: const Offset(0, 8),
+            ),
+          ],
+        ),
         child: Column(
-          mainAxisSize: MainAxisSize.max,
+          mainAxisSize: MainAxisSize.min,
           children: [
+            // Header
             Padding(
-              padding: const EdgeInsetsDirectional.fromSTEB(40.0, 20.0, 40.0, 0.0),
+              padding: const EdgeInsets.fromLTRB(24.0, 20.0, 20.0, 16.0),
               child: Row(
-                mainAxisSize: MainAxisSize.max,
-                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
+                  Container(
+                    width: 40.0,
+                    height: 40.0,
+                    decoration: BoxDecoration(
+                      color: theme.primary,
+                      borderRadius: BorderRadius.circular(10.0),
+                    ),
+                    child: Icon(
+                      Icons.edit_note_rounded,
+                      color: theme.secondary,
+                      size: 22.0,
+                    ),
+                  ),
+                  const SizedBox(width: 14.0),
                   Expanded(
-                    flex: 5,
-                    child: Container(
-                      width: 100.0,
-                      decoration: BoxDecoration(
-                        color: FlutterFlowTheme.of(context).secondaryBackground,
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.max,
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          wrapWithModel(
-                            model: _model.fonteTituloModalModel1,
-                            updateCallback: () => safeSetState(() {}),
-                            child: FonteTituloModalWidget(
-                              text: 'Editar ',
-                            ),
-                          ),
-                          wrapWithModel(
-                            model: _model.fonteTituloModalModel2,
-                            updateCallback: () => safeSetState(() {}),
-                            child: FonteTituloModalWidget(
-                              text: widget!.titulo!,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    flex: 3,
-                    child: Container(
-                      width: 100.0,
-                      decoration: BoxDecoration(
-                        color: FlutterFlowTheme.of(context).secondaryBackground,
-                      ),
-                      child: Align(
-                        alignment: AlignmentDirectional(1.0, 0.0),
-                        child: Padding(
-                          padding: EdgeInsetsDirectional.fromSTEB(
-                              0.0, 0.0, 30.0, 0.0),
-                          child: InkWell(
-                            splashColor: Colors.transparent,
-                            focusColor: Colors.transparent,
-                            hoverColor: Colors.transparent,
-                            highlightColor: Colors.transparent,
-                            onTap: () async {
-                              Navigator.pop(context);
-                            },
-                            child: Icon(
-                              Icons.close_rounded,
-                              color: FlutterFlowTheme.of(context).secondary,
-                              size: 27.0,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsetsDirectional.fromSTEB(40.0, 20.0, 40.0, 0.0),
-              child: Column(
-                mainAxisSize: MainAxisSize.max,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Descrição/Título',
-                    style: FlutterFlowTheme.of(context).bodyMedium.override(
-                          font: GoogleFonts.readexPro(
-                            fontWeight: FlutterFlowTheme.of(context)
-                                .bodyMedium
-                                .fontWeight,
-                            fontStyle: FlutterFlowTheme.of(context)
-                                .bodyMedium
-                                .fontStyle,
-                          ),
-                          color: FlutterFlowTheme.of(context).secondary,
-                          fontSize: 16.0,
-                          letterSpacing: 0.0,
-                          fontWeight: FlutterFlowTheme.of(context)
-                              .bodyMedium
-                              .fontWeight,
-                          fontStyle:
-                              FlutterFlowTheme.of(context).bodyMedium.fontStyle,
-                        ),
-                  ),
-                  SizedBox(
-                    width: double.infinity,
-                    child: TextFormField(
-                      controller: _model.descricaoTextController,
-                      focusNode: _model.descricaoFocusNode,
-                      autofocus: false,
-                      obscureText: false,
-                      decoration: InputDecoration(
-                        isDense: true,
-                        suffixIcon: const Icon(
-                          Icons.percent_rounded,
-                          color: Color(0xFF9A9A9A),
-                          size: 18.0,
-                        ),
-                        labelStyle:
-                            FlutterFlowTheme.of(context).labelMedium.override(
-                                  font: GoogleFonts.readexPro(
-                                    fontWeight: FlutterFlowTheme.of(context)
-                                        .labelMedium
-                                        .fontWeight,
-                                    fontStyle: FlutterFlowTheme.of(context)
-                                        .labelMedium
-                                        .fontStyle,
-                                  ),
-                                  letterSpacing: 0.0,
-                                  fontWeight: FlutterFlowTheme.of(context)
-                                      .labelMedium
-                                      .fontWeight,
-                                  fontStyle: FlutterFlowTheme.of(context)
-                                      .labelMedium
-                                      .fontStyle,
-                                ),
-                        hintStyle:
-                            FlutterFlowTheme.of(context).labelMedium.override(
-                                  font: GoogleFonts.readexPro(
-                                    fontWeight: FlutterFlowTheme.of(context)
-                                        .labelMedium
-                                        .fontWeight,
-                                    fontStyle: FlutterFlowTheme.of(context)
-                                        .labelMedium
-                                        .fontStyle,
-                                  ),
-                                  letterSpacing: 0.0,
-                                  fontWeight: FlutterFlowTheme.of(context)
-                                      .labelMedium
-                                      .fontWeight,
-                                  fontStyle: FlutterFlowTheme.of(context)
-                                      .labelMedium
-                                      .fontStyle,
-                                ),
-                        enabledBorder: OutlineInputBorder(
-                          borderSide: BorderSide(
-                            color: const Color(0xFFCCCCCC),
-                            width: 1.0,
-                          ),
-                          borderRadius: BorderRadius.circular(8.0),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderSide: BorderSide(
-                            color: const Color(0xFFCCCCCC),
-                            width: 1.0,
-                          ),
-                          borderRadius: BorderRadius.circular(8.0),
-                        ),
-                        errorBorder: OutlineInputBorder(
-                          borderSide: BorderSide(
-                                  color: FlutterFlowTheme.of(context).error,
-                                  width: 1.0,
-                                ),
-                          borderRadius: BorderRadius.circular(8.0),
-                        ),
-                        focusedErrorBorder: OutlineInputBorder(
-                          borderSide: BorderSide(
-                                  color: FlutterFlowTheme.of(context).error,
-                                  width: 1.0,
-                                ),
-                          borderRadius: BorderRadius.circular(8.0),
-                        ),
-                        filled: true,
-                        fillColor:
-                            FlutterFlowTheme.of(context).secondaryBackground,
-                        contentPadding: EdgeInsetsDirectional.fromSTEB(
-                            14.0, 14.0, 14.0, 14.0),
-                      ),
-                      style: FlutterFlowTheme.of(context).bodyMedium.override(
-                            font: GoogleFonts.readexPro(
-                              fontWeight: FlutterFlowTheme.of(context)
-                                  .bodyMedium
-                                  .fontWeight,
-                              fontStyle: FlutterFlowTheme.of(context)
-                                  .bodyMedium
-                                  .fontStyle,
-                            ),
-                            color: FlutterFlowTheme.of(context).primary,
-                            letterSpacing: 0.0,
-                            fontWeight: FlutterFlowTheme.of(context)
-                                .bodyMedium
-                                .fontWeight,
-                            fontStyle: FlutterFlowTheme.of(context)
-                                .bodyMedium
-                                .fontStyle,
-                          ),
-                      cursorColor: FlutterFlowTheme.of(context).primaryText,
-                      validator: _model.descricaoTextControllerValidator
-                          .asValidator(context),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsetsDirectional.fromSTEB(40.0, 20.0, 40.0, 0.0),
-              child: Column(
-                mainAxisSize: MainAxisSize.max,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Segmento',
-                    style: FlutterFlowTheme.of(context).bodyMedium.override(
-                          font: GoogleFonts.readexPro(
-                            fontWeight: FlutterFlowTheme.of(context)
-                                .bodyMedium
-                                .fontWeight,
-                            fontStyle: FlutterFlowTheme.of(context)
-                                .bodyMedium
-                                .fontStyle,
-                          ),
-                          color: FlutterFlowTheme.of(context).secondary,
-                          fontSize: 16.0,
-                          letterSpacing: 0.0,
-                          fontWeight: FlutterFlowTheme.of(context)
-                              .bodyMedium
-                              .fontWeight,
-                          fontStyle:
-                              FlutterFlowTheme.of(context).bodyMedium.fontStyle,
-                        ),
-                  ),
-                  SizedBox(
-                    width: double.infinity,
-                    child: Row(
-                      mainAxisSize: MainAxisSize.max,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Expanded(
-                          child: FlutterFlowDropDown<String>(
-                          controller: _model.segmentoValueController ??=
-                              FormFieldController<String>(null),
-                          options: _model.nomeSegmentos,
-                          onChanged: (val) async {
-                            safeSetState(() => _model.segmentoValue = val);
-                            _model.idSegmento =
-                                await actions.obterIdDoSegmentoPorNome(
-                              widget!.segmentos!.toList(),
-                              _model.segmentoValue,
-                            );
-                            _model.parceirosfiltrados = functions
-                                .criarParceiros(widget!.parceiros!.toList(),
-                                    _model.idSegmento!)
-                                .toList()
-                                .cast<String>();
-                            safeSetState(() {});
-
-                            safeSetState(() {});
-                          },
-                          height: 65.0,
-                          textStyle:
-                              FlutterFlowTheme.of(context).bodyMedium.override(
-                                    font: GoogleFonts.readexPro(
-                                      fontWeight: FlutterFlowTheme.of(context)
-                                          .bodyMedium
-                                          .fontWeight,
-                                      fontStyle: FlutterFlowTheme.of(context)
-                                          .bodyMedium
-                                          .fontStyle,
-                                    ),
-                                    letterSpacing: 0.0,
-                                    fontWeight: FlutterFlowTheme.of(context)
-                                        .bodyMedium
-                                        .fontWeight,
-                                    fontStyle: FlutterFlowTheme.of(context)
-                                        .bodyMedium
-                                        .fontStyle,
-                                  ),
-                          hintText: 'Selecione o segmento',
-                          icon: Icon(
-                            Icons.keyboard_arrow_down_rounded,
-                            color: FlutterFlowTheme.of(context).secondaryText,
-                            size: 24.0,
+                        Text(
+                          'Editar Dados do Cupom',
+                          style: GoogleFonts.readexPro(
+                            fontSize: 17.0,
+                            fontWeight: FontWeight.bold,
+                            color: theme.primaryText,
                           ),
-                          fillColor: Colors.white,
-                          elevation: 0.0,
-                                  borderColor: const Color(0xFFCCCCCC),
-                                  borderWidth: 1.0,
-                          borderRadius: 8.0,
-                          margin: EdgeInsetsDirectional.fromSTEB(
-                              12.0, 0.0, 12.0, 0.0),
-                          hidesUnderline: true,
-                          isOverButton: false,
-                          isSearchable: false,
-                          isMultiSelect: false,
                         ),
-                      ),
-                        Builder(
-                          builder: (context) => Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
-                                5.0, 0.0, 0.0, 0.0),
-                            child: InkWell(
-                              splashColor: Colors.transparent,
-                              focusColor: Colors.transparent,
-                              hoverColor: Colors.transparent,
-                              highlightColor: Colors.transparent,
-                              onTap: () async {
-                                await showDialog(
-                                  context: context,
-                                  builder: (dialogContext) {
-                                    return Dialog(
-                                      elevation: 0,
-                                      insetPadding: EdgeInsets.zero,
-                                      backgroundColor: Colors.transparent,
-                                      alignment: AlignmentDirectional(0.0, 0.0)
-                                          .resolve(Directionality.of(context)),
-                                      child: ModalAdicionarSegmentoWidget(),
-                                    );
-                                  },
-                                );
-
-                                _model.apiResult2po =
-                                    await ObterSegmentosCall.call();
-
-                                if ((_model.apiResult2po?.succeeded ?? true)) {
-                                  _model.segmentosAtualizados =
-                                      await actions.obterListaDeSegmentos(
-                                    (_model.apiResult2po?.jsonBody ?? ''),
-                                  );
-                                  _model.nomeSegmentos = _model
-                                      .segmentosAtualizados!
-                                      .toList()
-                                      .cast<String>();
-                                  safeSetState(() {});
-                                }
-
-                                safeSetState(() {});
-                              },
-                              child: Icon(
-                                Icons.add_box,
-                                color: FlutterFlowTheme.of(context).secondary,
-                                size: 30.0,
-                              ),
-                            ),
+                        Text(
+                          'Atualize o percentual, regras de utilização ou validade deste benefício.',
+                          style: GoogleFonts.readexPro(
+                            fontSize: 12.5,
+                            color: theme.secondaryText,
                           ),
                         ),
                       ],
                     ),
                   ),
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsetsDirectional.fromSTEB(40.0, 20.0, 40.0, 0.0),
-              child: Column(
-                mainAxisSize: MainAxisSize.max,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Porcentagem',
-                    style: FlutterFlowTheme.of(context).bodyMedium.override(
-                          font: GoogleFonts.readexPro(
-                            fontWeight: FlutterFlowTheme.of(context)
-                                .bodyMedium
-                                .fontWeight,
-                            fontStyle: FlutterFlowTheme.of(context)
-                                .bodyMedium
-                                .fontStyle,
-                          ),
-                          color: FlutterFlowTheme.of(context).secondary,
-                          fontSize: 16.0,
-                          letterSpacing: 0.0,
-                          fontWeight: FlutterFlowTheme.of(context)
-                              .bodyMedium
-                              .fontWeight,
-                          fontStyle:
-                              FlutterFlowTheme.of(context).bodyMedium.fontStyle,
-                        ),
-                  ),
-                  SizedBox(
-                    width: double.infinity,
-                    child: TextFormField(
-                      controller: _model.porcentagemTextController,
-                      focusNode: _model.porcentagemFocusNode,
-                      autofocus: false,
-                      obscureText: false,
-                      decoration: InputDecoration(
-                        isDense: true,
-                        suffixIcon: const Icon(
-                          Icons.percent_rounded,
-                          color: Color(0xFF9A9A9A),
-                          size: 18.0,
-                        ),
-                        labelStyle:
-                            FlutterFlowTheme.of(context).labelMedium.override(
-                                  font: GoogleFonts.readexPro(
-                                    fontWeight: FlutterFlowTheme.of(context)
-                                        .labelMedium
-                                        .fontWeight,
-                                    fontStyle: FlutterFlowTheme.of(context)
-                                        .labelMedium
-                                        .fontStyle,
-                                  ),
-                                  letterSpacing: 0.0,
-                                  fontWeight: FlutterFlowTheme.of(context)
-                                      .labelMedium
-                                      .fontWeight,
-                                  fontStyle: FlutterFlowTheme.of(context)
-                                      .labelMedium
-                                      .fontStyle,
-                                ),
-                        hintStyle:
-                            FlutterFlowTheme.of(context).labelMedium.override(
-                                  font: GoogleFonts.readexPro(
-                                    fontWeight: FlutterFlowTheme.of(context)
-                                        .labelMedium
-                                        .fontWeight,
-                                    fontStyle: FlutterFlowTheme.of(context)
-                                        .labelMedium
-                                        .fontStyle,
-                                  ),
-                                  letterSpacing: 0.0,
-                                  fontWeight: FlutterFlowTheme.of(context)
-                                      .labelMedium
-                                      .fontWeight,
-                                  fontStyle: FlutterFlowTheme.of(context)
-                                      .labelMedium
-                                      .fontStyle,
-                                ),
-                        enabledBorder: OutlineInputBorder(
-                          borderSide: BorderSide(
-                                  color: Color(0xFFCCCCCC),
-                                  width: 1.0,
-                                ),
-                          borderRadius: BorderRadius.circular(8.0),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderSide: BorderSide(
-                                  color: Color(0xFFCCCCCC),
-                                  width: 1.0,
-                                ),
-                          borderRadius: BorderRadius.circular(8.0),
-                        ),
-                        errorBorder: OutlineInputBorder(
-                          borderSide: BorderSide(
-                                  color: FlutterFlowTheme.of(context).error,
-                                  width: 1.0,
-                                ),
-                          borderRadius: BorderRadius.circular(8.0),
-                        ),
-                        focusedErrorBorder: OutlineInputBorder(
-                          borderSide: BorderSide(
-                                  color: FlutterFlowTheme.of(context).error,
-                                  width: 1.0,
-                                ),
-                          borderRadius: BorderRadius.circular(8.0),
-                        ),
-                        filled: true,
-                        fillColor:
-                            FlutterFlowTheme.of(context).secondaryBackground,
-                        contentPadding: EdgeInsetsDirectional.fromSTEB(
-                            14.0, 14.0, 14.0, 14.0),
-                      ),
-                      style: FlutterFlowTheme.of(context).bodyMedium.override(
-                            font: GoogleFonts.readexPro(
-                              fontWeight: FlutterFlowTheme.of(context)
-                                  .bodyMedium
-                                  .fontWeight,
-                              fontStyle: FlutterFlowTheme.of(context)
-                                  .bodyMedium
-                                  .fontStyle,
-                            ),
-                            letterSpacing: 0.0,
-                            fontWeight: FlutterFlowTheme.of(context)
-                                .bodyMedium
-                                .fontWeight,
-                            fontStyle: FlutterFlowTheme.of(context)
-                                .bodyMedium
-                                .fontStyle,
-                          ),
-                      cursorColor: FlutterFlowTheme.of(context).primaryText,
-                      validator: _model.porcentagemTextControllerValidator
-                          .asValidator(context),
-                    ),
+                  IconButton(
+                    icon: Icon(Icons.close_rounded, color: theme.secondaryText, size: 22.0),
+                    onPressed: () => Navigator.pop(context),
                   ),
                 ],
               ),
             ),
-            Padding(
-              padding: const EdgeInsetsDirectional.fromSTEB(40.0, 20.0, 40.0, 0.0),
-              child: Column(
-                mainAxisSize: MainAxisSize.max,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Parceiro',
-                    style: FlutterFlowTheme.of(context).bodyMedium.override(
-                          font: GoogleFonts.readexPro(
-                            fontWeight: FlutterFlowTheme.of(context)
-                                .bodyMedium
-                                .fontWeight,
-                            fontStyle: FlutterFlowTheme.of(context)
-                                .bodyMedium
-                                .fontStyle,
-                          ),
-                          color: FlutterFlowTheme.of(context).secondary,
-                          fontSize: 16.0,
-                          letterSpacing: 0.0,
-                          fontWeight: FlutterFlowTheme.of(context)
-                              .bodyMedium
-                              .fontWeight,
-                          fontStyle:
-                              FlutterFlowTheme.of(context).bodyMedium.fontStyle,
-                        ),
-                  ),
-                  FlutterFlowDropDown<String>(
-                    controller: _model.parceiroValueController ??=
-                        FormFieldController<String>(null),
-                    options: _model.parceirosfiltrados,
-                    onChanged: (val) async {
-                      safeSetState(() => _model.parceiroValue = val);
-                      _model.idParceiro =
-                          await actions.obterIdDoParceiroPorNome(
-                        _model.parceiroValue,
-                        widget!.parceiros!.toList(),
-                      );
+            const Divider(height: 1.0),
 
-                      safeSetState(() {});
-                    },
-                    width: double.infinity,
-                    height: 65.0,
-                    searchHintTextStyle:
-                        FlutterFlowTheme.of(context).labelMedium.override(
-                              font: GoogleFonts.readexPro(
-                                fontWeight: FlutterFlowTheme.of(context)
-                                    .labelMedium
-                                    .fontWeight,
-                                fontStyle: FlutterFlowTheme.of(context)
-                                    .labelMedium
-                                    .fontStyle,
+            // Form Body
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(24.0),
+                child: Form(
+                  key: _model.formKey,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // 1. Parceiro Estabelecimento
+                      Text(
+                        '1. Parceiro / Estabelecimento Emissor *',
+                        style: GoogleFonts.readexPro(
+                          fontSize: 13.0,
+                          fontWeight: FontWeight.w600,
+                          color: theme.primaryText,
+                        ),
+                      ),
+                      const SizedBox(height: 6.0),
+                      DropdownButtonFormField<dynamic>(
+                        value: _parceiroSelecionado,
+                        isExpanded: true,
+                        decoration: _buildInputDecoration(
+                          'Selecione o parceiro',
+                          theme,
+                          prefixIcon: Icon(Icons.storefront_rounded, color: theme.secondary, size: 18.0),
+                        ),
+                        style: GoogleFonts.readexPro(fontSize: 13.0, color: theme.primaryText),
+                        items: parceirosList.map((p) {
+                          final fantasia = (getJsonField(p, r'''$.fantasia''') ?? getJsonField(p, r'''$.partner.fantasia''') ?? getJsonField(p, r'''$.razao''') ?? 'Parceiro').toString();
+                          final cnpj = (getJsonField(p, r'''$.cnpj''') ?? getJsonField(p, r'''$.partner.cnpj''') ?? '').toString();
+                          return DropdownMenuItem<dynamic>(
+                            value: p,
+                            child: Text(
+                              cnpj.isNotEmpty ? '$fantasia — CNPJ: $cnpj' : fantasia,
+                              style: GoogleFonts.readexPro(fontSize: 13.0, color: theme.primaryText),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          );
+                        }).toList(),
+                        onChanged: _selecionarParceiro,
+                      ),
+
+                      // Card do Parceiro e Segmento Herdado
+                      if (_parceiroSelecionado != null) ...[
+                        const SizedBox(height: 10.0),
+                        Container(
+                          padding: const EdgeInsets.all(12.0),
+                          decoration: BoxDecoration(
+                            color: theme.primary.withValues(alpha: 0.04),
+                            borderRadius: BorderRadius.circular(10.0),
+                            border: Border.all(color: theme.secondary.withValues(alpha: 0.3)),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(Icons.check_circle_rounded, color: theme.secondary, size: 20.0),
+                              const SizedBox(width: 10.0),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      (getJsonField(_parceiroSelecionado, r'''$.fantasia''') ?? getJsonField(_parceiroSelecionado, r'''$.partner.fantasia''') ?? '').toString(),
+                                      style: GoogleFonts.readexPro(
+                                        fontSize: 13.0,
+                                        fontWeight: FontWeight.bold,
+                                        color: theme.primaryText,
+                                      ),
+                                    ),
+                                    Text(
+                                      'CNPJ: ${(getJsonField(_parceiroSelecionado, r'''$.cnpj''') ?? getJsonField(_parceiroSelecionado, r'''$.partner.cnpj''') ?? 'Não informado')}',
+                                      style: GoogleFonts.readexPro(
+                                        fontSize: 11.5,
+                                        color: theme.secondaryText,
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
-                              letterSpacing: 0.0,
-                              fontWeight: FlutterFlowTheme.of(context)
-                                  .labelMedium
-                                  .fontWeight,
-                              fontStyle: FlutterFlowTheme.of(context)
-                                  .labelMedium
-                                  .fontStyle,
-                            ),
-                    searchTextStyle: FlutterFlowTheme.of(context)
-                        .bodyMedium
-                        .override(
-                          font: GoogleFonts.readexPro(
-                            fontWeight: FlutterFlowTheme.of(context)
-                                .bodyMedium
-                                .fontWeight,
-                            fontStyle: FlutterFlowTheme.of(context)
-                                .bodyMedium
-                                .fontStyle,
-                          ),
-                          letterSpacing: 0.0,
-                          fontWeight: FlutterFlowTheme.of(context)
-                              .bodyMedium
-                              .fontWeight,
-                          fontStyle:
-                              FlutterFlowTheme.of(context).bodyMedium.fontStyle,
-                        ),
-                    textStyle: FlutterFlowTheme.of(context).bodyMedium.override(
-                          font: GoogleFonts.readexPro(
-                            fontWeight: FlutterFlowTheme.of(context)
-                                .bodyMedium
-                                .fontWeight,
-                            fontStyle: FlutterFlowTheme.of(context)
-                                .bodyMedium
-                                .fontStyle,
-                          ),
-                          letterSpacing: 0.0,
-                          fontWeight: FlutterFlowTheme.of(context)
-                              .bodyMedium
-                              .fontWeight,
-                          fontStyle:
-                              FlutterFlowTheme.of(context).bodyMedium.fontStyle,
-                        ),
-                    hintText: 'Selecione um parceiro',
-                    searchHintText: 'procurar',
-                    icon: Icon(
-                      Icons.keyboard_arrow_down_rounded,
-                      color: FlutterFlowTheme.of(context).secondaryText,
-                      size: 24.0,
-                    ),
-                    fillColor: Colors.white,
-                    elevation: 0.0,
-                                  borderColor: const Color(0xFFCCCCCC),
-                                  borderWidth: 1.0,
-                    borderRadius: 8.0,
-                    margin:
-                        EdgeInsetsDirectional.fromSTEB(12.0, 0.0, 12.0, 0.0),
-                    hidesUnderline: true,
-                    isOverButton: false,
-                    isSearchable: true,
-                    isMultiSelect: false,
-                  ),
-
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsetsDirectional.fromSTEB(40.0, 20.0, 40.0, 0.0),
-              child: Column(
-                mainAxisSize: MainAxisSize.max,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Data final',
-                    style: FlutterFlowTheme.of(context).bodyMedium.override(
-                          font: GoogleFonts.readexPro(
-                            fontWeight: FlutterFlowTheme.of(context)
-                                .bodyMedium
-                                .fontWeight,
-                            fontStyle: FlutterFlowTheme.of(context)
-                                .bodyMedium
-                                .fontStyle,
-                          ),
-                          color: FlutterFlowTheme.of(context).secondary,
-                          fontSize: 16.0,
-                          letterSpacing: 0.0,
-                          fontWeight: FlutterFlowTheme.of(context)
-                              .bodyMedium
-                              .fontWeight,
-                          fontStyle:
-                              FlutterFlowTheme.of(context).bodyMedium.fontStyle,
-                        ),
-                  ),
-                  InkWell(
-                    splashColor: Colors.transparent,
-                    focusColor: Colors.transparent,
-                    hoverColor: Colors.transparent,
-                    highlightColor: Colors.transparent,
-                    onTap: () async {
-                      final _datePickedDate = await showDatePicker(
-                        context: context,
-                        initialDate: getCurrentTimestamp,
-                        firstDate: getCurrentTimestamp,
-                        lastDate: DateTime(2050),
-                        builder: (context, child) {
-                          return wrapInMaterialDatePickerTheme(
-                            context,
-                            child!,
-                            headerBackgroundColor:
-                                FlutterFlowTheme.of(context).primary,
-                            headerForegroundColor:
-                                FlutterFlowTheme.of(context).info,
-                            headerTextStyle: FlutterFlowTheme.of(context)
-                                .headlineLarge
-                                .override(
-                                  font: GoogleFonts.outfit(
-                                    fontWeight: FontWeight.w600,
-                                    fontStyle: FlutterFlowTheme.of(context)
-                                        .headlineLarge
-                                        .fontStyle,
-                                  ),
-                                  fontSize: 32.0,
-                                  letterSpacing: 0.0,
-                                  fontWeight: FontWeight.w600,
-                                  fontStyle: FlutterFlowTheme.of(context)
-                                      .headlineLarge
-                                      .fontStyle,
+                              // Badge do Segmento
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
+                                decoration: BoxDecoration(
+                                  color: theme.secondaryBackground,
+                                  borderRadius: BorderRadius.circular(8.0),
+                                  border: Border.all(color: theme.alternate),
                                 ),
-                            pickerBackgroundColor: FlutterFlowTheme.of(context)
-                                .secondaryBackground,
-                            pickerForegroundColor:
-                                FlutterFlowTheme.of(context).primaryText,
-                            selectedDateTimeBackgroundColor:
-                                FlutterFlowTheme.of(context).primary,
-                            selectedDateTimeForegroundColor:
-                                FlutterFlowTheme.of(context).info,
-                            actionButtonForegroundColor:
-                                FlutterFlowTheme.of(context).primaryText,
-                            iconSize: 24.0,
-                          );
-                        },
-                      );
-
-                      if (_datePickedDate != null) {
-                        safeSetState(() {
-                          _model.datePicked = DateTime(
-                            _datePickedDate.year,
-                            _datePickedDate.month,
-                            _datePickedDate.day,
-                          );
-                        });
-                      } else if (_model.datePicked != null) {
-                        safeSetState(() {
-                          _model.datePicked = getCurrentTimestamp;
-                        });
-                      }
-                      if (_model.datePicked != null) {
-                        _model.hasData = true;
-                        safeSetState(() {});
-                      }
-                    },
-                    child: Container(
-                      width: double.infinity,
-                      height: 60.0,
-                      decoration: BoxDecoration(
-                        color: FlutterFlowTheme.of(context).secondaryBackground,
-                        border: Border.all(
-                          color: const Color(0xFFCCCCCC),
-                          width: 1.0,
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    if (segPhoto.isNotEmpty && segPhoto != 'null')
+                                      ClipRRect(
+                                        borderRadius: BorderRadius.circular(4.0),
+                                        child: Image.network(
+                                          segPhoto,
+                                          width: 14.0,
+                                          height: 14.0,
+                                          fit: BoxFit.cover,
+                                          errorBuilder: (_, __, ___) => Icon(Icons.category_outlined, size: 14.0, color: theme.secondary),
+                                        ),
+                                      )
+                                    else
+                                      Icon(Icons.category_outlined, size: 14.0, color: theme.secondary),
+                                    const SizedBox(width: 6.0),
+                                    Text(
+                                      segNome,
+                                      style: GoogleFonts.readexPro(
+                                        fontSize: 12.0,
+                                        fontWeight: FontWeight.w600,
+                                        color: theme.primaryText,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                        borderRadius: BorderRadius.circular(8.0),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 14.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              _model.hasData
-                                  ? functions.formataDataDeExibicao(
-                                      _model.datePicked?.toString())!
-                                  : 'Selecione uma data',
-                              style: FlutterFlowTheme.of(context)
-                                  .bodyMedium
-                                  .override(
-                                    font: GoogleFonts.readexPro(),
-                                    color: _model.hasData
-                                        ? FlutterFlowTheme.of(context).primaryText
-                                        : const Color(0xFF9A9A9A),
+                      ],
+
+                      const SizedBox(height: 20.0),
+
+                      // 2. Desconto (%) e Validade Lado a Lado
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Porcentagem de Desconto
+                          Expanded(
+                            flex: 1,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Desconto (%) *',
+                                  style: GoogleFonts.readexPro(
+                                    fontSize: 13.0,
+                                    fontWeight: FontWeight.w600,
+                                    color: theme.primaryText,
                                   ),
+                                ),
+                                const SizedBox(height: 6.0),
+                                TextFormField(
+                                  controller: _model.porcentagemTextController,
+                                  focusNode: _model.porcentagemFocusNode,
+                                  keyboardType: TextInputType.number,
+                                  decoration: _buildInputDecoration(
+                                    'Ex: 10',
+                                    theme,
+                                    suffixIcon: Padding(
+                                      padding: const EdgeInsets.only(right: 12.0, top: 12.0),
+                                      child: Text(
+                                        '%',
+                                        style: GoogleFonts.readexPro(
+                                          fontWeight: FontWeight.bold,
+                                          color: theme.secondary,
+                                          fontSize: 15.0,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  style: GoogleFonts.readexPro(fontSize: 13.0, color: theme.primaryText),
+                                ),
+                              ],
                             ),
-                            const Icon(
-                              Icons.calendar_today_rounded,
-                              color: Color(0xFF9A9A9A),
-                              size: 18.0,
+                          ),
+                          const SizedBox(width: 14.0),
+
+                          // Data de Validade
+                          Expanded(
+                            flex: 1,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Data de Validade *',
+                                  style: GoogleFonts.readexPro(
+                                    fontSize: 13.0,
+                                    fontWeight: FontWeight.w600,
+                                    color: theme.primaryText,
+                                  ),
+                                ),
+                                const SizedBox(height: 6.0),
+                                InkWell(
+                                  onTap: () async {
+                                    final picked = await showDatePicker(
+                                      context: context,
+                                      initialDate: _model.datePicked ?? DateTime.now().add(const Duration(days: 30)),
+                                      firstDate: DateTime.now().subtract(const Duration(days: 365)),
+                                      lastDate: DateTime.now().add(const Duration(days: 365 * 5)),
+                                      builder: (context, child) {
+                                        return Theme(
+                                          data: Theme.of(context).copyWith(
+                                            colorScheme: ColorScheme.light(
+                                              primary: theme.primary,
+                                              onPrimary: Colors.white,
+                                              onSurface: theme.primaryText,
+                                            ),
+                                          ),
+                                          child: child!,
+                                        );
+                                      },
+                                    );
+                                    if (picked != null) {
+                                      setState(() => _model.datePicked = picked);
+                                    }
+                                  },
+                                  child: Container(
+                                    height: 44.0,
+                                    padding: const EdgeInsets.symmetric(horizontal: 14.0),
+                                    decoration: BoxDecoration(
+                                      color: theme.primaryBackground,
+                                      borderRadius: BorderRadius.circular(8.0),
+                                      border: Border.all(color: theme.alternate),
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        Icon(Icons.calendar_today_rounded, size: 16.0, color: theme.secondary),
+                                        const SizedBox(width: 8.0),
+                                        Text(
+                                          _model.datePicked != null
+                                              ? DateFormat('dd/MM/yyyy').format(_model.datePicked!)
+                                              : 'Expiração',
+                                          style: GoogleFonts.readexPro(
+                                            fontSize: 13.0,
+                                            color: theme.primaryText,
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                        ),
+                                        const Spacer(),
+                                        Icon(Icons.edit_calendar_rounded, size: 16.0, color: theme.secondaryText),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      const SizedBox(height: 18.0),
+
+                      // 3. Título / Benefício do Cupom
+                      Text(
+                        'Título / Benefício Oferecido *',
+                        style: GoogleFonts.readexPro(
+                          fontSize: 13.0,
+                          fontWeight: FontWeight.w600,
+                          color: theme.primaryText,
+                        ),
+                      ),
+                      const SizedBox(height: 6.0),
+                      TextFormField(
+                        controller: _model.descricaoTextController,
+                        focusNode: _model.descricaoFocusNode,
+                        decoration: _buildInputDecoration(
+                          'Título do benefício...',
+                          theme,
+                          hint: 'Ex: 15% de desconto no almoço executivo',
+                        ),
+                        style: GoogleFonts.readexPro(fontSize: 13.0, color: theme.primaryText),
+                      ),
+
+                      const SizedBox(height: 18.0),
+
+                      // Card de Exclusividade Arms Pró ⭐
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+                        decoration: BoxDecoration(
+                          color: _model.isArmsPro
+                              ? theme.secondary.withValues(alpha: 0.12)
+                              : theme.primaryBackground,
+                          borderRadius: BorderRadius.circular(10.0),
+                          border: Border.all(
+                            color: _model.isArmsPro
+                                ? theme.secondary
+                                : theme.alternate,
+                            width: _model.isArmsPro ? 1.2 : 1.0,
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(8.0),
+                              decoration: BoxDecoration(
+                                color: theme.secondary.withValues(alpha: 0.2),
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(
+                                Icons.star_rounded,
+                                color: theme.secondary,
+                                size: 22.0,
+                              ),
+                            ),
+                            const SizedBox(width: 12.0),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Text(
+                                        'Exclusivo Membros Arms Pró',
+                                        style: GoogleFonts.readexPro(
+                                          fontSize: 13.5,
+                                          fontWeight: FontWeight.bold,
+                                          color: theme.primaryText,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 6.0),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 6.0, vertical: 2.0),
+                                        decoration: BoxDecoration(
+                                          color: theme.secondary,
+                                          borderRadius: BorderRadius.circular(4.0),
+                                        ),
+                                        child: Text(
+                                          'VIP',
+                                          style: GoogleFonts.readexPro(
+                                            fontSize: 10.0,
+                                            fontWeight: FontWeight.bold,
+                                            color: theme.primary,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 2.0),
+                                  Text(
+                                    'Apenas assinantes Arms Pró poderão visualizar e resgatar este benefício',
+                                    style: TextStyle(
+                                      fontSize: 11.5,
+                                      color: theme.secondaryText,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Switch.adaptive(
+                              value: _model.isArmsPro,
+                              activeThumbColor: theme.secondary,
+                              onChanged: (val) {
+                                setState(() {
+                                  _model.isArmsPro = val;
+                                });
+                              },
                             ),
                           ],
                         ),
                       ),
-                    ),
+
+                      const SizedBox(height: 18.0),
+
+                      // Limite de Estoque / Cupons
+                      Text(
+                        'Limite de Cupons (Estoque)',
+                        style: GoogleFonts.readexPro(
+                          fontSize: 13.0,
+                          fontWeight: FontWeight.w600,
+                          color: theme.primaryText,
+                        ),
+                      ),
+                      const SizedBox(height: 6.0),
+                      TextFormField(
+                        controller: _model.limiteQuantidadeTextController,
+                        focusNode: _model.limiteQuantidadeFocusNode,
+                        keyboardType: TextInputType.number,
+                        decoration: _buildInputDecoration(
+                          'Ex: 20 (deixe vazio para ilimitado)',
+                          theme,
+                          hint: 'Quantidade máxima total disponível',
+                          prefixIcon: Icon(Icons.inventory_2_outlined, color: theme.secondary, size: 18.0),
+                        ),
+                        style: GoogleFonts.readexPro(fontSize: 13.0, color: theme.primaryText),
+                      ),
+
+                      const SizedBox(height: 18.0),
+
+                      // 4. Regras de Utilização & Condições
+                      Text(
+                        'Regras de Utilização & Condições',
+                        style: GoogleFonts.readexPro(
+                          fontSize: 13.0,
+                          fontWeight: FontWeight.w600,
+                          color: theme.primaryText,
+                        ),
+                      ),
+                      const SizedBox(height: 6.0),
+                      TextFormField(
+                        controller: _model.regrasTextController,
+                        focusNode: _model.regrasFocusNode,
+                        maxLines: 3,
+                        decoration: _buildInputDecoration(
+                          'Regras e restrições para uso no app...',
+                          theme,
+                          hint: 'Ex: Válido de segunda a sexta para consumo no local. Apresentar o cupom antes do fechamento da conta.',
+                        ),
+                        style: GoogleFonts.readexPro(fontSize: 13.0, color: theme.primaryText),
+                      ),
+                    ],
                   ),
-                ],
+                ),
               ),
             ),
+
+            // Footer
+            const Divider(height: 1.0),
             Padding(
-              padding: const EdgeInsetsDirectional.fromSTEB(40.0, 24.0, 40.0, 15.0),
+              padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
               child: Row(
-                mainAxisSize: MainAxisSize.max,
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  FFButtonWidget(
-                    onPressed: () async {
-                      Navigator.pop(context);
-                    },
-                    text: 'Cancelar',
-                    options: FFButtonOptions(
-                      width: 120.0,
-                      height: 50.0,
-                      padding:
-                          EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
-                      iconPadding:
-                          EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
-                      color: Colors.transparent,
-                      textStyle: FlutterFlowTheme.of(context)
-                          .titleSmall
-                          .override(
-                            font: GoogleFonts.readexPro(),
-                            color: FlutterFlowTheme.of(context).secondaryText,
-                            fontSize: 14.0,
-                          ),
-                      borderSide: BorderSide(
-                        color: FlutterFlowTheme.of(context).alternate,
-                        width: 1.0,
+                  OutlinedButton(
+                    onPressed: _salvando ? null : () => Navigator.pop(context),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 14.0),
+                      side: BorderSide(color: theme.alternate),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
+                    ),
+                    child: Text(
+                      'Cancelar',
+                      style: GoogleFonts.readexPro(
+                        color: theme.secondaryText,
+                        fontSize: 13.0,
+                        fontWeight: FontWeight.w600,
                       ),
-                      borderRadius: BorderRadius.circular(8.0),
                     ),
                   ),
-                  const SizedBox(width: 16.0),
+                  const SizedBox(width: 12.0),
                   FFButtonWidget(
-                    onPressed: () async {
-                      if ((_model.formKey.currentState?.validate() ?? false) &&
-                          (_model.descricaoTextController.text != null &&
-                              _model.descricaoTextController.text != '') &&
-                          (_model.segmentoValue != null &&
-                              _model.segmentoValue != '') &&
-                          (_model.porcentagemTextController.text != null &&
-                              _model.porcentagemTextController.text != '') &&
-                          (_model.parceiroValue != null &&
-                              _model.parceiroValue != '') &&
-                          (_model.datePicked != null)) {
-                        _model.apiResultEdicao = await EditarDescontoCall.call(
-                          id: getJsonField(widget!.desconto, r'''$.id''')
-                              .toString(),
-                          descricao: _model.descricaoTextController.text,
-                          porcentagem: _model.porcentagemTextController.text,
-                          idParceiro: _model.idParceiro?.toString(),
-                          data: _model.datePicked?.toString(),
-                          idTenant: FFAppConstants.tenantId,
-                          idSegmento: _model.idSegmento?.toString(),
-                        );
-
-                        if ((_model.apiResultEdicao?.succeeded ?? true)) {
-                          await showDialog(
-                            context: context,
-                            builder: (alertDialogContext) {
-                              return AlertDialog(
-                                title: Text('Desconto atualizado'),
-                                content: Text(
-                                    'O desconto foi atualizado com sucesso.'),
-                                actions: [
-                                  TextButton(
-                                    onPressed: () =>
-                                        Navigator.pop(alertDialogContext),
-                                    child: Text('Ok'),
-                                  ),
-                                ],
-                              );
-                            },
-                          );
-                          Navigator.pop(context);
-                        } else {
-                          await showDialog(
-                            context: context,
-                            builder: (alertDialogContext) {
-                              return AlertDialog(
-                                title: Text('Algo deu errado'),
-                                content: Text(
-                                    'Não foi possível atualizar o desconto. Essa funcionalidade depende de um ajuste no backend que ainda não foi feito.'),
-                                actions: [
-                                  TextButton(
-                                    onPressed: () =>
-                                        Navigator.pop(alertDialogContext),
-                                    child: Text('Ok'),
-                                  ),
-                                ],
-                              );
-                            },
-                          );
-                        }
-                      } else {
-                        await showDialog(
-                          context: context,
-                          builder: (alertDialogContext) {
-                            return AlertDialog(
-                              title: Text('Campos não preenchidos'),
-                              content: Text(
-                                  'Preencha todos os campos corretamente.'),
-                              actions: [
-                                TextButton(
-                                  onPressed: () =>
-                                      Navigator.pop(alertDialogContext),
-                                  child: Text('Ok'),
-                                ),
-                              ],
-                            );
-                          },
-                        );
-                      }
-
-                      safeSetState(() {});
-                    },
-                    text: 'Salvar alterações',
-                    icon: Icon(
-                      Icons.save_outlined,
-                      size: 21.0,
-                    ),
+                    onPressed: _salvando ? null : _submeterEdicao,
+                    text: _salvando ? 'Salvando...' : 'Salvar Alterações',
+                    icon: _salvando
+                        ? null
+                        : Icon(
+                            Icons.check_rounded,
+                            color: theme.secondary,
+                            size: 18.0,
+                          ),
                     options: FFButtonOptions(
-                      width: 200.0,
-                      height: 50.0,
-                      padding:
-                          EdgeInsetsDirectional.fromSTEB(16.0, 0.0, 16.0, 0.0),
-                      iconPadding:
-                          EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
-                      color: FlutterFlowTheme.of(context).secondary,
-                      textStyle:
-                          FlutterFlowTheme.of(context).titleSmall.override(
-                                font: GoogleFonts.readexPro(
-                                  fontWeight: FlutterFlowTheme.of(context)
-                                      .titleSmall
-                                      .fontWeight,
-                                  fontStyle: FlutterFlowTheme.of(context)
-                                      .titleSmall
-                                      .fontStyle,
-                                ),
-                                color: FlutterFlowTheme.of(context).primary,
-                                letterSpacing: 0.0,
-                                fontWeight: FlutterFlowTheme.of(context)
-                                    .titleSmall
-                                    .fontWeight,
-                                fontStyle: FlutterFlowTheme.of(context)
-                                    .titleSmall
-                                    .fontStyle,
-                              ),
-                      elevation: 0.0,
+                      height: 44.0,
+                      padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                      color: theme.primary,
+                      textStyle: GoogleFonts.readexPro(
+                        color: Colors.white,
+                        fontSize: 13.5,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      elevation: 0,
                       borderRadius: BorderRadius.circular(8.0),
                     ),
                   ),

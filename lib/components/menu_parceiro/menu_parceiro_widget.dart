@@ -52,71 +52,67 @@ class _MenuParceiroWidgetState extends State<MenuParceiroWidget> {
     final theme = FlutterFlowTheme.of(context);
     final isCollapsed = FFAppState().sidebarCollapsed;
 
-    return MouseRegion(
-      cursor: SystemMouseCursors.click,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(8.0),
-        hoverColor:
-            isActive ? Colors.transparent : theme.primary.withOpacity(0.12),
-        splashColor: theme.primary.withOpacity(0.2),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 150),
-          width: double.infinity,
-          height: 48.0,
-          decoration: BoxDecoration(
-            color: isActive ? theme.secondaryBackground : Colors.transparent,
-            borderRadius: BorderRadius.circular(8.0),
-            boxShadow: isActive
-                ? [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.08),
-                      blurRadius: 4,
-                      offset: const Offset(0, 2),
-                    )
-                  ]
-                : null,
-          ),
-          child: Row(
-            mainAxisAlignment: isCollapsed
-                ? MainAxisAlignment.center
-                : MainAxisAlignment.start,
-            children: [
-              if (!isCollapsed) ...[
-                AnimatedContainer(
-                  duration: const Duration(milliseconds: 150),
-                  width: 4.0,
-                  height: isActive ? 24.0 : 0.0,
-                  decoration: BoxDecoration(
-                    color: theme.secondary,
-                    borderRadius: BorderRadius.circular(2.0),
-                  ),
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(8.0),
+      hoverColor:
+          isActive ? Colors.transparent : theme.primary.withValues(alpha: 0.12),
+      splashColor: theme.primary.withValues(alpha: 0.2),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
+        width: double.infinity,
+        height: 48.0,
+        decoration: BoxDecoration(
+          color: isActive ? theme.secondaryBackground : Colors.transparent,
+          borderRadius: BorderRadius.circular(8.0),
+          boxShadow: isActive
+              ? [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.08),
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
+                  )
+                ]
+              : null,
+        ),
+        child: Row(
+          mainAxisAlignment: isCollapsed
+              ? MainAxisAlignment.center
+              : MainAxisAlignment.start,
+          children: [
+            if (!isCollapsed) ...[
+              Container(
+                width: 4.0,
+                height: 24.0,
+                decoration: BoxDecoration(
+                  color: isActive ? theme.secondary : Colors.transparent,
+                  borderRadius: BorderRadius.circular(2.0),
                 ),
-                const SizedBox(width: 14.0),
-              ],
-              Icon(
-                icon,
-                size: 20.0,
-                color: isActive
-                    ? theme.primary
-                    : theme.primaryText.withOpacity(0.85),
               ),
-              if (!isCollapsed) ...[
-                const SizedBox(width: 10.0),
-                Text(
-                  title,
-                  style: theme.bodyMedium.override(
-                    fontFamily: 'Open Sans',
-                    fontSize: 14.0,
-                    fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
-                    color: isActive
-                        ? theme.primary
-                        : theme.primaryText.withOpacity(0.85),
-                  ),
-                ),
-              ],
+              const SizedBox(width: 14.0),
             ],
-          ),
+            Icon(
+              icon,
+              size: 20.0,
+              color: isActive
+                  ? theme.primary
+                  : theme.primaryText.withValues(alpha: 0.85),
+            ),
+            if (!isCollapsed) ...[
+              const SizedBox(width: 10.0),
+              Text(
+                title,
+                style: theme.bodyMedium.override(
+                  fontFamily: 'Open Sans',
+                  fontSize: 14.0,
+                  fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
+                  color: isActive
+                      ? theme.primary
+                      : theme.primaryText.withValues(alpha: 0.85),
+                ),
+              ),
+            ],
+          ],
         ),
       ),
     );

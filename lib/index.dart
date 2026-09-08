@@ -21,3 +21,5 @@ export '/pages/cupons_parceiro/cupons_parceiro_widget.dart'
 export '/pages/contrato_parceiro/contrato_parceiro_widget.dart'
     show ContratoParceiroWidget;
 export '/pages/segmentos/segmentos_widget.dart' show SegmentosWidget;
+export '/pages/planos/planos_widget.dart' show PlanosWidget;
+export '/pages/assinaturas/assinaturas_widget.dart' show AssinaturasWidget;
