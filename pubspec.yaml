@@ -61,7 +61,7 @@ dependencies:
   image_picker_macos: 0.2.1+2
   image_picker_platform_interface: 2.10.1
   image_picker_windows: 0.2.1+1
-  intl: 0.20.2
+  intl: ^0.20.2
   json_path: 0.7.2
   mask_text_input_formatter: 2.9.0
   mime_type: 1.0.0
@@ -104,6 +104,7 @@ dependencies:
 
 dependency_overrides:
   collection: 1.19.1
+  intl: ^0.20.3
   http: 1.4.0
   uuid: ^4.0.0
   font_awesome_flutter: 11.0.0
