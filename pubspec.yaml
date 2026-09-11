@@ -103,6 +103,7 @@ dependencies:
   cupertino_icons: ^1.0.0
 
 dependency_overrides:
+  collection: 1.19.1
   http: 1.4.0
   uuid: ^4.0.0
   font_awesome_flutter: 11.0.0

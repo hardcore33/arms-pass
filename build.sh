@@ -2,9 +2,12 @@
 set -e
 echo "=== Preparando ambiente Flutter Web para Vercel ==="
 
+git config --global --add safe.directory '*' 2>/dev/null || true
+
 if ! command -v flutter &> /dev/null; then
-  echo "Instalando Flutter SDK..."
-  git clone https://github.com/flutter/flutter.git --depth 1 -b 3.24.3 $HOME/flutter
+  echo "Instalando Flutter SDK (channel stable)..."
+  rm -rf $HOME/flutter
+  git clone https://github.com/flutter/flutter.git --depth 1 -b stable $HOME/flutter
   export PATH="$PATH:$HOME/flutter/bin"
 fi
 
