@@ -20,12 +20,8 @@ class LoginModel extends FlutterFlowModel<LoginWidget> {
   TextEditingController? textController1;
   String? Function(BuildContext, String?)? textController1Validator;
   String? _textController1Validator(BuildContext context, String? val) {
-    if (val == null || val.isEmpty) {
-      return 'Campo necessário';
-    }
-
-    if (!RegExp(kTextValidatorEmailRegex).hasMatch(val)) {
-      return 'Has to be a valid email address.';
+    if (val == null || val.trim().isEmpty) {
+      return 'Por favor, informe seu e-mail ou CNPJ';
     }
     return null;
   }

@@ -349,7 +349,7 @@ class _ModalDeAlterarCustomerWidgetState
 
                     const SizedBox(height: 18.0),
 
-                    // Card de Status Arms Pró
+                    // Card de Status Arms Pro
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
                       decoration: BoxDecoration(
@@ -386,7 +386,7 @@ class _ModalDeAlterarCustomerWidgetState
                                 Row(
                                   children: [
                                     Text(
-                                      'Membro Arms Pró',
+                                      'Membro Arms Pro',
                                       style: GoogleFonts.readexPro(
                                         fontSize: 13.5,
                                         fontWeight: FontWeight.bold,

@@ -14,7 +14,7 @@ class ModalAdicionarDescontoParceiroModel extends FlutterFlowModel<ModalAdiciona
   TextEditingController? porcentagemTextController;
   String? Function(BuildContext, String?)? porcentagemTextControllerValidator;
 
-  // Arms Pró & Limite de Quantidade
+  // Arms Pro & Limite de Quantidade
   bool isArmsPro = false;
 
   FocusNode? limiteQuantidadeFocusNode;

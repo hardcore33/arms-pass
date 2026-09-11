@@ -1,10 +1,11 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
+import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import '/backend/api_requests/api_calls.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 
-/// Modelo de dados de um Plano Arms Pró
+/// Modelo de dados de um Plano Arms Pro
 class PlanModel {
   PlanModel({
     required this.id,
@@ -43,7 +44,7 @@ class PlanModel {
   factory PlanModel.fromJson(Map<String, dynamic> json) {
     return PlanModel(
       id: json['id']?.toString() ?? DateTime.now().millisecondsSinceEpoch.toString(),
-      name: json['name']?.toString() ?? 'Plano Arms Pró',
+      name: json['name']?.toString() ?? 'Plano Arms Pro',
       price: (json['price'] is num) ? (json['price'] as num).toDouble() : double.tryParse(json['price']?.toString() ?? '0') ?? 0.0,
       billingCycle: json['billingCycle']?.toString() ?? 'Mensal',
       highlightTag: json['highlightTag']?.toString(),
@@ -82,7 +83,7 @@ class PlanModel {
   }
 }
 
-/// Modelo de Assinatura de Membro Arms Pró
+/// Modelo de Assinatura de Membro Arms Pro
 class SubscriptionMemberModel {
   SubscriptionMemberModel({
     required this.id,
@@ -138,7 +139,7 @@ class SubscriptionMemberModel {
       userCpf: json['userCpf']?.toString() ?? '',
       userEmail: json['userEmail']?.toString() ?? '',
       planId: json['planId']?.toString() ?? '',
-      planName: json['planName']?.toString() ?? 'Arms Pró',
+      planName: json['planName']?.toString() ?? 'Arms Pro',
       startDate: DateTime.tryParse(json['startDate']?.toString() ?? '') ?? DateTime.now(),
       nextBillingDate: DateTime.tryParse(json['nextBillingDate']?.toString() ?? '') ??
           DateTime.now().add(const Duration(days: 30)),
@@ -160,10 +161,13 @@ class PlansAndSubscriptionsService extends ChangeNotifier {
 
   static const String _storageKeyPlans = 'armspro_plans_v1';
   static const String _storageKeySubscriptions = 'armspro_subscriptions_v1';
+  static const String _storageKeyDeletedPlans = 'armspro_deleted_plans_v1';
 
   bool _initialized = false;
   List<PlanModel> _plans = [];
   List<SubscriptionMemberModel> _subscriptions = [];
+  // IDs de planos explicitamente deletados pelo usuário — persiste entre restarts
+  Set<String> _deletedPlanIds = {};
 
   List<PlanModel> get plans => List.unmodifiable(_plans);
   List<SubscriptionMemberModel> get subscriptions => List.unmodifiable(_subscriptions);
@@ -179,7 +183,11 @@ class PlansAndSubscriptionsService extends ChangeNotifier {
     if (plansJson != null && plansJson.isNotEmpty) {
       try {
         final List<dynamic> decoded = jsonDecode(plansJson);
-        _plans = decoded.map((e) => PlanModel.fromJson(e as Map<String, dynamic>)).toList();
+        final loaded = decoded
+            .map((e) => PlanModel.fromJson(e as Map<String, dynamic>))
+            .where((p) => p.id != 'plan_black_anual' && p.id != 'plan_trimestral')
+            .toList();
+        _plans = loaded.isNotEmpty ? loaded : _getDefaultPlans();
       } catch (_) {
         _plans = _getDefaultPlans();
       }
@@ -188,20 +196,99 @@ class PlansAndSubscriptionsService extends ChangeNotifier {
       await _savePlansToStorage();
     }
 
+    // Carrega IDs de planos deletados
+    try {
+      final deletedJson = prefs.getString(_storageKeyDeletedPlans);
+      if (deletedJson != null && deletedJson.isNotEmpty) {
+        final List<dynamic> deletedList = jsonDecode(deletedJson);
+        _deletedPlanIds = deletedList.map((e) => e.toString()).toSet();
+        // Remove da lista carregada qualquer plano marcado como deletado
+        _plans.removeWhere((p) => _deletedPlanIds.contains(p.id));
+      }
+    } catch (_) {}
+
     if (subsJson != null && subsJson.isNotEmpty) {
       try {
         final List<dynamic> decoded = jsonDecode(subsJson);
-        _subscriptions = decoded.map((e) => SubscriptionMemberModel.fromJson(e as Map<String, dynamic>)).toList();
+        final loaded = decoded
+            .map((e) => SubscriptionMemberModel.fromJson(e as Map<String, dynamic>))
+            .where((s) => !s.id.startsWith('sub_00'))
+            .toList();
+        _subscriptions = loaded;
       } catch (_) {
-        _subscriptions = _getDefaultSubscriptions();
+        _subscriptions = [];
       }
     } else {
-      _subscriptions = _getDefaultSubscriptions();
+      _subscriptions = [];
       await _saveSubscriptionsToStorage();
     }
 
     _initialized = true;
     notifyListeners();
+
+    // Sincronização em segundo plano com os dados reais
+    syncWithBackend();
+  }
+
+  /// Sincroniza dados com os endpoints REST mantendo dados 100% reais
+  Future<void> syncWithBackend() async {
+    // 1. Planos: tenta o endpoint da nuvem; se não implantado (404), tenta o backend local
+    try {
+      final response = await ObterPlanosCall.call();
+      if (response.succeeded && response.jsonBody is List) {
+        final List<dynamic> list = response.jsonBody as List<dynamic>;
+        if (list.isNotEmpty) {
+          // Filtra planos explicitamente deletados pelo usuário
+          _plans = list
+              .map((e) => PlanModel.fromJson(e as Map<String, dynamic>))
+              .where((p) => !_deletedPlanIds.contains(p.id))
+              .toList();
+          await _savePlansToStorage();
+        }
+      } else {
+        // Fallback local caso a VPS ainda não tenha recebido o deploy do novo JAR
+        try {
+          final resLocal = await http.get(Uri.parse('http://localhost:8181/api/v1/plans'));
+          if (resLocal.statusCode == 200) {
+            final decoded = jsonDecode(utf8.decode(resLocal.bodyBytes));
+            if (decoded is List && decoded.isNotEmpty) {
+              _plans = decoded
+                  .map((e) => PlanModel.fromJson(e as Map<String, dynamic>))
+                  .where((p) => !_deletedPlanIds.contains(p.id))
+                  .toList();
+              await _savePlansToStorage();
+            }
+          }
+        } catch (_) {}
+      }
+    } catch (_) {}
+
+    // 2. Assinaturas: tenta obter assinaturas reais
+    try {
+      final subResponse = await ObterAssinaturasCall.call();
+      if (subResponse.succeeded && subResponse.jsonBody is List) {
+        final List<dynamic> list = subResponse.jsonBody as List<dynamic>;
+        _subscriptions = list
+            .map((e) => SubscriptionMemberModel.fromJson(e as Map<String, dynamic>))
+            .where((s) => !s.id.startsWith('sub_00'))
+            .toList();
+        await _saveSubscriptionsToStorage();
+      } else {
+        try {
+          final resLocal = await http.get(Uri.parse('http://localhost:8181/api/v1/subscriptions'));
+          if (resLocal.statusCode == 200) {
+            final decoded = jsonDecode(utf8.decode(resLocal.bodyBytes));
+            if (decoded is List) {
+              _subscriptions = decoded
+                  .map((e) => SubscriptionMemberModel.fromJson(e as Map<String, dynamic>))
+                  .where((s) => !s.id.startsWith('sub_00'))
+                  .toList();
+              await _saveSubscriptionsToStorage();
+            }
+          }
+        } catch (_) {}
+      }
+    } catch (_) {}
   }
 
   Future<void> _savePlansToStorage() async {
@@ -222,8 +309,9 @@ class PlansAndSubscriptionsService extends ChangeNotifier {
   // MÓDULO A: GESTÃO DE PLANOS ARMS PRÓ
   // -------------------------------------------------------------
 
-  /// Adiciona ou atualiza um plano
+  /// Adiciona ou atualiza um plano com sincronização em nuvem e persistência local
   Future<void> savePlan(PlanModel plan) async {
+    final isExisting = _plans.any((p) => p.id == plan.id);
     final index = _plans.indexWhere((p) => p.id == plan.id);
     if (index >= 0) {
       _plans[index] = plan;
@@ -231,6 +319,43 @@ class PlansAndSubscriptionsService extends ChangeNotifier {
       _plans.insert(0, plan);
     }
     await _savePlansToStorage();
+
+    // Sincroniza em nuvem com o backend
+    try {
+      if (isExisting) {
+        await AtualizarPlanoCall.call(
+          id: plan.id,
+          name: plan.name,
+          price: plan.price,
+          billingCycle: plan.billingCycle,
+          highlightTag: plan.highlightTag,
+          benefits: plan.benefits,
+          eligiblePartnerIds: plan.eligiblePartnerIds,
+          isActive: plan.isActive,
+        );
+      } else {
+        final res = await CriarPlanoCall.call(
+          name: plan.name,
+          price: plan.price,
+          billingCycle: plan.billingCycle,
+          highlightTag: plan.highlightTag,
+          benefits: plan.benefits,
+          eligiblePartnerIds: plan.eligiblePartnerIds,
+          isActive: plan.isActive,
+        );
+        // Se a API retornar o ID criado pelo banco, atualiza no modelo local
+        if (res.succeeded && res.jsonBody is Map && res.jsonBody['id'] != null) {
+          final cloudId = res.jsonBody['id'].toString();
+          final idx = _plans.indexWhere((p) => p.id == plan.id);
+          if (idx >= 0) {
+            _plans[idx] = plan.copyWith(id: cloudId);
+            await _savePlansToStorage();
+          }
+        }
+      }
+    } catch (_) {
+      // Falha de envio em nuvem não impede uso local (fallback offline)
+    }
   }
 
   /// Alterna o status (Ativo / Inativo) de um plano
@@ -239,13 +364,39 @@ class PlansAndSubscriptionsService extends ChangeNotifier {
     if (index >= 0) {
       _plans[index].isActive = !_plans[index].isActive;
       await _savePlansToStorage();
+
+      final plan = _plans[index];
+      try {
+        await AtualizarPlanoCall.call(
+          id: plan.id,
+          name: plan.name,
+          price: plan.price,
+          billingCycle: plan.billingCycle,
+          highlightTag: plan.highlightTag,
+          benefits: plan.benefits,
+          eligiblePartnerIds: plan.eligiblePartnerIds,
+          isActive: plan.isActive,
+        );
+      } catch (_) {}
     }
   }
 
-  /// Exclui um plano
+  /// Exclui um plano com sincronização em nuvem
   Future<void> deletePlan(String planId) async {
+    // Registra o ID como deletado ANTES de tudo para persistir entre restarts
+    _deletedPlanIds.add(planId);
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(
+      _storageKeyDeletedPlans,
+      jsonEncode(_deletedPlanIds.toList()),
+    );
+
     _plans.removeWhere((p) => p.id == planId);
     await _savePlansToStorage();
+
+    try {
+      await ExcluirPlanoCall.call(id: planId);
+    } catch (_) {}
   }
 
   /// Retorna um plano pelo ID
@@ -311,7 +462,7 @@ class PlansAndSubscriptionsService extends ChangeNotifier {
     return _subscriptions.where((sub) => sub.status == 'Ativa' && planIdsWithPartner.contains(sub.planId)).length;
   }
 
-  /// Retorna um resumo detalhado do parceiro em relação ao ecossistema Arms Pró
+  /// Retorna um resumo detalhado do parceiro em relação ao ecossistema Arms Pro
   Map<String, dynamic> getPartnerSummary(int partnerId) {
     final linkedPlans = getPlansForPartner(partnerId);
     final subscribersCount = getPartnerSubscribersCount(partnerId);
@@ -336,7 +487,7 @@ class PlansAndSubscriptionsService extends ChangeNotifier {
     }).toList();
   }
 
-  /// Analisa a string de regras de desconto/cupom e extrai metadados do Arms Pró
+  /// Analisa a string de regras de desconto/cupom e extrai metadados do Arms Pro
   static Map<String, dynamic> parseArmsProDiscountRules(String? rules) {
     if (rules == null || rules.trim().isEmpty) {
       return {
@@ -398,7 +549,7 @@ class PlansAndSubscriptionsService extends ChangeNotifier {
     return '$prefix $cleanBase';
   }
 
-  /// Verifica se um cupom/desconto é elegível para o usuário com base no seu plano Arms Pró
+  /// Verifica se um cupom/desconto é elegível para o usuário com base no seu plano Arms Pro
   static bool isDiscountApplicableForPlan({
     required String? discountRules,
     required String userPlanId,
@@ -407,10 +558,10 @@ class PlansAndSubscriptionsService extends ChangeNotifier {
     final isArmsPro = parsed['isArmsPro'] as bool;
     final allowedPlans = parsed['allowedPlanIds'] as List<String>;
 
-    // Se não tiver restrição Arms Pró, qualquer usuário/plano tem acesso
+    // Se não tiver restrição Arms Pro, qualquer usuário/plano tem acesso
     if (!isArmsPro) return true;
 
-    // Se for restrito ao Arms Pró mas sem planos específicos, qualquer plano Arms Pró serve
+    // Se for restrito ao Arms Pro mas sem planos específicos, qualquer plano Arms Pro serve
     if (allowedPlans.isEmpty) return true;
 
     // Se houver planos específicos, verifica se o plano do usuário está na lista
@@ -480,132 +631,25 @@ class PlansAndSubscriptionsService extends ChangeNotifier {
   List<PlanModel> _getDefaultPlans() {
     return [
       PlanModel(
-        id: 'plan_mensal',
-        name: 'Arms Pró Mensal',
-        price: 99.90,
+        id: '1',
+        name: 'Arms Pro Mensal',
+        price: 89.90,
         billingCycle: 'Mensal',
-        highlightTag: 'Flexível',
-        benefits: [
-          'Acesso livre a toda a rede de academias',
-          'Descontos exclusivos nos parceiros credenciados',
-          'Acesso ao aplicativo móvel Arms Pró',
-          'Suporte prioritário na recepção',
-        ],
-        isActive: true,
-        eligiblePartnerIds: [1, 2, 3],
-        createdAt: DateTime.now().subtract(const Duration(days: 60)),
-      ),
-      PlanModel(
-        id: 'plan_black_anual',
-        name: 'Arms Pró Black Anual',
-        price: 899.90,
-        billingCycle: 'Anual',
         highlightTag: 'Mais Popular',
         benefits: [
-          'Acesso livre VIP e irrestrito a todas as unidades',
-          'Até 30% OFF em toda a rede de parceiros credenciados',
-          'Concierge VIP para agendamentos',
-          '1 consulta nutricional por trimestre',
-          'Kit exclusivo Arms Gym de boas-vindas',
-          'Convite mensal para um amigo treinar',
+          'Acesso ao aplicativo móvel Arms Pro',
+          'Descontos exclusivos nos parceiros credenciados',
+          'Check-in facilitado nas unidades',
         ],
         isActive: true,
-        eligiblePartnerIds: [1, 2, 3, 4, 5],
-        createdAt: DateTime.now().subtract(const Duration(days: 90)),
-      ),
-      PlanModel(
-        id: 'plan_trimestral',
-        name: 'Arms Pró Trimestral',
-        price: 269.70,
-        billingCycle: 'Trimestral',
-        highlightTag: '10% OFF',
-        benefits: [
-          'Acesso livre a toda a rede de academias',
-          'Descontos especiais na rede parceira credenciada',
-          'Avaliação física mensal incluída',
-          'Toalha e armário exclusivo na unidade sede',
-        ],
-        isActive: true,
-        eligiblePartnerIds: [1, 2, 4],
-        createdAt: DateTime.now().subtract(const Duration(days: 45)),
+        eligiblePartnerIds: [170],
+        createdAt: DateTime(2026, 9, 9),
       ),
     ];
   }
 
   List<SubscriptionMemberModel> _getDefaultSubscriptions() {
-    final now = DateTime.now();
-    return [
-      SubscriptionMemberModel(
-        id: 'sub_001',
-        customerId: 101,
-        userName: 'Carlos Eduardo Mendes',
-        userCpf: '12345678901',
-        userEmail: 'carlos.mendes@email.com',
-        planId: 'plan_black_anual',
-        planName: 'Arms Pró Black Anual',
-        startDate: now.subtract(const Duration(days: 120)),
-        nextBillingDate: now.add(const Duration(days: 245)),
-        status: 'Ativa',
-        lastPaymentMethod: 'Cartão de Crédito',
-        amountPaid: 899.90,
-      ),
-      SubscriptionMemberModel(
-        id: 'sub_002',
-        customerId: 102,
-        userName: 'Fernanda Lima Ribeiro',
-        userCpf: '98765432100',
-        userEmail: 'fernanda.ribeiro@email.com',
-        planId: 'plan_mensal',
-        planName: 'Arms Pró Mensal',
-        startDate: now.subtract(const Duration(days: 25)),
-        nextBillingDate: now.add(const Duration(days: 5)),
-        status: 'Ativa',
-        lastPaymentMethod: 'PIX Recorrente',
-        amountPaid: 99.90,
-      ),
-      SubscriptionMemberModel(
-        id: 'sub_003',
-        customerId: 103,
-        userName: 'Roberto Albuquerque',
-        userCpf: '45678912344',
-        userEmail: 'roberto.alb@email.com',
-        planId: 'plan_trimestral',
-        planName: 'Arms Pró Trimestral',
-        startDate: now.subtract(const Duration(days: 95)),
-        nextBillingDate: now.subtract(const Duration(days: 5)),
-        status: 'Vencida',
-        lastPaymentMethod: 'Boleto Bancário',
-        amountPaid: 269.70,
-      ),
-      SubscriptionMemberModel(
-        id: 'sub_004',
-        customerId: 104,
-        userName: 'Mariana Souza Castro',
-        userCpf: '32165498722',
-        userEmail: 'mariana.castro@email.com',
-        planId: 'plan_mensal',
-        planName: 'Arms Pró Mensal',
-        startDate: now.subtract(const Duration(days: 2)),
-        nextBillingDate: now.add(const Duration(days: 28)),
-        status: 'Pendente de Pagamento',
-        lastPaymentMethod: 'PIX',
-        amountPaid: 99.90,
-      ),
-      SubscriptionMemberModel(
-        id: 'sub_005',
-        customerId: 105,
-        userName: 'Thiago Martins Fonseca',
-        userCpf: '65498732155',
-        userEmail: 'thiago.fonseca@email.com',
-        planId: 'plan_black_anual',
-        planName: 'Arms Pró Black Anual',
-        startDate: now.subtract(const Duration(days: 200)),
-        nextBillingDate: now.subtract(const Duration(days: 20)),
-        status: 'Cancelada',
-        lastPaymentMethod: 'Cartão de Crédito',
-        amountPaid: 899.90,
-        cancellationReason: 'Mudança de cidade',
-      ),
-    ];
+    // 100% dados reais: sem assinaturas fabricadas
+    return [];
   }
 }

@@ -414,7 +414,7 @@ class _ListagemDeCuponsParceiroWidgetState
                                                     Icon(Icons.star_rounded, color: highlightColor, size: 12.0),
                                                     const SizedBox(width: 3.0),
                                                     Text(
-                                                      'Arms Pró VIP',
+                                                      'Arms Pro VIP',
                                                       style: TextStyle(
                                                         color: highlightColor,
                                                         fontSize: 10.5,

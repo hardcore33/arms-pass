@@ -41,171 +41,50 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
-  <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
-    body, html {
-      width: 100%;
-      height: 100%;
-      background-color: #12100B;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      overflow: hidden;
-    }
-
-    #loading-screen {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      background: radial-gradient(circle at center, #1c1914 0%, #12100B 75%, #0b0a07 100%);
-      z-index: 99999;
-      opacity: 1;
-      visibility: visible;
-      transition: opacity 0.45s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.45s;
-    }
-
-    #loading-screen.fade-out {
-      opacity: 0;
-      visibility: hidden;
-      pointer-events: none;
-    }
-
-    .loader-content {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      text-align: center;
-    }
-
-    .logo-wrapper {
-      position: relative;
-      margin-bottom: 24px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .logo-glow {
-      position: absolute;
-      width: 130px;
-      height: 130px;
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(214, 164, 59, 0.18) 0%, rgba(214, 164, 59, 0) 70%);
-      animation: pulseGlow 2.8s ease-in-out infinite;
-    }
-
-    .app-logo {
-      width: 104px;
-      height: auto;
-      max-height: 104px;
-      object-fit: contain;
-      position: relative;
-      z-index: 2;
-      filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.5));
-      animation: logoFloat 3s ease-in-out infinite;
-    }
-
-    .app-title {
-      font-size: 13px;
-      font-weight: 700;
-      letter-spacing: 3.5px;
-      text-transform: uppercase;
-      color: #A49C88;
-      margin-bottom: 20px;
-      opacity: 0.95;
-    }
-
-    .progress-bar-container {
-      width: 160px;
-      height: 3px;
-      background-color: rgba(255, 255, 255, 0.08);
-      border-radius: 99px;
-      overflow: hidden;
-      position: relative;
-      margin-bottom: 12px;
-    }
-
-    .progress-bar-indicator {
-      position: absolute;
-      top: 0;
-      left: 0;
-      height: 100%;
-      width: 45%;
-      background: linear-gradient(90deg, transparent, #D6A43B, #F9CF58, #D6A43B, transparent);
-      border-radius: 99px;
-      animation: indeterminateShimmer 1.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-    }
-
-    .loading-status {
-      font-size: 11px;
-      color: #71717A;
-      letter-spacing: 0.5px;
-    }
-
-    @keyframes indeterminateShimmer {
-      0% {
-        left: -50%;
-        width: 30%;
-      }
-      50% {
-        width: 60%;
-      }
-      100% {
-        left: 110%;
-        width: 30%;
-      }
-    }
-
-    @keyframes pulseGlow {
-      0%, 100% {
-        transform: scale(0.95);
-        opacity: 0.6;
-      }
-      50% {
-        transform: scale(1.2);
-        opacity: 1;
-      }
-    }
-
-    @keyframes logoFloat {
-      0%, 100% {
-        transform: translateY(0);
-      }
-      50% {
-        transform: translateY(-4px);
-      }
-    }
-  </style>
 </head>
 <body>
-  <!-- Tela de Carregamento Instantânea (HTML/CSS nativo) -->
-  <div id="loading-screen" aria-label="Carregando Procard...">
-    <div class="loader-content">
-      <div class="logo-wrapper">
-        <div class="logo-glow"></div>
-        <img 
-          class="app-logo" 
-          src="logo.png" 
-          alt="Clube Procard"
-          onerror="this.src='aa3db6d9-5079-4de7-b256-8aac6f1e4aa5.png'" 
-        />
-      </div>
-      <div class="app-title">Clube Procard</div>
-      <div class="progress-bar-container">
-        <div class="progress-bar-indicator"></div>
-      </div>
-      <div class="loading-status">Carregando painel...</div>
-    </div>
-  </div>
+
+
+  <!--Start of Tawk.to Script-->
+  <style>
+    /* Reposiciona e redimensiona o widget do Tawk.to */
+    #tawk-bubble-container,
+    .tawk-min-container {
+      bottom: 16px !important;
+      right: 16px !important;
+      left: auto !important;
+    }
+    /* Reduz o tamanho do botão flutuante */
+    .tawk-button-circle {
+      width: 48px !important;
+      height: 48px !important;
+    }
+    .tawk-button-circle svg {
+      width: 24px !important;
+      height: 24px !important;
+    }
+  </style>
+  <script type="text/javascript">
+  var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
+  Tawk_API.customStyle = {
+    visibility: {
+      desktop: { position: 'br', xOffset: 16, yOffset: 16 },
+      mobile:  { position: 'br', xOffset: 8,  yOffset: 8  }
+    }
+  };
+  Tawk_API.onLoad = function() {
+    Tawk_API.setAttributes({}, function(error) {});
+  };
+  (function(){
+  var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
+  s1.async=true;
+  s1.src='https://embed.tawk.to/6aa30d384df4bd34491d4ab9/1k26en9u6';
+  s1.charset='UTF-8';
+  s1.setAttribute('crossorigin','*');
+  s0.parentNode.insertBefore(s1,s0);
+  })();
+  </script>
+  <!--End of Tawk.to Script-->
 
   <script>
     {{flutter_bootstrap_js}}

@@ -386,9 +386,147 @@ class _DashboardParceiroWidgetState extends State<DashboardParceiroWidget> {
         ],
         descontosAplicados);
 
+    // Dados do parceiro logado para o card de boas-vindas
+    // O jsonBody do login tem estrutura { token, user: { name, partner: { ... } } }
+    final parceiroJson = FFAppState().parceiro;
+    final String partnerFantasy = (getJsonField(parceiroJson, r'$.user.partner.fantasy') ??
+                                   getJsonField(parceiroJson, r'$.user.partner.nomeFantasia') ??
+                                   getJsonField(parceiroJson, r'$.partner.fantasy') ??
+                                   getJsonField(parceiroJson, r'$.partner.nomeFantasia') ??
+                                   '').toString().trim();
+    final String partnerRazao  = (getJsonField(parceiroJson, r'$.user.partner.razao') ??
+                                  getJsonField(parceiroJson, r'$.user.partner.razaoSocial') ??
+                                  getJsonField(parceiroJson, r'$.partner.razao') ??
+                                  getJsonField(parceiroJson, r'$.partner.razaoSocial') ??
+                                  '').toString().trim();
+    final String customerName  = (getJsonField(parceiroJson, r'$.user.name') ??
+                                  getJsonField(parceiroJson, r'$.name'))?.toString().trim() ?? '';
+    final String partnerName   = partnerFantasy.isNotEmpty ? partnerFantasy
+        : (partnerRazao.isNotEmpty ? partnerRazao
+        : (customerName.isNotEmpty ? customerName : 'Parceiro Credenciado'));
+    final String segmentName   = (getJsonField(parceiroJson, r'$.user.partner.segment.name') ??
+                                  getJsonField(parceiroJson, r'$.partner.segment.name') ??
+                                  getJsonField(parceiroJson, r'$.segment.name'))?.toString().trim() ?? '';
+    final String partnerCity   = (getJsonField(parceiroJson, r'$.user.partner.city') ??
+                                  getJsonField(parceiroJson, r'$.partner.city') ??
+                                  getJsonField(parceiroJson, r'$.city'))?.toString().trim() ?? '';
+    final String partnerState  = (getJsonField(parceiroJson, r'$.user.partner.state') ??
+                                  getJsonField(parceiroJson, r'$.partner.state') ??
+                                  getJsonField(parceiroJson, r'$.state'))?.toString().trim() ?? '';
+    final String location      = [partnerCity, partnerState].where((s) => s.isNotEmpty).join(' – ');
+
+    // Taxa de validação = cupons validados / (validados + não validados) — calculável localmente
+    final cuponsValidados    = castToType<double>(getJsonField(jsonResponse, r'$.cuponsValidados')) ?? cuponsUtilizados;
+    final cuponsNaoValidados = castToType<double>(getJsonField(jsonResponse, r'$.cuponsNaoValidados')) ?? 0.0;
+    final totalCupons        = cuponsValidados + cuponsNaoValidados;
+    final taxaValidacao      = totalCupons > 0 ? (cuponsValidados / totalCupons * 100) : 0.0;
+
     return Column(
       mainAxisSize: MainAxisSize.max,
       children: [
+        // Card de boas-vindas com dados do parceiro
+        Padding(
+          padding: const EdgeInsets.fromLTRB(20.0, 4.0, 20.0, 0.0),
+          child: Material(
+            color: Colors.transparent,
+            elevation: 2.0,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(
+                  FlutterFlowTheme.of(context).designToken.radius.md),
+            ),
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 14.0),
+              decoration: BoxDecoration(
+                color: cardBgColor,
+                borderRadius: BorderRadius.circular(
+                    FlutterFlowTheme.of(context).designToken.radius.md),
+                border: Border.all(color: borderColor),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    width: 44.0,
+                    height: 44.0,
+                    decoration: BoxDecoration(
+                      color: highlightColor.withOpacity(0.15),
+                      shape: BoxShape.circle,
+                      border: Border.all(color: highlightColor.withOpacity(0.4)),
+                    ),
+                    child: Icon(Icons.storefront_rounded,
+                        color: highlightColor, size: 22.0),
+                  ),
+                  const SizedBox(width: 14.0),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          partnerName,
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 15.0,
+                          ),
+                        ),
+                        if (segmentName.isNotEmpty || location.isNotEmpty) ...[
+                          const SizedBox(height: 3.0),
+                          Text(
+                            [segmentName, location]
+                                .where((s) => s.isNotEmpty)
+                                .join('  •  '),
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
+                            style: TextStyle(
+                              color: Colors.white.withOpacity(0.55),
+                              fontSize: 12.0,
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 12.0),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 10.0, vertical: 5.0),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF00C853).withOpacity(0.12),
+                      borderRadius: BorderRadius.circular(20.0),
+                      border: Border.all(
+                          color: const Color(0xFF00C853).withOpacity(0.35)),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          width: 7.0,
+                          height: 7.0,
+                          decoration: const BoxDecoration(
+                            color: Color(0xFF00C853),
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                        const SizedBox(width: 5.0),
+                        const Text(
+                          'Conectado',
+                          style: TextStyle(
+                            color: Color(0xFF00C853),
+                            fontWeight: FontWeight.bold,
+                            fontSize: 11.5,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 16.0),
         // Metrics Containers
         Container(
           width: double.infinity,
@@ -454,6 +592,19 @@ class _DashboardParceiroWidgetState extends State<DashboardParceiroWidget> {
                       ),
                     ),
                   ),
+                  Expanded(
+                    child: BoxIndicadoresWidget(
+                      titulo: 'Taxa de validação',
+                      dado: '${taxaValidacao.toStringAsFixed(1).replaceAll('.', ',')}%',
+                      icon: Icon(
+                        Icons.verified_rounded,
+                        color: FlutterFlowTheme.of(context).secondary,
+                        size: 24.0,
+                      ),
+                      onTap: () =>
+                          context.pushNamed(ValidarParceiroWidget.routeName),
+                    ),
+                  ),
                 ].divide(SizedBox(width: 16.0)),
               ),
               const SizedBox(height: 16.0),
@@ -514,7 +665,7 @@ class _DashboardParceiroWidgetState extends State<DashboardParceiroWidget> {
         ),
         // Bloco Operacional (Últimas Validações de Hoje e Minhas Promoções Ativas)
         Padding(
-          padding: EdgeInsetsDirectional.fromSTEB(0.0, 25.0, 0.0, 0.0),
+          padding: EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
           child: Container(
             width: double.infinity,
             decoration: BoxDecoration(
@@ -537,8 +688,7 @@ class _DashboardParceiroWidgetState extends State<DashboardParceiroWidget> {
                     child: _buildPromoPanel(
                         context, cardBgColor, borderColor, highlightColor),
                   ),
-                  // Painel de Insights (produto mais resgatado, horário de
-                  // pico e quem validou)
+                  // Painel de Destaques Operacionais
                   Expanded(
                     child: _buildInsightsPanel(
                         context, cardBgColor, borderColor, highlightColor),
@@ -866,12 +1016,25 @@ class _DashboardParceiroWidgetState extends State<DashboardParceiroWidget> {
                             final customerName =
                                 getJsonField(item, r'''$.customer.name''')
                                         ?.toString() ??
-                                    'Cliente';
-                            final productName =
-                                getJsonField(item, r'''$.product.name''')
+                                    getJsonField(item, r'''$.customer.cpf''')
                                         ?.toString() ??
-                                    'Benefício';
-                            final rawVal = getJsonField(item, r'''$.value''') ??
+                                    'Associado';
+                            final desc =
+                                getJsonField(item, r'''$.description''')?.toString() ?? '';
+                            String displaySubtitle = 'Benefício Validado';
+                            if (desc.contains('Desconto resgatado:')) {
+                              displaySubtitle = desc.replaceAll('Desconto resgatado:', '').trim();
+                            } else if (desc.contains('Cupom validado')) {
+                              displaySubtitle = 'Benefício Validado no Caixa';
+                            } else if (desc.isNotEmpty) {
+                              displaySubtitle = desc;
+                            }
+
+                            final rawVal = getJsonField(item, r'''$.qtd_point''') ??
+                                getJsonField(item, r'''$.qtdPoint''') ??
+                                getJsonField(item, r'''$.total_saving''') ??
+                                getJsonField(item, r'''$.totalSaving''') ??
+                                getJsonField(item, r'''$.value''') ??
                                 getJsonField(item, r'''$.valorPagar''');
 
                             double? parsedVal;
@@ -891,34 +1054,43 @@ class _DashboardParceiroWidgetState extends State<DashboardParceiroWidget> {
                             return Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Row(
-                                  children: [
-                                    const Icon(
-                                        Icons.check_circle_outline_rounded,
-                                        color: Color(0xFF00C853),
-                                        size: 16.0),
-                                    const SizedBox(width: 10.0),
-                                    Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          customerName,
-                                          style: const TextStyle(
-                                              color: Colors.white,
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 13.0),
+                                Expanded(
+                                  child: Row(
+                                    children: [
+                                      const Icon(
+                                          Icons.check_circle_outline_rounded,
+                                          color: Color(0xFF00C853),
+                                          size: 16.0),
+                                      const SizedBox(width: 10.0),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              customerName,
+                                              overflow: TextOverflow.ellipsis,
+                                              maxLines: 1,
+                                              style: const TextStyle(
+                                                  color: Colors.white,
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 13.0),
+                                            ),
+                                            Text(
+                                              displaySubtitle,
+                                              overflow: TextOverflow.ellipsis,
+                                              maxLines: 1,
+                                              style: const TextStyle(
+                                                  color: Colors.grey,
+                                                  fontSize: 11.0),
+                                            ),
+                                          ],
                                         ),
-                                        Text(
-                                          productName,
-                                          style: const TextStyle(
-                                              color: Colors.grey,
-                                              fontSize: 11.0),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
+                                      ),
+                                    ],
+                                  ),
                                 ),
+                                const SizedBox(width: 8.0),
                                 Text(
                                   formattedVal,
                                   style: TextStyle(
@@ -1184,7 +1356,7 @@ class _DashboardParceiroWidgetState extends State<DashboardParceiroWidget> {
                                                     Icon(Icons.star_rounded, color: highlight, size: 10.0),
                                                     const SizedBox(width: 2.0),
                                                     Text(
-                                                      'Arms Pró VIP',
+                                                      'Arms Pro VIP',
                                                       style: TextStyle(
                                                         color: highlight,
                                                         fontSize: 9.5,
@@ -1419,11 +1591,11 @@ class _DashboardParceiroWidgetState extends State<DashboardParceiroWidget> {
                       vertical: 14.0),
                   child: Row(
                     children: [
-                      Icon(Icons.insights_rounded,
+                      Icon(Icons.query_stats_rounded,
                           color: highlight, size: 18.0),
                       const SizedBox(width: 8.0),
                       const Text(
-                        'Insights do Dia',
+                        'Destaques Operacionais',
                         style: TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
@@ -1477,9 +1649,9 @@ class _DashboardParceiroWidgetState extends State<DashboardParceiroWidget> {
     );
   }
 
-  // Linha do painel de Insights. Quando `value` é null, o dado depende de um
-  // campo que o backend ainda não confirmou — mostra um aviso discreto em
-  // vez de esconder a linha ou inventar um valor.
+  // Linha do painel de Destaques Operacionais. Quando `value` é null,
+  // o campo ainda não chegou do backend — exibe "–" de forma discreta
+  // em vez de uma mensagem técnica visível ao usuário.
   Widget _buildInsightRow({
     required IconData icon,
     required String label,
@@ -1491,7 +1663,7 @@ class _DashboardParceiroWidgetState extends State<DashboardParceiroWidget> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, color: highlight, size: 16.0),
+          Icon(icon, color: value != null ? highlight : Colors.grey.withOpacity(0.5), size: 16.0),
           const SizedBox(width: 10.0),
           Expanded(
             child: Column(
@@ -1503,17 +1675,15 @@ class _DashboardParceiroWidgetState extends State<DashboardParceiroWidget> {
                 ),
                 const SizedBox(height: 2.0),
                 Text(
-                  value ?? 'Aguardando dado do backend',
+                  value ?? '—',
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     color: value != null
                         ? Colors.white
-                        : Colors.grey.withOpacity(0.6),
+                        : Colors.grey.withOpacity(0.35),
                     fontWeight:
                         value != null ? FontWeight.bold : FontWeight.normal,
-                    fontStyle:
-                        value != null ? FontStyle.normal : FontStyle.italic,
                     fontSize: 13.0,
                   ),
                 ),

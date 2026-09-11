@@ -834,6 +834,52 @@ class _ModalAdicionarParceiroWidgetState
                                 ),
                               ],
                             ),
+                            const SizedBox(height: 14.0),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 10.0),
+                              decoration: BoxDecoration(
+                                color: theme.secondary.withOpacity(0.08),
+                                borderRadius: BorderRadius.circular(8.0),
+                                border: Border.all(color: theme.secondary.withOpacity(0.2)),
+                              ),
+                              child: Row(
+                                children: [
+                                  Icon(Icons.radar_rounded, color: theme.secondary, size: 20.0),
+                                  const SizedBox(width: 10.0),
+                                  Expanded(
+                                    child: Text(
+                                      'Geolocalização & Cerca Digital: o endereço cadastrado alimenta o radar de ofertas por raio no app dos assinantes.',
+                                      style: GoogleFonts.readexPro(
+                                        fontSize: 12.0,
+                                        color: theme.primaryText,
+                                      ),
+                                    ),
+                                  ),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+                                    decoration: BoxDecoration(
+                                      color: theme.success.withOpacity(0.15),
+                                      borderRadius: BorderRadius.circular(6.0),
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(Icons.check_circle_rounded, size: 13.0, color: theme.success),
+                                        const SizedBox(width: 4.0),
+                                        Text(
+                                          'Radar Ativo',
+                                          style: GoogleFonts.readexPro(
+                                            fontSize: 11.0,
+                                            fontWeight: FontWeight.w600,
+                                            color: theme.success,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
                           ],
                         ),
                       ),

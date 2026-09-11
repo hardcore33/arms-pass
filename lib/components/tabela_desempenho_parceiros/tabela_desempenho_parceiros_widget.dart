@@ -249,11 +249,13 @@ class _TabelaDesempenhoParceirosWidgetState
         }
       }
 
-      if (target == null && (partnerId != null || (partnerName != null && partnerName.isNotEmpty))) {
-        final newId = partnerId ?? partnerName!;
+      // Se o parceiro não existe na lista de parceiros ativos e não possui nome identificável,
+      // ignora para não poluir o painel com registro genérico "Parceiro / Geral".
+      if (target == null && partnerName != null && partnerName.trim().isNotEmpty && partnerName.trim() != 'Parceiro') {
+        final newId = partnerId ?? partnerName;
         target = _PartnerPerformanceItem(
           id: newId,
-          fantasia: partnerName ?? 'Parceiro',
+          fantasia: partnerName,
           photo: partnerPhoto ?? '',
           segment: 'Geral',
           city: '',
@@ -320,35 +322,41 @@ class _TabelaDesempenhoParceirosWidgetState
     });
   }
 
-  Widget _buildSortableHeader(String label, String column) {
+  Widget _buildSortableHeader(String label, String column, {double width = 120.0}) {
     final theme = FlutterFlowTheme.of(context);
     final isSelected = _sortColumn == column;
     return InkWell(
       onTap: () => _onSort(column),
       borderRadius: BorderRadius.circular(4.0),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 4.0),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              label,
-              style: GoogleFonts.readexPro(
-                fontWeight: FontWeight.w600,
-                fontSize: 11.5,
-                color: isSelected ? theme.primary : theme.secondaryText,
-                letterSpacing: 0.3,
+      child: SizedBox(
+        width: width,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 4.0),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Flexible(
+                child: Text(
+                  label,
+                  overflow: TextOverflow.visible,
+                  style: GoogleFonts.readexPro(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 11.5,
+                    color: isSelected ? theme.primary : theme.secondaryText,
+                    letterSpacing: 0.3,
+                  ),
+                ),
               ),
-            ),
-            const SizedBox(width: 4.0),
-            Icon(
-              isSelected
-                  ? (_sortAsc ? Icons.arrow_upward_rounded : Icons.arrow_downward_rounded)
-                  : Icons.unfold_more_rounded,
-              size: 14.0,
-              color: isSelected ? theme.secondary : theme.secondaryText.withOpacity(0.5),
-            ),
-          ],
+              const SizedBox(width: 4.0),
+              Icon(
+                isSelected
+                    ? (_sortAsc ? Icons.arrow_upward_rounded : Icons.arrow_downward_rounded)
+                    : Icons.unfold_more_rounded,
+                size: 14.0,
+                color: isSelected ? theme.secondary : theme.secondaryText.withOpacity(0.5),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -958,7 +966,7 @@ class _TabelaDesempenhoParceirosWidgetState
               scrollDirection: Axis.horizontal,
               child: ConstrainedBox(
                 constraints: BoxConstraints(
-                  minWidth: MediaQuery.sizeOf(context).width - 320,
+                  minWidth: (MediaQuery.sizeOf(context).width - 320).clamp(800.0, double.infinity),
                 ),
                 child: DataTable(
                   headingRowColor: WidgetStateProperty.all(theme.primaryBackground),
@@ -968,17 +976,20 @@ class _TabelaDesempenhoParceirosWidgetState
                   horizontalMargin: 24.0,
                   columnSpacing: 28.0,
                   columns: [
-                    DataColumn(label: _buildSortableHeader('PARCEIRO', 'nome')),
-                    DataColumn(label: _buildSortableHeader('TOTAL EM VENDAS', 'vendas')),
-                    DataColumn(label: _buildSortableHeader('CUPONS (RESGATADOS / ATIVOS)', 'validados')),
-                    DataColumn(label: _buildSortableHeader('ECONOMIA GERADA', 'economia')),
+                    DataColumn(label: _buildSortableHeader('PARCEIRO', 'nome', width: 160.0)),
+                    DataColumn(label: _buildSortableHeader('TOTAL EM\nVENDAS', 'vendas', width: 110.0)),
+                    DataColumn(label: _buildSortableHeader('CUPONS\n(RESG./ATIVOS)', 'validados', width: 130.0)),
+                    DataColumn(label: _buildSortableHeader('ECONOMIA\nGERADA', 'economia', width: 110.0)),
                     DataColumn(
-                      label: Text(
-                        'PRODUTO LÍDER',
-                        style: GoogleFonts.readexPro(
-                          fontWeight: FontWeight.w600,
-                          fontSize: 11.5,
-                          color: theme.secondaryText,
+                      label: SizedBox(
+                        width: 120.0,
+                        child: Text(
+                          'PRODUTO LÍDER',
+                          style: GoogleFonts.readexPro(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 11.5,
+                            color: theme.secondaryText,
+                          ),
                         ),
                       ),
                     ),

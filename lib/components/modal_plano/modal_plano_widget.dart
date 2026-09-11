@@ -184,7 +184,7 @@ class _ModalPlanoWidgetState extends State<ModalPlanoWidget> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          isEdit ? 'Editar Plano Arms Pró' : 'Novo Plano Arms Pró',
+                          isEdit ? 'Editar Plano Arms Pro' : 'Novo Plano Arms Pro',
                           style: GoogleFonts.outfit(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
@@ -231,7 +231,7 @@ class _ModalPlanoWidgetState extends State<ModalPlanoWidget> {
                       focusNode: _model.nomeFocusNode,
                       style: GoogleFonts.readexPro(fontSize: 13, color: theme.primaryText),
                       decoration: InputDecoration(
-                        hintText: 'Ex.: Arms Pró Black Anual, Arms Pró Mensal...',
+                        hintText: 'Ex.: Arms Pro Black Anual, Arms Pro Mensal...',
                         hintStyle: GoogleFonts.readexPro(
                           fontSize: 12.5,
                           color: theme.secondaryText,

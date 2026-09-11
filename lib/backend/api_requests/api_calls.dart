@@ -8,7 +8,7 @@ import '/flutter_flow/flutter_flow_util.dart';
 import '/auth/custom_auth/auth_util.dart';
 import 'api_manager.dart';
 
-export 'api_manager.dart' show ApiCallResponse;
+export 'api_manager.dart' show ApiCallResponse, ApiManager;
 
 const _kPrivateApiFunctionName = 'ffPrivateApiCall';
 
@@ -272,21 +272,22 @@ class ObterProdutosCall {
 
 class AtualizarDadosCall {
   static Future<ApiCallResponse> call({
-    String? id = '',
+    String? id,
     String? email = '',
     String? password = '',
     String? inviteCode = '',
     int? role,
   }) async {
-    final ffApiRequestBody = '''
-{
-  "id": "${id}",
-  "isActive": true,
-  "inviteCode": "${inviteCode}",
-  "login": "${email}",
-  "password": "${password}",
-  "role": ${role}
-}''';
+    final effectiveId = (id != null && id.isNotEmpty) ? id : currentUserUid;
+    final Map<String, dynamic> bodyMap = {
+      if (effectiveId.isNotEmpty) "id": effectiveId,
+      "isActive": true,
+      "inviteCode": inviteCode ?? "",
+      "login": email ?? "",
+      "password": password ?? "",
+      if (role != null) "role": role,
+    };
+    final ffApiRequestBody = jsonEncode(bodyMap);
     return ApiManager.instance.makeApiCall(
       callName: 'atualizarDados',
       apiUrl: 'https://codeflowbr.online:8080/api/v1/user',
@@ -334,23 +335,26 @@ class EnviarNotificacaoCall {
     String? url = '',
     String? mensageiro = '',
   }) async {
-    final ffApiRequestBody = '''
-{
-  "data": "${data}",
-  "description": "${message}",
-  "title": "${title}",
-  "url": "${url}",
-  "sendby": "${mensageiro}",
-  "tenant": {
-    "id": "${tenantId}"
-  },
-  "active": true
-}''';
+    final int tId = int.tryParse(tenantId ?? '1') ?? 1;
+    final Map<String, dynamic> bodyMap = {
+      'data': data ?? '',
+      'description': message ?? '',
+      'title': title ?? '',
+      'url': url ?? '',
+      'sendby': mensageiro ?? 'Arms Pass',
+      'tenant': {
+        'id': tId,
+      },
+      'active': true,
+    };
+    final ffApiRequestBody = jsonEncode(bodyMap);
     return ApiManager.instance.makeApiCall(
       callName: 'enviarNotificacao',
       apiUrl: 'https://codeflowbr.online:8080/api/v1/notify',
       callType: ApiCallType.POST,
-      headers: {},
+      headers: {
+        'Content-Type': 'application/json',
+      },
       params: {},
       body: ffApiRequestBody,
       bodyType: BodyType.JSON,
@@ -467,16 +471,21 @@ class ValidarCupomCall {
     String? code = '',
     String? value = '',
     String? paidValue = '',
+    String? partnerId = '',
+    String? discountId,
   }) async {
+    final partnerIdValue = (partnerId != null && partnerId.isNotEmpty) ? partnerId : 'null';
+    final discountIdField = (discountId != null && discountId.isNotEmpty) ? ',\n  "discountId": $discountId' : '';
     final ffApiRequestBody = '''
 {
   "validateCode": "${code}",
   "valorProduto": "${value}",
-  "valorPagar": "${paidValue}"
+  "valorPagar": "${paidValue}",
+  "partnerId": ${partnerIdValue}${discountIdField}
 }''';
     return ApiManager.instance.makeApiCall(
       callName: 'validarCupom',
-      apiUrl: 'https://codeflowbr.online:8080/api/v1/cupom/validar',
+      apiUrl: 'http://localhost:8181/api/v1/cupom/validar',
       callType: ApiCallType.POST,
       headers: {},
       params: {},
@@ -1236,16 +1245,27 @@ class AdicionarPropostaCall {
     String? rua = '',
     String? bairro = '',
   }) async {
-    final ffApiRequestBody = '''
-{
-  "senha": "${senha}",
-  "responsavel": "${nomeRepresentante}",
-  "phone": "${telefoneRepresentante}",
-  "email": "${email}",
-  "cnpj": "${cnpj}",
-  "razaoSocial": "${razao}",
-  "aprovado": false
-}''';
+    final Map<String, dynamic> bodyMap = {
+      "senha": senha ?? "",
+      "nomeRepresentante": nomeRepresentante ?? "",
+      "responsavel": nomeRepresentante ?? "",
+      "telefoneRepresentante": telefoneRepresentante ?? "",
+      "phone": telefoneRepresentante ?? "",
+      "email": email ?? "",
+      "cnpj": cnpj ?? "",
+      "razao": razao ?? "",
+      "razaoSocial": razao ?? "",
+      "cep": cep ?? "",
+      "numero": numero ?? "",
+      "proposta": proposta ?? "",
+      "uf": uf ?? "",
+      "cidade": cidade ?? "",
+      "rua": rua ?? "",
+      "bairro": bairro ?? "",
+      "status": false,
+      "aceito": false,
+    };
+    final ffApiRequestBody = jsonEncode(bodyMap);
     return ApiManager.instance.makeApiCall(
       callName: 'adicionarProposta',
       apiUrl: 'https://codeflowbr.online:8080/api/v1/proposta',
@@ -1271,14 +1291,14 @@ class ObterDashboardParceiroCall {
     return ApiManager.instance.makeApiCall(
       callName: 'obterDashboardParceiro',
       apiUrl:
-          'https://codeflowbr.online:8080/api/v1/dashboard/partner/${partnerId}',
+          'http://localhost:8181/api/v1/dashboard/partner/${partnerId}',
       callType: ApiCallType.GET,
       headers: {},
       params: {},
       returnBody: true,
       encodeBodyUtf8: false,
       decodeUtf8: true,
-      cache: true,
+      cache: false,
       isStreamingApi: false,
       alwaysAllowBody: false,
     );
@@ -1300,6 +1320,27 @@ class ObterCuponsDoParceiroCall {
       encodeBodyUtf8: false,
       decodeUtf8: true,
       cache: true,
+      isStreamingApi: false,
+      alwaysAllowBody: false,
+    );
+  }
+}
+
+class ObterDescontosDoParceiroPorIdCall {
+  static Future<ApiCallResponse> call({
+    String? partnerId = '',
+  }) async {
+    return ApiManager.instance.makeApiCall(
+      callName: 'obterDescontosDoParceiroPorId',
+      apiUrl:
+          'https://codeflowbr.online:8080/api/v1/discount/partner/${partnerId}',
+      callType: ApiCallType.GET,
+      headers: {},
+      params: {},
+      returnBody: true,
+      encodeBodyUtf8: false,
+      decodeUtf8: true,
+      cache: false,
       isStreamingApi: false,
       alwaysAllowBody: false,
     );
@@ -1439,7 +1480,7 @@ class GetHistoricoRecenteCall {
   }) async {
     return ApiManager.instance.makeApiCall(
       callName: 'GetHistoricoRecente',
-      apiUrl: 'https://codeflowbr.online:8080/api/v1/history/recentes',
+      apiUrl: 'http://localhost:8181/api/v1/history/recentes',
       callType: ApiCallType.GET,
       headers: {},
       params: {
@@ -1527,3 +1568,177 @@ String? escapeStringForJson(String? input) {
       .replaceAll('\n', '\\n')
       .replaceAll('\t', '\\t');
 }
+
+/// Chamadas da API para Planos e Assinaturas Arms Pro (Zero Downtime)
+class ObterPlanosCall {
+  static Future<ApiCallResponse> call({
+    String? tenantId = '',
+    bool activeOnly = false,
+  }) async {
+    return ApiManager.instance.makeApiCall(
+      callName: 'obterPlanos',
+      apiUrl: '${FFAppConstants.apiBaseUrl}/plans',
+      callType: ApiCallType.GET,
+      headers: {},
+      params: {
+        if (tenantId != null && tenantId.isNotEmpty) 'tenant_id': tenantId,
+        if (activeOnly) 'active_only': 'true',
+      },
+      returnBody: true,
+      encodeBodyUtf8: false,
+      decodeUtf8: true,
+      cache: false,
+      isStreamingApi: false,
+      alwaysAllowBody: false,
+    );
+  }
+}
+
+class CriarPlanoCall {
+  static Future<ApiCallResponse> call({
+    required String name,
+    required double price,
+    String billingCycle = 'Mensal',
+    String? highlightTag,
+    List<String>? benefits,
+    List<int>? eligiblePartnerIds,
+    bool isActive = true,
+    int? tenantId,
+  }) async {
+    final benefitsJson = json.encode(benefits ?? []);
+    final partnersJson = json.encode(eligiblePartnerIds ?? []);
+    final body = '''
+{
+  "name": "${escapeStringForJson(name)}",
+  "price": $price,
+  "billingCycle": "${escapeStringForJson(billingCycle)}",
+  "highlightTag": ${highlightTag != null ? '"${escapeStringForJson(highlightTag)}"' : 'null'},
+  "benefits": $benefitsJson,
+  "eligiblePartnerIds": $partnersJson,
+  "isActive": $isActive,
+  "tenantId": ${tenantId ?? 1}
+}''';
+    return ApiManager.instance.makeApiCall(
+      callName: 'criarPlano',
+      apiUrl: '${FFAppConstants.apiBaseUrl}/plans',
+      callType: ApiCallType.POST,
+      headers: {'Content-Type': 'application/json'},
+      params: {},
+      body: body,
+      bodyType: BodyType.JSON,
+      returnBody: true,
+      encodeBodyUtf8: false,
+      decodeUtf8: true,
+      cache: false,
+      isStreamingApi: false,
+      alwaysAllowBody: false,
+    );
+  }
+}
+
+class AtualizarPlanoCall {
+  static Future<ApiCallResponse> call({
+    required String id,
+    required String name,
+    required double price,
+    String billingCycle = 'Mensal',
+    String? highlightTag,
+    List<String>? benefits,
+    List<int>? eligiblePartnerIds,
+    bool isActive = true,
+    int? tenantId,
+  }) async {
+    final benefitsJson = json.encode(benefits ?? []);
+    final partnersJson = json.encode(eligiblePartnerIds ?? []);
+    final body = '''
+{
+  "id": "$id",
+  "name": "${escapeStringForJson(name)}",
+  "price": $price,
+  "billingCycle": "${escapeStringForJson(billingCycle)}",
+  "highlightTag": ${highlightTag != null ? '"${escapeStringForJson(highlightTag)}"' : 'null'},
+  "benefits": $benefitsJson,
+  "eligiblePartnerIds": $partnersJson,
+  "isActive": $isActive,
+  "tenantId": ${tenantId ?? 1}
+}''';
+    return ApiManager.instance.makeApiCall(
+      callName: 'atualizarPlano',
+      apiUrl: '${FFAppConstants.apiBaseUrl}/plans/$id',
+      callType: ApiCallType.PUT,
+      headers: {'Content-Type': 'application/json'},
+      params: {},
+      body: body,
+      bodyType: BodyType.JSON,
+      returnBody: true,
+      encodeBodyUtf8: false,
+      decodeUtf8: true,
+      cache: false,
+      isStreamingApi: false,
+      alwaysAllowBody: false,
+    );
+  }
+}
+
+class ExcluirPlanoCall {
+  static Future<ApiCallResponse> call({
+    required String id,
+  }) async {
+    return ApiManager.instance.makeApiCall(
+      callName: 'excluirPlano',
+      apiUrl: '${FFAppConstants.apiBaseUrl}/plans/$id',
+      callType: ApiCallType.DELETE,
+      headers: {},
+      params: {},
+      returnBody: true,
+      encodeBodyUtf8: false,
+      decodeUtf8: true,
+      cache: false,
+      isStreamingApi: false,
+      alwaysAllowBody: false,
+    );
+  }
+}
+
+class ObterAssinaturasCall {
+  static Future<ApiCallResponse> call({
+    String? tenantId = '',
+  }) async {
+    return ApiManager.instance.makeApiCall(
+      callName: 'obterAssinaturas',
+      apiUrl: '${FFAppConstants.apiBaseUrl}/subscriptions',
+      callType: ApiCallType.GET,
+      headers: {},
+      params: {
+        if (tenantId != null && tenantId.isNotEmpty) 'tenant_id': tenantId,
+      },
+      returnBody: true,
+      encodeBodyUtf8: false,
+      decodeUtf8: true,
+      cache: false,
+      isStreamingApi: false,
+      alwaysAllowBody: false,
+    );
+  }
+}
+
+class ObterAssinaturaClienteCall {
+  static Future<ApiCallResponse> call({
+    required String customerId,
+  }) async {
+    return ApiManager.instance.makeApiCall(
+      callName: 'obterAssinaturaCliente',
+      apiUrl: '${FFAppConstants.apiBaseUrl}/subscriptions/customer/$customerId',
+      callType: ApiCallType.GET,
+      headers: {},
+      params: {},
+      returnBody: true,
+      encodeBodyUtf8: false,
+      decodeUtf8: true,
+      cache: false,
+      isStreamingApi: false,
+      alwaysAllowBody: false,
+    );
+  }
+}
+

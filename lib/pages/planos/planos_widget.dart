@@ -152,23 +152,52 @@ class _PlanosWidgetState extends State<PlanosWidget> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           HeaderPaginaWidget(
-                            titulo: 'Gestão de Planos Arms Pró',
+                            titulo: 'Gestão de Planos Arms Pro',
                             breadcrumb: 'Painel',
                             descricao: 'Cadastre e gerencie planos, precificação, tags promocionais e rede de parceiros credenciados.',
-                            action: ElevatedButton.icon(
-                              onPressed: () => _abrirModalPlano(),
-                              icon: const Icon(Icons.add_rounded, size: 18),
-                              label: Text(
-                                'Novo Plano',
-                                style: GoogleFonts.readexPro(fontSize: 13, fontWeight: FontWeight.bold),
-                              ),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: theme.secondary,
-                                foregroundColor: const Color(0xFF14120E),
-                                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                                elevation: 3,
-                              ),
+                            action: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Tooltip(
+                                  message: 'Sincronizar com a nuvem',
+                                  child: InkWell(
+                                    borderRadius: BorderRadius.circular(8),
+                                    onTap: () async {
+                                      showSuccessToast(context, 'Sincronizando com a nuvem...');
+                                      await _plansService.syncWithBackend();
+                                      if (mounted) {
+                                        safeSetState(() {});
+                                        showSuccessToast(context, 'Dados sincronizados!');
+                                      }
+                                    },
+                                    child: Container(
+                                      padding: const EdgeInsets.all(12),
+                                      decoration: BoxDecoration(
+                                        color: theme.secondaryBackground,
+                                        borderRadius: BorderRadius.circular(8),
+                                        border: Border.all(color: theme.alternate),
+                                      ),
+                                      child: Icon(Icons.sync_rounded, color: theme.secondary, size: 20),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                ElevatedButton.icon(
+                                  onPressed: () => _abrirModalPlano(),
+                                  icon: const Icon(Icons.add_rounded, size: 18),
+                                  label: Text(
+                                    'Novo Plano',
+                                    style: GoogleFonts.readexPro(fontSize: 13, fontWeight: FontWeight.bold),
+                                  ),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: theme.secondary,
+                                    foregroundColor: const Color(0xFF14120E),
+                                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                    elevation: 3,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
 
@@ -226,7 +255,7 @@ class _PlanosWidgetState extends State<PlanosWidget> {
                                     ),
                                     const SizedBox(height: 8),
                                     Text(
-                                      'Clique no botão "Novo Plano" para criar seu primeiro plano Arms Pró.',
+                                      'Clique no botão "Novo Plano" para criar seu primeiro plano Arms Pro.',
                                       style: GoogleFonts.readexPro(fontSize: 13, color: theme.secondaryText),
                                     ),
                                   ],

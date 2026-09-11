@@ -51,6 +51,8 @@ class _ValidarParceiroWidgetState extends State<ValidarParceiroWidget> {
     _model.valorMobileTextController ??= TextEditingController();
     _model.valorMobileFocusNode ??= FocusNode();
 
+    _carregarDescontos();
+
     WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));
   }
 
@@ -60,10 +62,249 @@ class _ValidarParceiroWidgetState extends State<ValidarParceiroWidget> {
     super.dispose();
   }
 
+  Future<void> _carregarDescontos() async {
+    safeSetState(() {
+      _model.isLoadingDiscounts = true;
+    });
+    try {
+      final res = await ObterDescontosDoParceiroPorIdCall.call(
+        partnerId: currentUserUid,
+      );
+      if (res.succeeded && res.jsonBody is List) {
+        final list = (res.jsonBody as List)
+            .where((d) => d['isActive'] == true)
+            .toList();
+        _model.partnerDiscounts = list;
+        if (list.isNotEmpty && _model.selectedDiscountId == null) {
+          _model.selectedDiscountId = list.first['id']?.toString();
+        }
+      }
+    } catch (_) {}
+    if (mounted) {
+      safeSetState(() {
+        _model.isLoadingDiscounts = false;
+      });
+    }
+  }
+
   void _atualizarHistorico() {
     setState(() {
       _historyKey = UniqueKey();
     });
+  }
+
+  Widget _buildDiscountSelector() {
+    if (_model.isLoadingDiscounts) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 10.0),
+        child: Row(
+          children: [
+            SizedBox(
+              width: 14.0,
+              height: 14.0,
+              child: CircularProgressIndicator(
+                strokeWidth: 2.0,
+                color: FlutterFlowTheme.of(context).secondary,
+              ),
+            ),
+            const SizedBox(width: 8.0),
+            Text(
+              'Carregando regras de desconto ativas...',
+              style: TextStyle(
+                color: FlutterFlowTheme.of(context).secondaryText,
+                fontSize: 12.0,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (_model.partnerDiscounts.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    final theme = FlutterFlowTheme.of(context);
+
+    // Se tiver apenas 1 desconto
+    if (_model.partnerDiscounts.length == 1) {
+      final d = _model.partnerDiscounts.first;
+      final discVal = (d['discount'] is num) ? d['discount'].toInt() : d['discount']?.toString() ?? '0';
+      final desc = d['description']?.toString() ?? 'Desconto padrão';
+      final rawValidity = d['validity']?.toString() ?? '';
+      String formattedDate = '';
+      if (rawValidity.isNotEmpty) {
+        final parsed = DateTime.tryParse(rawValidity);
+        if (parsed != null) {
+          formattedDate = '${parsed.day.toString().padLeft(2, '0')}/${parsed.month.toString().padLeft(2, '0')}/${parsed.year}';
+        }
+      }
+
+      return Container(
+        margin: const EdgeInsets.only(top: 18.0, bottom: 6.0),
+        padding: const EdgeInsets.all(12.0),
+        decoration: BoxDecoration(
+          color: theme.primary.withValues(alpha: 0.5),
+          borderRadius: BorderRadius.circular(10.0),
+          border: Border.all(color: theme.secondary.withValues(alpha: 0.35)),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 9.0, vertical: 5.0),
+              decoration: BoxDecoration(
+                color: theme.secondary,
+                borderRadius: BorderRadius.circular(6.0),
+              ),
+              child: Text(
+                '$discVal% OFF',
+                style: GoogleFonts.readexPro(
+                  color: theme.primary,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 12.0,
+                ),
+              ),
+            ),
+            const SizedBox(width: 12.0),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    desc,
+                    style: GoogleFonts.readexPro(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 13.0,
+                    ),
+                  ),
+                  if (formattedDate.isNotEmpty)
+                    Text(
+                      'Válido até $formattedDate',
+                      style: TextStyle(color: theme.secondaryText, fontSize: 11.5),
+                    ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // Se tiver múltiplos descontos: seletor interativo
+    return Container(
+      margin: const EdgeInsets.only(top: 18.0, bottom: 6.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.local_offer_rounded, color: theme.secondary, size: 15.0),
+              const SizedBox(width: 8.0),
+              Text(
+                'Selecione a regra/promoção desta compra (para validação por CPF):',
+                style: GoogleFonts.readexPro(
+                  color: theme.secondaryText,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 12.5,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10.0),
+          Wrap(
+            spacing: 10.0,
+            runSpacing: 10.0,
+            children: _model.partnerDiscounts.map((d) {
+              final idStr = d['id']?.toString() ?? '';
+              final isSelected = _model.selectedDiscountId == idStr;
+              final discVal = (d['discount'] is num) ? d['discount'].toInt() : d['discount']?.toString() ?? '0';
+              final desc = d['description']?.toString() ?? 'Benefício';
+              final rawValidity = d['validity']?.toString() ?? '';
+              String formattedDate = '';
+              if (rawValidity.isNotEmpty) {
+                final parsed = DateTime.tryParse(rawValidity);
+                if (parsed != null) {
+                  formattedDate = '${parsed.day.toString().padLeft(2, '0')}/${parsed.month.toString().padLeft(2, '0')}/${parsed.year}';
+                }
+              }
+
+              return InkWell(
+                onTap: () {
+                  safeSetState(() {
+                    _model.selectedDiscountId = idStr;
+                  });
+                },
+                borderRadius: BorderRadius.circular(10.0),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+                  decoration: BoxDecoration(
+                    color: isSelected
+                        ? theme.secondary.withValues(alpha: 0.15)
+                        : theme.primary,
+                    borderRadius: BorderRadius.circular(10.0),
+                    border: Border.all(
+                      color: isSelected ? theme.secondary : const Color(0xFF404040),
+                      width: isSelected ? 1.5 : 1.0,
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        isSelected ? Icons.radio_button_checked_rounded : Icons.radio_button_off_rounded,
+                        color: isSelected ? theme.secondary : Colors.grey,
+                        size: 16.0,
+                      ),
+                      const SizedBox(width: 8.0),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6.0, vertical: 2.0),
+                        decoration: BoxDecoration(
+                          color: isSelected ? theme.secondary : Colors.grey.withValues(alpha: 0.2),
+                          borderRadius: BorderRadius.circular(6.0),
+                        ),
+                        child: Text(
+                          '$discVal% OFF',
+                          style: GoogleFonts.readexPro(
+                            color: isSelected ? theme.primary : Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 11.0,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8.0),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            desc,
+                            style: GoogleFonts.readexPro(
+                              color: isSelected ? Colors.white : Colors.grey[300],
+                              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                              fontSize: 12.0,
+                            ),
+                          ),
+                          if (formattedDate.isNotEmpty)
+                            Text(
+                              'Até $formattedDate',
+                              style: TextStyle(
+                                color: isSelected ? theme.secondaryText : Colors.grey[500],
+                                fontSize: 10.5,
+                              ),
+                            ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -120,10 +361,10 @@ class _ValidarParceiroWidgetState extends State<ValidarParceiroWidget> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 const HeaderPaginaWidget(
-                                  titulo: 'Validação de Cupom',
+                                  titulo: 'Validação de Cupom / CPF',
                                   breadcrumb: 'Parceiro',
                                   descricao:
-                                      'Valide os códigos gerados pelos clientes para aplicar cashbacks e descontos',
+                                      'Valide os códigos de cupons ou o CPF dos associados para aplicar descontos e benefícios',
                                 ),
                                 const SizedBox(height: 25.0),
                                 Material(
@@ -157,7 +398,7 @@ class _ValidarParceiroWidgetState extends State<ValidarParceiroWidget> {
                                                 crossAxisAlignment: CrossAxisAlignment.start,
                                                 children: [
                                                   Text(
-                                                    'Código do Cupom*',
+                                                    'Código do Cupom ou CPF do Associado*',
                                                     style: FlutterFlowTheme.of(context).bodyMedium.override(
                                                       font: GoogleFonts.readexPro(
                                                         fontWeight: FontWeight.w600,
@@ -173,7 +414,7 @@ class _ValidarParceiroWidgetState extends State<ValidarParceiroWidget> {
                                                     autofocus: false,
                                                     decoration: InputDecoration(
                                                       isDense: true,
-                                                      hintText: 'Ex: XYZ-1234',
+                                                      hintText: 'Ex: XYZ-1234 ou 000.000.000-00',
                                                       enabledBorder: OutlineInputBorder(
                                                         borderSide: BorderSide(
                                                           color: Color(0xFFC5C4C4),
@@ -268,59 +509,82 @@ class _ValidarParceiroWidgetState extends State<ValidarParceiroWidget> {
                                             ),
                                           ],
                                         ),
-                                        const SizedBox(height: 25.0),
+                                        _buildDiscountSelector(),
+                                        const SizedBox(height: 18.0),
                                         // Submit Button
                                         Align(
                                           alignment: AlignmentDirectional.bottomEnd,
                                           child: FFButtonWidget(
                                             onPressed: () async {
+                                              final code = _model.textController1?.text.trim() ?? '';
+                                              if (code.isEmpty) {
+                                                showWarningToast(
+                                                  context,
+                                                  'Por favor, informe o código do cupom ou CPF.',
+                                                );
+                                                return;
+                                              }
+
                                               _model.apiResultr69 = await ValidarCupomCall.call(
-                                                code: _model.textController1?.text ?? '',
+                                                code: code,
                                                 value: _model.textController2?.text ?? '',
                                                 paidValue: _model.textController2?.text ?? '',
+                                                partnerId: currentUserUid,
+                                                discountId: _model.selectedDiscountId,
                                               );
 
-                                              if ((_model.apiResultr69?.succeeded ?? true)) {
+                                              if (_model.apiResultr69?.succeeded == true) {
                                                 _atualizarHistorico();
                                                 _model.textController1?.clear();
                                                 _model.textController2?.clear();
                                                 
-                                                await showDialog(
-                                                  context: context,
-                                                  builder: (alertDialogContext) {
-                                                    return AlertDialog(
-                                                      title: Text('Cupom validado'),
-                                                      content: Text(
-                                                          'O cupom apresentado foi validado com sucesso.'),
-                                                      actions: [
-                                                        TextButton(
-                                                          onPressed: () => Navigator.pop(alertDialogContext),
-                                                          child: Text('Ok'),
-                                                        ),
-                                                      ],
-                                                    );
-                                                  },
-                                                );
+                                                if (context.mounted) {
+                                                  await showDialog(
+                                                    context: context,
+                                                    builder: (alertDialogContext) {
+                                                      return AlertDialog(
+                                                        title: const Text('Validação Concluída'),
+                                                        content: const Text(
+                                                            'O benefício do cliente foi validado com sucesso.'),
+                                                        actions: [
+                                                          TextButton(
+                                                            onPressed: () => Navigator.pop(alertDialogContext),
+                                                            child: const Text('Ok'),
+                                                          ),
+                                                        ],
+                                                      );
+                                                    },
+                                                  );
+                                                }
                                               } else {
-                                                await showDialog(
-                                                  context: context,
-                                                  builder: (alertDialogContext) {
-                                                    return AlertDialog(
-                                                      title: Text('Falha na validação'),
-                                                      content: Text(
-                                                          'Código inválido, expirado ou já utilizado.'),
-                                                      actions: [
-                                                        TextButton(
-                                                          onPressed: () => Navigator.pop(alertDialogContext),
-                                                          child: Text('Ok'),
-                                                        ),
-                                                      ],
-                                                    );
-                                                  },
-                                                );
+                                                String errorMsg = 'Cupom ou CPF inválido, não encontrado ou benefício expirado.';
+                                                final bodyText = _model.apiResultr69?.response?.body ?? '';
+                                                if (bodyText.contains('Cliente não possui assinatura Arms Pro')) {
+                                                  errorMsg = 'Cliente não possui assinatura Arms Pro ativa ou está inativo.';
+                                                } else if (bodyText.contains('Nenhum desconto ativo')) {
+                                                  errorMsg = 'Nenhum desconto ativo ou válido encontrado para este parceiro.';
+                                                }
+
+                                                if (context.mounted) {
+                                                  await showDialog(
+                                                    context: context,
+                                                    builder: (alertDialogContext) {
+                                                      return AlertDialog(
+                                                        title: const Text('Falha na validação'),
+                                                        content: Text(errorMsg),
+                                                        actions: [
+                                                          TextButton(
+                                                            onPressed: () => Navigator.pop(alertDialogContext),
+                                                            child: const Text('Ok'),
+                                                          ),
+                                                        ],
+                                                      );
+                                                    },
+                                                  );
+                                                }
                                               }
                                             },
-                                            text: 'Validar Cupom',
+                                            text: 'Validar Benefício',
                                             options: FFButtonOptions(
                                               width: 180.0,
                                               height: 50.0,
@@ -422,7 +686,7 @@ class _ValidarParceiroWidgetState extends State<ValidarParceiroWidget> {
                                   children: [
                                     // Code input
                                     Text(
-                                      'Código do Cupom*',
+                                      'Código do Cupom ou CPF do Associado*',
                                       style: FlutterFlowTheme.of(context).bodyMedium.override(
                                         font: GoogleFonts.readexPro(
                                           fontWeight: FontWeight.w600,
@@ -438,7 +702,7 @@ class _ValidarParceiroWidgetState extends State<ValidarParceiroWidget> {
                                       autofocus: false,
                                       decoration: InputDecoration(
                                         isDense: true,
-                                        hintText: 'Ex: XYZ-1234',
+                                        hintText: 'Ex: XYZ-1234 ou 000.000.000-00',
                                         enabledBorder: OutlineInputBorder(
                                           borderSide: BorderSide(
                                             color: Color(0xFFC5C4C4),
@@ -529,6 +793,7 @@ class _ValidarParceiroWidgetState extends State<ValidarParceiroWidget> {
                                           code: _model.codigoMobileTextController?.text ?? '',
                                           value: _model.valorMobileTextController?.text ?? '',
                                           paidValue: _model.valorMobileTextController?.text ?? '',
+                                          partnerId: currentUserUid,
                                         );
 
                                         if ((_model.apiResultr699?.succeeded ?? true)) {
@@ -540,9 +805,9 @@ class _ValidarParceiroWidgetState extends State<ValidarParceiroWidget> {
                                             context: context,
                                             builder: (alertDialogContext) {
                                               return AlertDialog(
-                                                title: Text('Cupom validado'),
+                                                title: Text('Validação Concluída'),
                                                 content: Text(
-                                                    'O cupom apresentado foi validado com sucesso.'),
+                                                    'O benefício do cliente foi validado com sucesso.'),
                                                 actions: [
                                                   TextButton(
                                                     onPressed: () => Navigator.pop(alertDialogContext),
@@ -559,7 +824,7 @@ class _ValidarParceiroWidgetState extends State<ValidarParceiroWidget> {
                                               return AlertDialog(
                                                 title: Text('Falha na validação'),
                                                 content: Text(
-                                                    'Código inválido, expirado ou já utilizado.'),
+                                                    'Cupom ou CPF inválido, não encontrado ou já utilizado.'),
                                                 actions: [
                                                   TextButton(
                                                     onPressed: () => Navigator.pop(alertDialogContext),
@@ -571,7 +836,7 @@ class _ValidarParceiroWidgetState extends State<ValidarParceiroWidget> {
                                           );
                                         }
                                       },
-                                      text: 'Validar Cupom',
+                                      text: 'Validar Benefício',
                                       options: FFButtonOptions(
                                         width: double.infinity,
                                         height: 50.0,
@@ -642,17 +907,19 @@ class _ValidarParceiroWidgetState extends State<ValidarParceiroWidget> {
         }
 
         final response = snapshot.data!;
-        final historyList = (response.jsonBody as List?) ?? [];
+        final historyList = ((response.jsonBody as List?) ?? [])
+            .where((item) => getJsonField(item, r'''$.is_point''') == true || getJsonField(item, r'''$.qtd_point''') != null || getJsonField(item, r'''$.total_saving''') != null)
+            .toList();
 
         if (historyList.isEmpty) {
           return Container(
             width: double.infinity,
             padding: const EdgeInsets.all(30.0),
             decoration: BoxDecoration(
-              color: FlutterFlowTheme.of(context).secondaryBackground,
+              color: const Color(0xFF161616),
               borderRadius: BorderRadius.circular(16.0),
               border: Border.all(
-                color: FlutterFlowTheme.of(context).alternate,
+                color: const Color(0xFF26221A),
               ),
             ),
             child: Column(
@@ -677,26 +944,41 @@ class _ValidarParceiroWidgetState extends State<ValidarParceiroWidget> {
 
         return Container(
           decoration: BoxDecoration(
-            color: FlutterFlowTheme.of(context).secondaryBackground,
+            color: const Color(0xFF161616),
             borderRadius: BorderRadius.circular(16.0),
             border: Border.all(
-              color: FlutterFlowTheme.of(context).alternate,
+              color: const Color(0xFF26221A),
             ),
           ),
           child: ListView.separated(
             padding: const EdgeInsets.all(16.0),
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
-            itemCount: historyList.length > 5 ? 5 : historyList.length,
+            itemCount: historyList.length > 6 ? 6 : historyList.length,
             separatorBuilder: (context, index) => Divider(
-              color: FlutterFlowTheme.of(context).alternate,
+              color: const Color(0xFF26221A),
               height: 20.0,
             ),
             itemBuilder: (context, index) {
               final item = historyList[index];
-              final customerName = getJsonField(item, r'''$.customer.name''')?.toString() ?? 'Cliente';
-              final productName = getJsonField(item, r'''$.product.name''')?.toString() ?? 'Benefício';
-              final rawValue = getJsonField(item, r'''$.value''') ?? getJsonField(item, r'''$.valorPagar''');
+              final customerName = getJsonField(item, r'''$.customer.name''')?.toString() ?? 
+                                   getJsonField(item, r'''$.customer.cpf''')?.toString() ?? 'Associado';
+              final desc = getJsonField(item, r'''$.description''')?.toString() ?? '';
+              String displaySubtitle = 'Benefício Validado';
+              if (desc.contains('Desconto resgatado:')) {
+                displaySubtitle = desc.replaceAll('Desconto resgatado:', '').trim();
+              } else if (desc.contains('Cupom validado')) {
+                displaySubtitle = 'Benefício Validado no Caixa';
+              } else if (desc.isNotEmpty) {
+                displaySubtitle = desc;
+              }
+
+              final rawValue = getJsonField(item, r'''$.qtd_point''') ?? 
+                               getJsonField(item, r'''$.qtdPoint''') ?? 
+                               getJsonField(item, r'''$.total_saving''') ?? 
+                               getJsonField(item, r'''$.totalSaving''') ?? 
+                               getJsonField(item, r'''$.value''') ?? 
+                               getJsonField(item, r'''$.valorPagar''');
               
               double? parsedVal;
               if (rawValue != null) {
@@ -713,52 +995,59 @@ class _ValidarParceiroWidgetState extends State<ValidarParceiroWidget> {
               return Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Row(
-                    children: [
-                      Container(
-                        width: 38.0,
-                        height: 38.0,
-                        decoration: BoxDecoration(
-                          color: const Color(0x2000C853),
-                          shape: BoxShape.circle,
+                  Expanded(
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 38.0,
+                          height: 38.0,
+                          decoration: const BoxDecoration(
+                            color: Color(0x2000C853),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.check_circle_rounded,
+                            color: Color(0xFF00C853),
+                            size: 20.0,
+                          ),
                         ),
-                        child: const Icon(
-                          Icons.check_circle_rounded,
-                          color: Color(0xFF00C853),
-                          size: 20.0,
-                        ),
-                      ),
-                      const SizedBox(width: 12.0),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            customerName,
-                            style: FlutterFlowTheme.of(context).bodyMedium.override(
-                              font: GoogleFonts.readexPro(
-                                fontWeight: FontWeight.bold,
+                        const SizedBox(width: 12.0),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                customerName,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: GoogleFonts.readexPro(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 14.0,
+                                  color: Colors.white,
+                                ),
                               ),
-                              color: Colors.white,
-                            ),
+                              const SizedBox(height: 2.0),
+                              Text(
+                                displaySubtitle,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  color: FlutterFlowTheme.of(context).secondaryText,
+                                  fontSize: 12.0,
+                                ),
+                              ),
+                            ],
                           ),
-                          const SizedBox(height: 2.0),
-                          Text(
-                            productName,
-                            style: TextStyle(
-                              color: FlutterFlowTheme.of(context).secondaryText,
-                              fontSize: 12.0,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
+                        ),
+                      ],
+                    ),
                   ),
+                  const SizedBox(width: 8.0),
                   Text(
                     formattedValue,
-                    style: FlutterFlowTheme.of(context).bodyMedium.override(
-                      font: GoogleFonts.readexPro(
-                        fontWeight: FontWeight.bold,
-                      ),
+                    style: GoogleFonts.readexPro(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14.0,
                       color: FlutterFlowTheme.of(context).secondary,
                     ),
                   ),

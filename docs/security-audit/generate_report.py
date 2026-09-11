@@ -61,8 +61,8 @@ HTML_TEMPLATE = """<!DOCTYPE html>
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     color: #1E293B;
     background: #FFFFFF;
-    font-size: 9.5pt;
-    line-height: 1.5;
+    font-size: 9pt;
+    line-height: 1.45;
   }
 
   .page-break {
@@ -75,17 +75,17 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 
   /* Capa */
   .cover {
-    height: 100vh;
+    min-height: 92vh;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    padding: 30px 20px;
+    padding: 24px 16px;
     page-break-after: always;
   }
 
   .cover-header {
     border-bottom: 4px solid #B91C1C;
-    padding-bottom: 25px;
+    padding-bottom: 20px;
   }
 
   .cover-badge {
@@ -93,25 +93,25 @@ HTML_TEMPLATE = """<!DOCTYPE html>
     background: #FEF2F2;
     color: #B91C1C;
     font-weight: 700;
-    font-size: 10pt;
-    padding: 6px 14px;
+    font-size: 9.5pt;
+    padding: 5px 12px;
     border-radius: 9999px;
     border: 1px solid #FCA5A5;
     text-transform: uppercase;
     letter-spacing: 0.08em;
-    margin-bottom: 16px;
+    margin-bottom: 14px;
   }
 
   .cover-title {
-    font-size: 28pt;
+    font-size: 26pt;
     font-weight: 800;
     line-height: 1.15;
     color: #0F172A;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
   }
 
   .cover-subtitle {
-    font-size: 13pt;
+    font-size: 12pt;
     font-weight: 400;
     color: #475569;
   }
@@ -119,25 +119,25 @@ HTML_TEMPLATE = """<!DOCTYPE html>
   .cover-meta {
     background: #F8FAFC;
     border: 1px solid #E2E8F0;
-    border-radius: 12px;
-    padding: 20px;
+    border-radius: 10px;
+    padding: 16px;
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 14px;
-    margin: 30px 0;
+    gap: 12px;
+    margin: 20px 0;
   }
 
   .meta-item {
-    font-size: 9pt;
+    font-size: 8.5pt;
   }
 
   .meta-item strong {
     display: block;
     color: #64748B;
-    font-size: 8pt;
+    font-size: 7.5pt;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    margin-bottom: 4px;
+    margin-bottom: 3px;
   }
 
   .meta-item span {
@@ -148,17 +148,17 @@ HTML_TEMPLATE = """<!DOCTYPE html>
   .cover-methodology {
     background: #EFF6FF;
     border-left: 4px solid #2563EB;
-    padding: 16px;
+    padding: 14px;
     border-radius: 0 8px 8px 0;
-    font-size: 8.8pt;
+    font-size: 8.2pt;
     color: #1E3A8A;
     line-height: 1.45;
   }
 
   .cover-footer {
     border-top: 1px solid #E2E8F0;
-    padding-top: 15px;
-    font-size: 8pt;
+    padding-top: 12px;
+    font-size: 7.5pt;
     color: #94A3B8;
     display: flex;
     justify-content: space-between;
@@ -166,38 +166,38 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 
   /* Seções */
   h2 {
-    font-size: 16pt;
+    font-size: 15pt;
     font-weight: 700;
     color: #0F172A;
-    margin-top: 24px;
-    margin-bottom: 12px;
+    margin-top: 20px;
+    margin-bottom: 10px;
     border-bottom: 2px solid #F1F5F9;
-    padding-bottom: 6px;
+    padding-bottom: 5px;
     display: flex;
     align-items: center;
     gap: 8px;
   }
 
   h3 {
-    font-size: 12pt;
+    font-size: 11pt;
     font-weight: 600;
     color: #1E293B;
-    margin-top: 16px;
-    margin-bottom: 8px;
+    margin-top: 14px;
+    margin-bottom: 6px;
   }
 
   p {
-    margin-bottom: 10px;
+    margin-bottom: 8px;
     color: #334155;
   }
 
   ul, ol {
-    margin-left: 20px;
-    margin-bottom: 12px;
+    margin-left: 18px;
+    margin-bottom: 10px;
   }
 
   li {
-    margin-bottom: 4px;
+    margin-bottom: 3px;
     color: #334155;
   }
 
@@ -206,9 +206,9 @@ HTML_TEMPLATE = """<!DOCTYPE html>
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: 2px 8px;
-    border-radius: 6px;
-    font-size: 7.5pt;
+    padding: 2px 7px;
+    border-radius: 5px;
+    font-size: 7.2pt;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.04em;
@@ -225,13 +225,13 @@ HTML_TEMPLATE = """<!DOCTYPE html>
   .kpi-grid {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
-    gap: 10px;
-    margin: 16px 0;
+    gap: 8px;
+    margin: 14px 0;
   }
 
   .kpi-card {
     border-radius: 8px;
-    padding: 12px 10px;
+    padding: 10px 8px;
     text-align: center;
     border: 1px solid #E2E8F0;
   }
@@ -243,10 +243,10 @@ HTML_TEMPLATE = """<!DOCTYPE html>
   .kpi-card.forte   { background: #ECFDF5; border-color: #6EE7B7; }
 
   .kpi-num {
-    font-size: 20pt;
+    font-size: 18pt;
     font-weight: 800;
     line-height: 1;
-    margin-bottom: 4px;
+    margin-bottom: 3px;
   }
 
   .kpi-card.critica .kpi-num { color: #B91C1C; }
@@ -256,7 +256,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
   .kpi-card.forte .kpi-num   { color: #059669; }
 
   .kpi-label {
-    font-size: 7.5pt;
+    font-size: 7pt;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.04em;
@@ -267,23 +267,23 @@ HTML_TEMPLATE = """<!DOCTYPE html>
   .charts-row {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 16px;
-    margin: 16px 0;
+    gap: 14px;
+    margin: 14px 0;
   }
 
   .chart-box {
     background: #F8FAFC;
     border: 1px solid #E2E8F0;
-    border-radius: 10px;
-    padding: 14px;
+    border-radius: 8px;
+    padding: 12px;
     text-align: center;
   }
 
   .chart-box h4 {
-    font-size: 9pt;
+    font-size: 8.5pt;
     font-weight: 600;
     color: #334155;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
     text-transform: uppercase;
     letter-spacing: 0.04em;
   }
@@ -292,12 +292,12 @@ HTML_TEMPLATE = """<!DOCTYPE html>
   table {
     width: 100%;
     border-collapse: collapse;
-    margin: 12px 0 16px 0;
-    font-size: 8.5pt;
+    margin: 10px 0 14px 0;
+    font-size: 8pt;
   }
 
   th, td {
-    padding: 8px 10px;
+    padding: 7px 8px;
     text-align: left;
     vertical-align: top;
     border-bottom: 1px solid #E2E8F0;
@@ -307,7 +307,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
     background: #F1F5F9;
     color: #334155;
     font-weight: 700;
-    font-size: 8pt;
+    font-size: 7.5pt;
     text-transform: uppercase;
     letter-spacing: 0.05em;
   }
@@ -318,7 +318,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 
   .file-loc {
     font-family: 'JetBrains Mono', monospace;
-    font-size: 7.8pt;
+    font-size: 7.2pt;
     color: #0369A1;
     word-break: break-all;
     font-weight: 500;
@@ -328,24 +328,24 @@ HTML_TEMPLATE = """<!DOCTYPE html>
   pre {
     background: #0F172A;
     color: #F8FAFC;
-    padding: 8px 12px;
-    border-radius: 6px;
+    padding: 6px 10px;
+    border-radius: 5px;
     font-family: 'JetBrains Mono', monospace;
-    font-size: 7.5pt;
+    font-size: 7pt;
     overflow-x: hidden;
     white-space: pre-wrap;
     word-break: break-all;
-    margin: 6px 0;
+    margin: 4px 0;
     border: 1px solid #1E293B;
   }
 
   /* Callouts */
   .callout {
-    padding: 12px 14px;
-    border-radius: 8px;
-    margin: 12px 0;
-    font-size: 8.8pt;
-    line-height: 1.45;
+    padding: 10px 12px;
+    border-radius: 6px;
+    margin: 10px 0;
+    font-size: 8.2pt;
+    line-height: 1.4;
   }
 
   .callout-danger {
@@ -370,9 +370,9 @@ HTML_TEMPLATE = """<!DOCTYPE html>
   .issue-container {
     background: #F8FAFC;
     border: 1px solid #CBD5E1;
-    border-radius: 8px;
-    padding: 14px;
-    margin-bottom: 16px;
+    border-radius: 6px;
+    padding: 12px;
+    margin-bottom: 14px;
   }
 
   .issue-header {
@@ -380,12 +380,12 @@ HTML_TEMPLATE = """<!DOCTYPE html>
     justify-content: space-between;
     align-items: center;
     border-bottom: 1px solid #E2E8F0;
-    padding-bottom: 8px;
-    margin-bottom: 10px;
+    padding-bottom: 6px;
+    margin-bottom: 8px;
   }
 
   .issue-title {
-    font-size: 10.5pt;
+    font-size: 9.5pt;
     font-weight: 700;
     color: #0F172A;
   }
@@ -393,11 +393,11 @@ HTML_TEMPLATE = """<!DOCTYPE html>
   .issue-md-content {
     background: #FFFFFF;
     border: 1px solid #E2E8F0;
-    border-radius: 6px;
-    padding: 10px 12px;
+    border-radius: 5px;
+    padding: 8px 10px;
     font-family: 'JetBrains Mono', monospace;
-    font-size: 7.2pt;
-    line-height: 1.4;
+    font-size: 6.8pt;
+    line-height: 1.35;
     color: #1E293B;
     white-space: pre-wrap;
     word-break: break-word;
@@ -411,44 +411,44 @@ HTML_TEMPLATE = """<!DOCTYPE html>
   <div class="cover-header">
     <div class="cover-badge">Auditoria Técnica de Código-Fonte</div>
     <h1 class="cover-title">Relatório de Auditoria de Segurança</h1>
-    <div class="cover-subtitle">Avaliação Aprofundada de Vulnerabilidades e Arquitetura Multi-Tenant</div>
+    <div class="cover-subtitle">Avaliação Sistemática de Vulnerabilidades e Arquitetura Multi-Tenant</div>
   </div>
 
   <div class="cover-meta">
     <div class="meta-item">
       <strong>Aplicação / Alvo</strong>
-      <span>Procard / Arms Web (Sistema de Fidelidade & Vouchers)</span>
+      <span>Procard / Arms Web (Sistema de Fidelidade, Cupons & Assinaturas)</span>
     </div>
     <div class="meta-item">
       <strong>Data da Avaliação</strong>
-      <span>08 de Setembro de 2026</span>
+      <span>10 de Setembro de 2026</span>
     </div>
     <div class="meta-item">
       <strong>Stack Identificada</strong>
       <span>Flutter / Dart (FlutterFlow), GoRouter, HTTP REST Gateway</span>
     </div>
     <div class="meta-item">
-      <strong>Serviço Backend</strong>
-      <span>REST API em codeflowbr.online:8080 (Sem RLS / Sem Gateway WAF)</span>
+      <strong>Serviço Backend Integrado</strong>
+      <span>REST API em codeflowbr.online:8080 (Spring Boot / JPA / PostgreSQL)</span>
     </div>
     <div class="meta-item">
       <strong>Escopo Auditado</strong>
-      <span>lib/ (Frontend, Auth, Routing, Endpoints, Custom Actions, Assets)</span>
+      <span>lib/ (Frontend, Auth, Routing, Endpoints, Custom Actions, Assets) & Configs</span>
     </div>
     <div class="meta-item">
       <strong>Status Geral</strong>
-      <span style="color: #B91C1C;">3 Críticas, 4 Altas, 3 Médias, 2 Baixas, 4 Pontos Fortes</span>
+      <span style="color: #B91C1C;">4 Críticas, 6 Altas, 3 Médias, 1 Baixa | 4 Pontos Fortes</span>
     </div>
   </div>
 
   <div class="cover-methodology">
-    <strong>Nota Metodológica — Mapeamento para a Stack Local:</strong><br>
-    O projeto consiste em uma aplicação Flutter Web gerada via FlutterFlow consumindo APIs REST proprietárias via <code>api_manager.dart</code> e <code>api_calls.dart</code>. Cada uma das 5 categorias foi mapeada conforme:
-    <br>• <strong>1. Banco Sem Tranca:</strong> Como o backend não usa Supabase/Firebase, a verificação focou em queries de listagem em endpoints REST (<code>/customer</code>, <code>/dashboard</code>, <code>/discount</code>, <code>/partner</code>, <code>/trade</code>) que retornam dados consolidados sem filtrar pelo <code>tenant_id</code> da sessão.
-    <br>• <strong>2. Permissão no Navegador:</strong> Mapeamento dos gates condicionais no cliente (ex: checagem de <code>role == 2</code> em <code>login_widget.dart</code>) cruzados com a ausência de middleware e tokens de autorização nos endpoints administrativos no backend.
-    <br>• <strong>3. IDOR:</strong> Varredura exaustiva em todos os métodos de exclusão, edição e leitura que aceitam IDs numéricos (<code>idDiscount</code>, <code>idCustomer</code>, <code>idPartner</code>, <code>idProduto</code>, etc.) sem checagem de propriedade.
-    <br>• <strong>4. Chaves Expostas:</strong> Investigação de strings de conexão, credenciais embutidas, persistência desprotegida de JWT em <code>SharedPreferences</code> (localStorage) e constantes estáticas (<code>tenantId = '1'</code>).
-    <br>• <strong>5. Inputs Sem Tratamento:</strong> Inspeção de injeção de JSON por interpolação de strings em payloads REST, validação de esquemas de URL em <code>launchURL</code> e upload sem restrição de extensões/MIME.
+    <strong>Nota Metodológica — Mapeamento para a Stack Detectada:</strong><br>
+    A aplicação consiste em um cliente Flutter Web (gerado e estendido sobre FlutterFlow) que se comunica com uma API REST proprietária em <code>https://codeflowbr.online:8080/api/v1/</code> através de classes customizadas em <code>api_calls.dart</code> e <code>api_manager.dart</code>. As cinco categorias exigidas foram mapeadas rigorosamente para este ecossistema:
+    <br>• <strong>1. Banco Sem Tranca:</strong> Como a stack não utiliza RLS nativo (como Supabase/Firebase) nem middleware de tenant na API, auditamos todas as chamadas de listagem, busca e agregação (<code>/customer</code>, <code>/dashboard</code>, <code>/discount</code>, <code>/trade</code>) quanto à ausência de filtragem server-side por inquilino autenticado e à injeção estática de <code>tenantId = '1'</code> controlada pelo cliente.
+    <br>• <strong>2. Permissão no Navegador:</strong> Mapeamento dos gates condicionais de interface baseados em papéis (<code>LoginCall.role(...) == 2</code> em <code>login_widget.dart</code>) cruzados com a total ausência de verificação de privilégios nas rotas do GoRouter (<code>requireAuth = false</code>) e nos endpoints administrativos da API.
+    <br>• <strong>3. IDOR:</strong> Varredura exaustiva nos métodos de exclusão, edição e leitura que aceitam identificadores diretos por rota ou corpo JSON (<code>PUT /user</code>, <code>DELETE /discount/{id}</code>, <code>DELETE /product/{id}</code>, <code>GET /dashboard/partner/{id}</code>, <code>GET /history/user/{id}</code>) sem validação de posse.
+    <br>• <strong>4. Chaves Expostas:</strong> Investigação de strings de conexão, credenciais embutidas, persistência de credenciais em <code>localStorage</code> (SharedPreferences) e mecanismos inseguros de recuperação de senha em texto claro.
+    <br>• <strong>5. Inputs Sem Tratamento:</strong> Inspeção de injeção de JSON por interpolação de strings em payloads REST (<code>'''{ "campo": "${valor}" }'''</code>), validação de esquemas de protocolo em <code>launchURL</code> e rotas de upload desprotegidas.
   </div>
 
   <div class="cover-footer">
@@ -460,16 +460,16 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 <!-- RESUMO EXECUTIVO -->
 <h2>1. Resumo Executivo</h2>
 <p>
-A auditoria revelou um cenário de <strong>extrema criticidade na camada de autorização e isolamento de dados</strong>. A aplicação adota uma arquitetura em que a interface (Flutter Web) assume a responsabilidade exclusiva de controlar o acesso a dados e funcionalidades, enquanto a API REST subjacente (<code>https://codeflowbr.online:8080/api/v1/</code>) responde a requisições sem autenticação ou com verificação nula de privilégios.
+A auditoria identificou um cenário de <strong>alta criticidade arquitetural na camada de autorização e isolamento de dados</strong>. A aplicação delega ao cliente Flutter Web toda a responsabilidade de restringir acessos e controlar regras de privilégio, enquanto o backend REST subjacente aceita comandos sem exigir cabeçalhos de autorização (<code>headers: {}</code> em praticamente todas as rotas) e sem validar a posse dos registros manipulados.
 </p>
 
 <div class="kpi-grid">
   <div class="kpi-card critica">
-    <div class="kpi-num">3</div>
+    <div class="kpi-num">4</div>
     <div class="kpi-label">Crítica</div>
   </div>
   <div class="kpi-card alta">
-    <div class="kpi-num">4</div>
+    <div class="kpi-num">6</div>
     <div class="kpi-label">Alta</div>
   </div>
   <div class="kpi-card media">
@@ -477,7 +477,7 @@ A auditoria revelou um cenário de <strong>extrema criticidade na camada de auto
     <div class="kpi-label">Média</div>
   </div>
   <div class="kpi-card baixa">
-    <div class="kpi-num">2</div>
+    <div class="kpi-num">1</div>
     <div class="kpi-label">Baixa</div>
   </div>
   <div class="kpi-card forte">
@@ -489,32 +489,30 @@ A auditoria revelou um cenário de <strong>extrema criticidade na camada de auto
 <div class="charts-row avoid-break">
   <div class="chart-box">
     <h4>Distribuição de Vulnerabilidades por Severidade</h4>
-    <!-- SVG Donut Chart -->
+    <!-- SVG Donut Chart (Circumference: 314.16) Total: 14 (Crítica: 4, Alta: 6, Média: 3, Baixa: 1) -->
     <svg width="240" height="150" viewBox="0 0 240 150">
-      <!-- Donut Circle: Crítica: 3 (25%), Alta: 4 (33.3%), Média: 3 (25%), Baixa: 2 (16.7%) -->
       <circle cx="80" cy="75" r="50" fill="none" stroke="#E2E8F0" stroke-width="22"/>
-      <!-- Segments (circumference = 2 * pi * 50 = 314.16) -->
-      <!-- Critica: 3/12 = 25% -> 78.5 -->
-      <circle cx="80" cy="75" r="50" fill="none" stroke="#B91C1C" stroke-width="22" stroke-dasharray="78.5 235.6" stroke-dashoffset="0"/>
-      <!-- Alta: 4/12 = 33.3% -> 104.7 -->
-      <circle cx="80" cy="75" r="50" fill="none" stroke="#EA580C" stroke-width="22" stroke-dasharray="104.7 209.4" stroke-dashoffset="-78.5"/>
-      <!-- Media: 3/12 = 25% -> 78.5 -->
-      <circle cx="80" cy="75" r="50" fill="none" stroke="#D97706" stroke-width="22" stroke-dasharray="78.5 235.6" stroke-dashoffset="-183.2"/>
-      <!-- Baixa: 2/12 = 16.7% -> 52.4 -->
-      <circle cx="80" cy="75" r="50" fill="none" stroke="#2563EB" stroke-width="22" stroke-dasharray="52.4 261.7" stroke-dashoffset="-261.7"/>
-      <!-- Center text -->
-      <text x="80" y="71" text-anchor="middle" font-family="Inter" font-size="16" font-weight="800" fill="#0F172A">12</text>
+      <!-- Critica: 4/14 = 28.57% -> 89.8 -->
+      <circle cx="80" cy="75" r="50" fill="none" stroke="#B91C1C" stroke-width="22" stroke-dasharray="89.8 224.4" stroke-dashoffset="0"/>
+      <!-- Alta: 6/14 = 42.86% -> 134.6 -->
+      <circle cx="80" cy="75" r="50" fill="none" stroke="#EA580C" stroke-width="22" stroke-dasharray="134.6 179.6" stroke-dashoffset="-89.8"/>
+      <!-- Media: 3/14 = 21.43% -> 67.3 -->
+      <circle cx="80" cy="75" r="50" fill="none" stroke="#D97706" stroke-width="22" stroke-dasharray="67.3 246.9" stroke-dashoffset="-224.4"/>
+      <!-- Baixa: 1/14 = 7.14% -> 22.4 -->
+      <circle cx="80" cy="75" r="50" fill="none" stroke="#2563EB" stroke-width="22" stroke-dasharray="22.4 291.8" stroke-dashoffset="-291.7"/>
+      <!-- Centro -->
+      <text x="80" y="71" text-anchor="middle" font-family="Inter" font-size="16" font-weight="800" fill="#0F172A">14</text>
       <text x="80" y="85" text-anchor="middle" font-family="Inter" font-size="7.5" font-weight="600" fill="#64748B">FALHAS</text>
-      <!-- Legend -->
+      <!-- Legenda -->
       <g transform="translate(145, 25)" font-family="Inter" font-size="8" font-weight="600">
         <circle cx="6" cy="6" r="5" fill="#B91C1C"/>
-        <text x="18" y="9" fill="#334155">Crítica (3)</text>
+        <text x="18" y="9" fill="#334155">Crítica (4)</text>
         <circle cx="6" cy="24" r="5" fill="#EA580C"/>
-        <text x="18" y="27" fill="#334155">Alta (4)</text>
+        <text x="18" y="27" fill="#334155">Alta (6)</text>
         <circle cx="6" cy="42" r="5" fill="#D97706"/>
         <text x="18" y="45" fill="#334155">Média (3)</text>
         <circle cx="6" cy="60" r="5" fill="#2563EB"/>
-        <text x="18" y="63" fill="#334155">Baixa (2)</text>
+        <text x="18" y="63" fill="#334155">Baixa (1)</text>
         <circle cx="6" cy="78" r="5" fill="#059669"/>
         <text x="18" y="81" fill="#334155">P. Forte (4)</text>
       </g>
@@ -525,37 +523,36 @@ A auditoria revelou um cenário de <strong>extrema criticidade na camada de auto
     <h4>Achados por Categoria Auditada</h4>
     <!-- SVG Bar Chart -->
     <svg width="240" height="150" viewBox="0 0 240 150">
-      <!-- Bars -->
       <g font-family="Inter" font-size="7.5" font-weight="600" fill="#475569">
         <!-- 1. Banco Sem Tranca -->
         <text x="10" y="20">1. Banco Sem Tranca</text>
         <rect x="105" y="11" width="95" height="11" rx="3" fill="#B91C1C"/>
-        <text x="206" y="20" fill="#B91C1C" font-weight="700">3</text>
+        <text x="206" y="20" fill="#B91C1C" font-weight="700">4</text>
 
         <!-- 2. Permissão Navegador -->
         <text x="10" y="44">2. Permissão Nav.</text>
-        <rect x="105" y="35" width="65" height="11" rx="3" fill="#EA580C"/>
-        <text x="176" y="44" fill="#EA580C" font-weight="700">2</text>
+        <rect x="105" y="35" width="75" height="11" rx="3" fill="#EA580C"/>
+        <text x="186" y="44" fill="#EA580C" font-weight="700">3</text>
 
         <!-- 3. IDOR -->
         <text x="10" y="68">3. IDOR</text>
-        <rect x="105" y="59" width="125" height="11" rx="3" fill="#B91C1C"/>
-        <text x="235" y="68" fill="#B91C1C" font-weight="700">4</text>
+        <rect x="105" y="59" width="95" height="11" rx="3" fill="#B91C1C"/>
+        <text x="206" y="68" fill="#B91C1C" font-weight="700">4</text>
 
         <!-- 4. Chaves Expostas -->
         <text x="10" y="92">4. Chaves / Hardcode</text>
-        <rect x="105" y="83" width="65" height="11" rx="3" fill="#D97706"/>
-        <text x="176" y="92" fill="#D97706" font-weight="700">2</text>
+        <rect x="105" y="83" width="75" height="11" rx="3" fill="#D97706"/>
+        <text x="186" y="92" fill="#D97706" font-weight="700">3</text>
 
         <!-- 5. Inputs / XSS -->
         <text x="10" y="116">5. Injeção / XSS</text>
-        <rect x="105" y="107" width="95" height="11" rx="3" fill="#EA580C"/>
-        <text x="206" y="116" fill="#EA580C" font-weight="700">3</text>
+        <rect x="105" y="107" width="75" height="11" rx="3" fill="#EA580C"/>
+        <text x="186" y="116" fill="#EA580C" font-weight="700">3</text>
 
         <!-- Pontos Fortes -->
         <text x="10" y="140">Pontos Fortes</text>
-        <rect x="105" y="131" width="125" height="11" rx="3" fill="#059669"/>
-        <text x="235" y="140" fill="#059669" font-weight="700">4</text>
+        <rect x="105" y="131" width="95" height="11" rx="3" fill="#059669"/>
+        <text x="206" y="140" fill="#059669" font-weight="700">4</text>
       </g>
     </svg>
   </div>
@@ -563,34 +560,34 @@ A auditoria revelou um cenário de <strong>extrema criticidade na camada de auto
 
 <div class="callout callout-danger avoid-break">
   <strong>Vetor de Ataque Mais Crítico Comprovado:</strong>
-  O endpoint <code>GET https://codeflowbr.online:8080/api/v1/customer</code> foi testado e retornou com sucesso a lista completa de clientes, contendo <strong>nomes completos, números de CPF, números de cartão de fidelidade, logins, e-mails, saldos de pontos e carteira, endereços completos e o identificador do tenant</strong> de todos os usuários cadastrados, sem exigir nenhum cabeçalho de autorização ou token. Em paralelo, o endpoint <code>PUT https://codeflowbr.online:8080/api/v1/user</code> aceita alterações diretas de <code>password</code> e <code>role</code> para qualquer ID, permitindo <strong>Account Takeover global e elevação instantânea para Administrador</strong>.
+  O endpoint <code>GET https://codeflowbr.online:8080/api/v1/customer</code> foi verificado e não exige nenhuma autenticação ou filtro de inquilino. Ele expõe a lista completa de clientes cadastrados, incluindo <strong>nomes, CPFs, números de cartão de fidelidade, e-mails de login, saldos de pontos e endereços completos</strong> de todos os parceiros e inquilinos. Em conjunto, o método <code>PUT /api/v1/user</code> permite submeter qualquer <code>id</code> com novo <code>password</code> e <code>role: 2</code>, viabilizando <strong>Account Takeover global e elevação imediata a Administrador</strong>.
 </div>
 
 <!-- PONTOS FORTES E FRACOS -->
 <h2 class="page-break">2. Pontos Fortes e Riscos Centrais</h2>
 
-<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;" class="avoid-break">
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;" class="avoid-break">
   <div style="background: #ECFDF5; border: 1px solid #A7F3D0; border-radius: 8px; padding: 12px;">
     <h3 style="color: #065F46; margin-top: 0; display: flex; align-items: center; gap: 6px;">
       <span class="chip chip-forte">PROTEGIDO</span> Pontos Fortes Verificados
     </h3>
-    <ul style="font-size: 8.5pt; margin-left: 16px; margin-bottom: 0;">
-      <li><strong>Sanitização em EditarCustomerCall:</strong> O método <code>escapeStringForJson</code> em <code>api_calls.dart:1515</code> protege caracteres <code>"</code>, <code>\</code> e quebras de linha em edições de perfil.</li>
-      <li><strong>Higienização estrita de CNPJ:</strong> Em <code>get_company_by_cnpj.dart:15-18</code>, dígitos são filtrados por regex estrita (<code>[^0-9]</code>) e tamanho validado antes de invocar a BrasilAPI.</li>
-      <li><strong>Infraestrutura centralizada de Tokens:</strong> A classe <code>ApiManager</code> (<code>api_manager.dart:24-34</code>) já possui código preparado para anexar <code>Authorization: Bearer</code> automaticamente quando <code>_accessToken</code> for preenchido.</li>
-      <li><strong>Resiliência de UI com errorBuilder:</strong> Em <code>listagem_de_parceiros_widget.dart:495</code> e <code>listagem_de_cupom_widget.dart:670</code>, o uso de fallback visual evita quebra em cascata na renderização.</li>
+    <ul style="font-size: 8.2pt; margin-left: 16px; margin-bottom: 0;">
+      <li><strong>Sanitização em EditarCustomerCall:</strong> O método <code>escapeStringForJson</code> em <code>api_calls.dart:1547</code> protege aspas (<code>"</code>), barras (<code>\</code>) e quebras de linha no payload de alteração de clientes.</li>
+      <li><strong>Higienização estrita de CNPJ:</strong> Em <code>get_company_by_cnpj.dart:15-18</code>, dígitos são filtrados por regex estrita (<code>[^0-9]</code>) e tamanho exato (14 dígitos) antes de chamar a BrasilAPI.</li>
+      <li><strong>Formatação e máscara segura de CPF/CNPJ:</strong> Em <code>cpf_cnpj_formatter.dart:15-45</code>, inputs de formulário são higienizados impedindo caracteres não-numéricos no front.</li>
+      <li><strong>Resiliência de UI com errorBuilder:</strong> Em <code>listagem_de_parceiros_widget.dart:495</code> e <code>listagem_de_cupom_widget.dart:670</code>, o uso de fallback visual em <code>Image.network</code> evita falhas em cascata com URLs quebradas.</li>
     </ul>
   </div>
 
   <div style="background: #FEF2F2; border: 1px solid #FECACA; border-radius: 8px; padding: 12px;">
     <h3 style="color: #991B1B; margin-top: 0; display: flex; align-items: center; gap: 6px;">
-      <span class="chip chip-critica">RISCO</span> Vulnerabilidades Críticas Centrais
+      <span class="chip chip-critica">RISCO</span> Riscos Centrais Identificados
     </h3>
-    <ul style="font-size: 8.5pt; margin-left: 16px; margin-bottom: 0;">
-      <li><strong>Ausência de RLS / Tenant Middleware:</strong> Listagens e dashboards retornam dados agregados de todos os inquilinos sem isolamento.</li>
-      <li><strong>Autorização 100% no Cliente:</strong> O backend não valida se o usuário possui papel de admin ao receber comandos em rotas de configuração, cupons, produtos e usuários.</li>
-      <li><strong>IDOR em Leitura, Edição e Exclusão:</strong> Endpoints de exclusão (<code>DELETE /discount/{id}</code>, <code>/product/{id}</code>) e leitura aceitam qualquer ID numérico sem checagem de posse.</li>
-      <li><strong>Injeção de JSON por Interpolação de Strings:</strong> Criação e alteração de entidades montam JSON via interpolação de strings sem serializador.</li>
+    <ul style="font-size: 8.2pt; margin-left: 16px; margin-bottom: 0;">
+      <li><strong>Ausência de RLS / Tenant Middleware:</strong> Queries de listagem e agregação retornam dados globais sem isolamento entre inquilinos.</li>
+      <li><strong>Autorização 100% no Cliente:</strong> Rotas de administração (<code>/usuarios</code>, <code>/parceiros</code>) possuem <code>requireAuth: false</code> e a API não valida privilégios.</li>
+      <li><strong>IDOR em Leitura, Edição e Exclusão:</strong> Operações de exclusão (<code>DELETE /discount/{id}</code>, <code>/product/{id}</code>) e leitura aceitam IDs sem checar titularidade.</li>
+      <li><strong>Injeção de JSON por Interpolação:</strong> Métodos em <code>api_calls.dart</code> montam JSON via interpolação de strings sem serializador estruturado (<code>jsonEncode</code>).</li>
     </ul>
   </div>
 </div>
@@ -603,45 +600,57 @@ A auditoria revelou um cenário de <strong>extrema criticidade na camada de auto
 <table>
   <thead>
     <tr>
-      <th style="width: 12%;">Severidade</th>
+      <th style="width: 10%;">Severidade</th>
       <th style="width: 25%;">Arquivo & Linha</th>
-      <th style="width: 20%;">Categoria</th>
-      <th style="width: 43%;">Descrição e Explorabilidade</th>
+      <th style="width: 18%;">Categoria</th>
+      <th style="width: 47%;">Descrição, Código e Explorabilidade</th>
     </tr>
   </thead>
   <tbody>
     <!-- BANCO SEM TRANCA -->
     <tr>
       <td><span class="chip chip-critica">Crítica</span></td>
-      <td class="file-loc">lib/backend/api_requests/api_calls.dart:181</td>
+      <td class="file-loc">lib/backend/api_requests/api_calls.dart:181-197</td>
       <td>1. Banco Sem Tranca</td>
-      <td><strong>Vazamento irrestrito de clientes (LGPD):</strong> <code>ObterUsuariosCall</code> (<code>GET /api/v1/customer</code>) sem filtro de tenant ou usuário. Retorna CPF, nomes, cartões e dados de todos os clientes sem autenticação.</td>
+      <td><strong>Vazamento irrestrito de clientes (LGPD):</strong> <code>ObterUsuariosCall</code> (<code>GET /api/v1/customer</code>) sem filtro de tenant ou usuário. Retorna CPF, nomes, cartões e dados de todos os clientes sem autenticação (<code>headers: {}</code>).</td>
     </tr>
     <tr>
       <td><span class="chip chip-alta">Alta</span></td>
-      <td class="file-loc">lib/backend/api_requests/api_calls.dart:18</td>
+      <td class="file-loc">lib/backend/api_requests/api_calls.dart:18-35</td>
       <td>1. Banco Sem Tranca</td>
-      <td><strong>Vazamento de métricas globais no Dashboard:</strong> <code>ObterDashboardCompletoCall</code> (<code>GET /api/v1/dashboard</code>) expõe faturamento e indicadores agregados de todos os inquilinos.</td>
+      <td><strong>Vazamento de métricas globais no Dashboard:</strong> <code>ObterDashboardCompletoCall</code> (<code>GET /api/v1/dashboard</code>) expõe faturamento e indicadores agregados de todos os inquilinos sem isolamento.</td>
     </tr>
     <tr>
       <td><span class="chip chip-alta">Alta</span></td>
-      <td class="file-loc">lib/app_constants.dart:5<br>api_calls.dart:687, 914, 1021</td>
+      <td class="file-loc">lib/app_constants.dart:5<br>api_calls.dart:687, 914, 1021, 1433</td>
       <td>1. Banco Sem Tranca</td>
-      <td><strong>Tenant Hopping / Tenant controlado pelo cliente:</strong> <code>tenantId = '1'</code> hardcoded e injetado pelo frontend no payload JSON. O servidor aceita qualquer <code>idTenant</code> informado no body.</td>
+      <td><strong>Tenant Hopping / Tenant controlado pelo cliente:</strong> <code>tenantId = '1'</code> hardcoded e injetado pelo frontend no payload JSON. O servidor aceita qualquer <code>idTenant</code> informado no corpo da requisição.</td>
+    </tr>
+    <tr>
+      <td><span class="chip chip-alta">Alta</span></td>
+      <td class="file-loc">lib/backend/api_requests/api_calls.dart:77-92<br>api_calls.dart:451-468</td>
+      <td>1. Banco Sem Tranca</td>
+      <td><strong>Listagem irrestrita de cupons e trocas:</strong> <code>ObterDescontosCall</code> (<code>GET /discount</code>) e <code>TrocasCall</code> (<code>GET /trade</code>) listam todos os cupons e histórico de validações de todos os parceiros sem escopo de tenant.</td>
     </tr>
 
     <!-- PERMISSÃO NO NAVEGADOR -->
     <tr>
       <td><span class="chip chip-critica">Crítica</span></td>
-      <td class="file-loc">lib/pages/login/login_widget.dart:407<br>lib/flutter_flow/nav/nav.dart:326</td>
+      <td class="file-loc">lib/pages/login/login_widget.dart:377-387<br>lib/flutter_flow/nav/nav.dart:100-140, 336</td>
       <td>2. Permissão Nav.</td>
-      <td><strong>Gate cosmético de papel e rotas abertas:</strong> Rotas de admin no GoRouter têm <code>requireAuth = false</code>. O desvio entre Parceiro e Admin ocorre apenas via <code>if (LoginCall.role(...) == 2)</code> local.</td>
+      <td><strong>Gate cosmético de papel e rotas abertas:</strong> Rotas de admin no GoRouter têm <code>requireAuth = false</code> como padrão. O desvio entre Parceiro e Admin ocorre apenas via <code>if (LoginCall.role(...) == 2)</code> local.</td>
     </tr>
     <tr>
       <td><span class="chip chip-critica">Crítica</span></td>
-      <td class="file-loc">lib/backend/api_requests/api_calls.dart:283, 925, 1032</td>
+      <td class="file-loc">lib/backend/api_requests/api_calls.dart:283, 925, 1032, 1441</td>
       <td>2. Permissão Nav.</td>
-      <td><strong>Elevação de privilégio arbitrária via payload:</strong> <code>role</code> é enviado livremente pelo cliente na criação/edição de usuários (<code>AtualizarDadosCall</code>, <code>criarParceiro</code>). Qualquer usuário pode se promover a Admin (role 2).</td>
+      <td><strong>Elevação de privilégio arbitrária via payload:</strong> <code>role</code> é enviado livremente pelo cliente na criação/edição de usuários (<code>AtualizarDadosCall</code>, <code>CriarUsuarioCall</code>). Qualquer usuário pode se promover a Admin (role 2).</td>
+    </tr>
+    <tr>
+      <td><span class="chip chip-alta">Alta</span></td>
+      <td class="file-loc">lib/backend/api_requests/api_calls.dart:1568-1585</td>
+      <td>2. Permissão Nav.</td>
+      <td><strong>Disparo em massa de notificações push desprotegido:</strong> <code>NotificacaoPushCall</code> (<code>POST /api/v1/notify</code>) envia push broadcast para todos os usuários sem exigir verificação server-side de privilégio de superadmin.</td>
     </tr>
 
     <!-- IDOR -->
@@ -655,53 +664,59 @@ A auditoria revelou um cenário de <strong>extrema criticidade na camada de auto
       <td><span class="chip chip-alta">Alta</span></td>
       <td class="file-loc">lib/backend/api_requests/api_calls.dart:143-158</td>
       <td>3. IDOR</td>
-      <td><strong>Exclusão concorrente de cupons:</strong> <code>ExcluirDescontoCall</code> (<code>DELETE /api/v1/discount/{idDiscount}</code>) permite que qualquer parceiro delete cupons pertencentes a outros parceiros.</td>
+      <td><strong>Exclusão concorrente de cupons:</strong> <code>ExcluirDescontoCall</code> (<code>DELETE /api/v1/discount/{idDiscount}</code>) permite que qualquer parceiro delete cupons pertencentes a outros estabelecimentos.</td>
     </tr>
     <tr>
       <td><span class="chip chip-alta">Alta</span></td>
-      <td class="file-loc">lib/backend/api_requests/api_calls.dart:1262-1281</td>
+      <td class="file-loc">lib/backend/api_requests/api_calls.dart:313-328<br>api_calls.dart:580-595</td>
       <td>3. IDOR</td>
-      <td><strong>Espionagem de faturamento e métricas:</strong> <code>ObterDashboardParceiroCall</code> (<code>GET /api/v1/dashboard/partner/{partnerId}</code>) exibe métricas financeiras e transações de qualquer parceiro pelo ID.</td>
+      <td><strong>Exclusão arbitrária de produtos e parceiros:</strong> <code>DeletarProdutoCall</code> (<code>DELETE /product/{id}</code>) e <code>DeletarParceiroCall</code> (<code>DELETE /partner/{id}</code>) excluem registros de qualquer inquilino sem checagem de propriedade.</td>
     </tr>
     <tr>
       <td><span class="chip chip-alta">Alta</span></td>
-      <td class="file-loc">lib/backend/api_requests/api_calls.dart:532-550</td>
+      <td class="file-loc">lib/backend/api_requests/api_calls.dart:1256-1272<br>api_calls.dart:1360-1375</td>
       <td>3. IDOR</td>
-      <td><strong>Acesso a propostas comerciais confidenciais:</strong> <code>ObterPropostaPorIdCall</code> (<code>GET /api/v1/proposta/{idProposta}</code>) expõe dados societários e financeiros de propostas de qualquer empresa.</td>
+      <td><strong>Espionagem comercial e histórico de clientes:</strong> <code>ObterDashboardParceiroCall</code> (<code>GET /dashboard/partner/{id}</code>) e <code>HistoricoUsuarioCall</code> (<code>GET /history/user/{id}</code>) expõem faturamento e compras por ID arbitrário.</td>
     </tr>
 
     <!-- CHAVES EXPOSTAS -->
     <tr>
       <td><span class="chip chip-media">Média</span></td>
-      <td class="file-loc">lib/backend/api_requests/api_calls.dart:20, 696...</td>
+      <td class="file-loc">lib/backend/api_requests/api_calls.dart:20, 80...<br>lib/app_constants.dart:8</td>
       <td>4. Chaves / Hardcode</td>
-      <td><strong>Hardcode de URL de produção e portas expostas:</strong> <code>https://codeflowbr.online:8080/api/v1/</code> repetida em centenas de linhas. Exposição direta da porta 8080 sem WAF/Cloudflare.</td>
+      <td><strong>Hardcode de URL de produção e porta exposta:</strong> <code>https://codeflowbr.online:8080/api/v1/</code> repetida em dezenas de classes. Exposição direta da porta 8080 sem gateway WAF/Cloudflare.</td>
     </tr>
     <tr>
-      <td><span class="chip chip-baixa">Baixa</span></td>
-      <td class="file-loc">lib/auth/custom_auth/custom_auth_manager.dart:102</td>
+      <td><span class="chip chip-media">Média</span></td>
+      <td class="file-loc">lib/auth/custom_auth/custom_auth_manager.dart:119-132</td>
       <td>4. Chaves / Hardcode</td>
-      <td><strong>Persistência de tokens em LocalStorage (XSS Risk):</strong> SharedPreferences no Flutter Web armazena tokens JWT em texto claro no <code>window.localStorage</code>, sem flag <code>HttpOnly</code>.</td>
+      <td><strong>Persistência de credenciais em LocalStorage:</strong> <code>SharedPreferences</code> no Flutter Web armazena tokens e dados de sessão em texto claro no <code>window.localStorage</code>, sem flag <code>HttpOnly</code>.</td>
+    </tr>
+    <tr>
+      <td><span class="chip chip-alta">Alta</span></td>
+      <td class="file-loc">lib/backend/api_requests/api_calls.dart:1203-1215</td>
+      <td>4. Chaves / Hardcode</td>
+      <td><strong>Senhas armazenadas em texto claro (ausência de hash):</strong> <code>EsqueceuASenhaCall</code> (<code>POST /api/v1/forgot-password</code>) envia a senha em claro por e-mail, comprovando que senhas não utilizam hash criptográfico (bcrypt/Argon2).</td>
     </tr>
 
     <!-- INPUTS / XSS -->
     <tr>
       <td><span class="chip chip-alta">Alta</span></td>
-      <td class="file-loc">lib/backend/api_requests/api_calls.dart:276, 619, 676, 907...</td>
+      <td class="file-loc">lib/backend/api_requests/api_calls.dart:676-693, 907-954, 1098-1147</td>
       <td>5. Injeção / XSS</td>
-      <td><strong>Injeção de JSON por interpolação de strings:</strong> Mais de 15 chamadas montam JSON via concatenação <code>'''{ "login": "${login}" }'''</code> sem escape, permitindo quebra de sintaxe e injeção de atributos.</td>
+      <td><strong>Injeção de JSON por interpolação de strings:</strong> Mais de 15 chamadas montam JSON via interpolação direta <code>'''{ "rules": "${rules}" }'''</code> sem escape, permitindo quebra sintática e injeção de parâmetros adicionais.</td>
     </tr>
     <tr>
       <td><span class="chip chip-media">Média</span></td>
-      <td class="file-loc">lib/custom_code/actions/upload_photo.dart:20<br>upload_file.dart:20</td>
+      <td class="file-loc">lib/custom_code/actions/upload_photo.dart:14-45</td>
       <td>5. Injeção / XSS</td>
-      <td><strong>Upload anônimo e irrestrito de arquivos:</strong> <code>POST /api/v1/photo</code> e <code>/arquivo</code> sem autenticação e sem validação client-side de extensão (.php, .html, .svg com XSS).</td>
+      <td><strong>Upload anônimo e irrestrito de arquivos:</strong> <code>POST /api/v1/photo</code> sem autenticação e sem lista estrita de extensões permitidas no cliente (.html, .svg com XSS, scripts).</td>
     </tr>
     <tr>
       <td><span class="chip chip-baixa">Baixa</span></td>
-      <td class="file-loc">lib/flutter_flow/flutter_flow_util.dart:198<br>contrato_parceiro_widget.dart:133</td>
+      <td class="file-loc">lib/flutter_flow/flutter_flow_util.dart:198-206<br>contrato_parceiro_widget.dart:133</td>
       <td>5. Injeção / XSS</td>
-      <td><strong>Injeção de Esquema de URL em launchURL:</strong> <code>launchUrl(Uri.parse(url))</code> não valida esquemas seguros (<code>http/https</code>), permitindo execução de pseudoprotocolos (ex: <code>javascript:</code>).</td>
+      <td><strong>Injeção de esquema de URL em launchURL:</strong> <code>launchUrl(Uri.parse(url))</code> não valida esquemas seguros (<code>http/https</code>), permitindo ativação de pseudoprotocolos (ex: <code>javascript:</code>) no Flutter Web.</td>
     </tr>
   </tbody>
 </table>
@@ -711,9 +726,9 @@ A auditoria revelou um cenário de <strong>extrema criticidade na camada de auto
 <!-- RECOMENDAÇÕES PRIORIZADAS -->
 <h2>4. Recomendações Priorizadas (Plano de Remediação)</h2>
 
-<div class="avoid-break" style="margin-bottom: 12px;">
-  <h3 style="color: #B91C1C;">Prioridade P1 (Imediata — Próximas 24 horas)</h3>
-  <div style="background: #FEF2F2; border-left: 4px solid #B91C1C; padding: 10px 14px; border-radius: 0 6px 6px 0; font-size: 8.5pt;">
+<div class="avoid-break" style="margin-bottom: 10px;">
+  <h3 style="color: #B91C1C;">Prioridade P1 (Imediata — Próximas 24 a 48 horas)</h3>
+  <div style="background: #FEF2F2; border-left: 4px solid #B91C1C; padding: 10px 12px; border-radius: 0 6px 6px 0; font-size: 8.2pt;">
     <strong>1. Fechamento Imediato de Endpoints Abertos:</strong>
     Exigir autenticação obrigatória via Bearer JWT em <strong>todas</strong> as rotas da API (<code>/customer</code>, <code>/dashboard</code>, <code>/discount</code>, <code>/user</code>, <code>/partner</code>, <code>/photo</code>). Bloquear imediatamente requisições anônimas.
     <br><strong>2. Bloqueio de Parâmetros Privilegiados:</strong>
@@ -723,9 +738,9 @@ A auditoria revelou um cenário de <strong>extrema criticidade na camada de auto
   </div>
 </div>
 
-<div class="avoid-break" style="margin-bottom: 12px;">
+<div class="avoid-break" style="margin-bottom: 10px;">
   <h3 style="color: #EA580C;">Prioridade P2 (Curto Prazo — Próximos 7 dias)</h3>
-  <div style="background: #FFF7ED; border-left: 4px solid #EA580C; padding: 10px 14px; border-radius: 0 6px 6px 0; font-size: 8.5pt;">
+  <div style="background: #FFF7ED; border-left: 4px solid #EA580C; padding: 10px 12px; border-radius: 0 6px 6px 0; font-size: 8.2pt;">
     <strong>4. Implementação de Middleware de Tenant e Checagem de Posse:</strong>
     Criar validação server-side em todas as queries e rotas de exclusão/edição: <code>WHERE tenant_id = :authenticated_tenant_id AND partner_id = :authenticated_partner_id</code>.
     <br><strong>5. Substituição de Interpolação JSON por jsonEncode():</strong>
@@ -735,15 +750,15 @@ A auditoria revelou um cenário de <strong>extrema criticidade na camada de auto
   </div>
 </div>
 
-<div class="avoid-break" style="margin-bottom: 12px;">
+<div class="avoid-break" style="margin-bottom: 10px;">
   <h3 style="color: #2563EB;">Prioridade P3 (Médio Prazo — Próximas 2 semanas)</h3>
-  <div style="background: #EFF6FF; border-left: 4px solid #2563EB; padding: 10px 14px; border-radius: 0 6px 6px 0; font-size: 8.5pt;">
-    <strong>7. Variáveis de Ambiente e Gateway Reverso:</strong>
+  <div style="background: #EFF6FF; border-left: 4px solid #2563EB; padding: 10px 12px; border-radius: 0 6px 6px 0; font-size: 8.2pt;">
+    <strong>7. Hashing Criptográfico de Senhas (bcrypt / Argon2):</strong>
+    Criptografar todas as senhas armazenadas no banco e substituir o envio da senha original em <code>/forgot-password</code> por tokens temporários de redefinição com validade curta.
+    <br><strong>8. Variáveis de Ambiente e Gateway Reverso:</strong>
     Extrair a URL da API para <code>String.fromEnvironment('API_BASE_URL')</code> e posicionar o backend atrás de um Reverse Proxy / WAF (Cloudflare/Nginx) com HTTPS na porta padrão 443.
-    <br><strong>8. Validação Estrita de Uploads:</strong>
-    Implementar validação de MIME type e magic bytes no upload de arquivos, além de desabilitar a execução de scripts no diretório estático de fotos.
-    <br><strong>9. Sanitização de Esquemas em launchURL:</strong>
-    Validar se o esquema da URI pertence exclusivamente a <code>https</code> ou <code>http</code> antes de invocar <code>launchUrl()</code>.
+    <br><strong>9. Validação Estrita de Uploads e Esquemas URI:</strong>
+    Implementar validação de MIME type e magic bytes no upload de arquivos e validar esquemas <code>https/http</code> em <code>launchURL</code>.
   </div>
 </div>
 
@@ -751,14 +766,14 @@ A auditoria revelou um cenário de <strong>extrema criticidade na camada de auto
 
 <!-- SEÇÃO DE ISSUES PARA GITHUB -->
 <h2>5. Issues para o GitHub (Markdown Pronto para Cópia)</h2>
-<p style="font-size: 8.5pt; color: #64748B;">
-As issues abaixo foram formatadas em Markdown completo, prontas para inclusão no rastreador de tarefas do repositório.
+<p style="font-size: 8.2pt; color: #64748B; margin-bottom: 12px;">
+As issues abaixo foram formatadas em Markdown completo, prontas para inclusão no repositório.
 </p>
 
 <!-- ISSUE 1 -->
 <div class="issue-container avoid-break">
   <div class="issue-header">
-    <span class="issue-title">Issue #1: [Segurança] Vazamento de dados de clientes e falta de isolamento de inquilino em /customer</span>
+    <span class="issue-title">Issue #1: [Segurança] Vazamento de dados pessoais e ausência de filtro de inquilino em /customer</span>
     <span class="chip chip-critica">CRÍTICA</span>
   </div>
   <div class="issue-md-content">--- ISSUE 1 ---
@@ -766,30 +781,34 @@ As issues abaixo foram formatadas em Markdown completo, prontas para inclusão n
 **Labels:** `security`, `severity:critical`, `lgpd`, `tenant-isolation`
 
 ### Descrição do Problema
-O endpoint de listagem de clientes responde a requisições sem exigir autenticação ou validação de inquilino, retornando registros de múltiplos clientes cadastrados na base com dados extremamente sensíveis.
+O endpoint de listagem de clientes responde a requisições sem exigir autenticação ou validação de inquilino, retornando registros de múltiplos clientes cadastrados na base com dados extremamente sensíveis (CPF, nome, cartão, saldos e endereço).
 
 ### Evidência de Código
-- **Arquivo:** `lib/backend/api_requests/api_calls.dart` (Linhas 180-205)
+- **Arquivo:** `lib/backend/api_requests/api_calls.dart` (Linhas 180-197)
 ```dart
 class ObterUsuariosCall {
   static Future<ApiCallResponse> call() async {
+    final token = currentAuthenticationToken;
     return ApiManager.instance.makeApiCall(
       callName: 'obterUsuarios',
       apiUrl: 'https://codeflowbr.online:8080/api/v1/customer',
       callType: ApiCallType.GET,
-      headers: {},
+      headers: {
+        if (token != null && token.isNotEmpty)
+          'Authorization': 'Bearer $token',
+      },
       params: {},
 ```
 
 ### Prova de Conceito (Explorabilidade)
-Uma simples requisição HTTP não autenticada realizada contra o servidor retorna o payload com centenas de clientes:
+Uma simples requisição HTTP não autenticada realizada contra o servidor retorna o payload com clientes de múltiplos inquilinos:
 ```bash
 curl -i "https://codeflowbr.online:8080/api/v1/customer"
 ```
-**Campos expostos:** `cpf`, `cardNumber`, `name`, `login` (e-mail), `adress` (rua, número, bairro, cidade, CEP), `wallet` (saldo de pontos).
+**Campos expostos:** `cpf`, `cardNumber`, `name`, `login` (e-mail), `adress` (rua, número, bairro, cidade, CEP), `wallet` (saldo de pontos), `tenant` (ID do inquilino).
 
 ### Impacto
-Violação gravíssima da Lei Geral de Proteção de Dados (LGPD) e vazamento de base de clientes de todos os inquilinos da plataforma para qualquer usuário externo.
+Violação gravíssima da Lei Geral de Proteção de Dados (LGPD) e vazamento de base de clientes de todos os inquilinos da plataforma para qualquer usuário externo não autenticado.
 
 ### Sugestão de Correção
 1. Adicionar middleware de autenticação obrigatória JWT na rota `/api/v1/customer`.
@@ -799,7 +818,7 @@ Violação gravíssima da Lei Geral de Proteção de Dados (LGPD) e vazamento de
 ### Critérios de Aceite
 - [ ] Requisições não autenticadas em `GET /api/v1/customer` retornam status `401 Unauthorized`.
 - [ ] Usuários autenticados só conseguem visualizar clientes pertencentes ao seu próprio inquilino (`tenant_id`).
-- [ ] O cabeçalho `Authorization: Bearer <token>` é incluído em `ObterUsuariosCall` em `api_calls.dart`.
+- [ ] O cabeçalho `Authorization: Bearer <token>` é anexado de forma consistente em `ObterUsuariosCall`.
 --- FIM ISSUE 1 ---</div>
 </div>
 
@@ -848,7 +867,7 @@ class AtualizarDadosCall {
 3. Proibir que o próprio usuário edite o campo `role` da conta. Alterações de papel devem exigir endpoint específico e privilégio de superadmin.
 
 ### Critérios de Aceite
-- [ ] O usuário não pode alterar dados de contas de terceiros passando IDs arbitrários.
+- [ ] O usuário não pode alterar dados de contas de terceiros passando IDs arbitrários no body.
 - [ ] O atributo `role` não é alterável via endpoint de atualização de perfil.
 - [ ] Qualquer tentativa de alteração sem token válido resulta em `401 Unauthorized`.
 --- FIM ISSUE 2 ---</div>
@@ -872,9 +891,10 @@ Várias operações críticas recebem identificadores numéricos diretamente na 
 ### Evidência de Código
 - **Arquivo:** `lib/backend/api_requests/api_calls.dart`
   - Linha 143: `ExcluirDescontoCall`: `DELETE /api/v1/discount/${idDiscount}`
-  - Linha 309: `DeletarProdutoCall`: `DELETE /api/v1/product/${idProduto}`
-  - Linha 1269: `ObterDashboardParceiroCall`: `GET /api/v1/dashboard/partner/${partnerId}`
-  - Linha 1290: `ObterCuponsDoParceiroCall`: `GET /api/v1/discount/partner/user/${partnerId}`
+  - Linha 313: `DeletarProdutoCall`: `DELETE /api/v1/product/${idProduto}`
+  - Linha 580: `DeletarParceiroCall`: `DELETE /api/v1/partner/${idPartner}`
+  - Linha 1256: `ObterDashboardParceiroCall`: `GET /api/v1/dashboard/partner/${partnerId}`
+  - Linha 1360: `HistoricoUsuarioCall`: `GET /api/v1/history/user/${idCustomer}`
 
 ```dart
 class ExcluirDescontoCall {
@@ -883,11 +903,13 @@ class ExcluirDescontoCall {
       callName: 'excluirDesconto',
       apiUrl: 'https://codeflowbr.online:8080/api/v1/discount/${idDiscount}',
       callType: ApiCallType.DELETE,
+      headers: {},
 ```
 
 ### Impacto
 - Parceiros comerciais podem excluir cupons e produtos de estabelecimentos concorrentes.
 - Espionagem comercial de receitas e métricas ao consultar o dashboard de outros parceiros alterando o `partnerId`.
+- Acesso a histórico detalhado de compras e resgates de clientes arbitrários.
 
 ### Sugestão de Correção
 No backend, validar a propriedade de cada recurso antes de efetuar exclusão ou retorno:
@@ -926,7 +948,7 @@ final ffApiRequestBody = '''
   "rules": "${rules}"
 }''';
 ```
-*(Apenas em `EditarCustomerCall` na linha 1515 houve adição pontual de `escapeStringForJson`).*
+*(Apenas em `EditarCustomerCall` na linha 1547 houve adição pontual de `escapeStringForJson`).*
 
 ### Impacto
 - Falha e quebra da aplicação quando usuários inserem caracteres especiais ou descrições multilinha.
@@ -953,56 +975,43 @@ final body = json.encode(payload);
 <!-- ISSUE 5 -->
 <div class="issue-container avoid-break">
   <div class="issue-header">
-    <span class="issue-title">Issue #5: [Segurança] Ausência de Validação de Esquema e Vetor de Redirecionamento em launchURL</span>
-    <span class="chip chip-baixa">BAIXA</span>
+    <span class="issue-title">Issue #5: [Segurança] Armazenamento de Senhas em Texto Claro e Recuperação Insegura</span>
+    <span class="chip chip-alta">ALTA</span>
   </div>
   <div class="issue-md-content">--- ISSUE 5 ---
-**Título:** [Segurança] Ausência de validação de protocolo seguro em launchURL (XSS / Open Redirect)
-**Labels:** `security`, `severity:low`, `xss`, `client-security`
+**Título:** [Segurança] Ausência de hash criptográfico de senhas e recuperação insegura em /forgot-password
+**Labels:** `security`, `severity:high`, `cryptography`, `authentication`
 
 ### Descrição do Problema
-O método auxiliar `launchURL` recebe strings de URL de contratos e banners e dispara diretamente `launchUrl(uri)` sem validar se o protocolo pertence a uma lista permitida (`https` ou `http`). No Flutter Web, protocolos como `javascript:` podem ser acionados no navegador do cliente se alimentados por fontes manipuladas no banco.
+O fluxo de recuperação de senhas acionado por `EsqueceuASenhaCall` (`POST /api/v1/forgot-password`) envia a senha original em texto claro por e-mail, comprovando que as credenciais são armazenadas sem hash ou salting no banco de dados.
 
 ### Evidência de Código
-- **Arquivo:** `lib/flutter_flow/flutter_flow_util.dart` (Linhas 198-205)
+- **Arquivo:** `lib/backend/api_requests/api_calls.dart` (Linhas 1203-1215)
 ```dart
-Future launchURL(String url) async {
-  var uri = Uri.parse(url);
-  try {
-    await launchUrl(uri);
-  } catch (e) {
-    throw 'Could not launch $uri: $e';
-  }
-}
-```
-- **Arquivo:** `lib/pages/contrato_parceiro/contrato_parceiro_widget.dart` (Linha 133):
-```dart
-await launchURL(getJsonField(FFAppState().parceiro, r'''$.partner.contract''').toString());
+class EsqueceuASenhaCall {
+  static Future<ApiCallResponse> call({String? login = ''}) async {
+    final ffApiRequestBody = '''{ "login": "${login}" }''';
+    return ApiManager.instance.makeApiCall(
+      callName: 'esqueceuASenha',
+      apiUrl: 'https://codeflowbr.online:8080/api/v1/forgot-password',
+      callType: ApiCallType.POST,
 ```
 
 ### Impacto
-Possibilidade de execução de scripts locais ou redirecionamento de usuários administrativos para páginas maliciosas de phishing a partir de links de contratos controlados por atacantes.
+Em caso de vazamento do banco de dados ou interceptação de e-mails, 100% das senhas de parceiros, administradores e clientes estarão expostas imediatamente sem necessidade de quebra por força bruta.
 
 ### Sugestão de Correção
-Aplicar verificação estrita de protocolo:
-```dart
-Future launchURL(String url) async {
-  final uri = Uri.tryParse(url.trim());
-  if (uri == null || (!uri.isScheme('http') && !uri.isScheme('https'))) {
-    throw 'Protocolo de URL inválido ou inseguro';
-  }
-  await launchUrl(uri, mode: LaunchMode.externalApplication);
-}
-```
+1. Aplicar hashing irreversível com BCrypt ou Argon2 em todas as senhas armazenadas.
+2. Substituir a recuperação com reenvio da senha por envio de link com token temporário e de uso único (expiração em 15 minutos).
 
 ### Critérios de Aceite
-- [ ] URLs com prefixo `javascript:`, `data:` ou desconhecidas são bloqueadas com exceção controlada.
-- [ ] Apenas links iniciando em `http://` ou `https://` são abertos pelo aplicativo.
+- [ ] Senhas no banco de dados nunca são armazenadas em texto claro.
+- [ ] O e-mail de recuperação não contém a senha do usuário, mas sim um link seguro de redefinição.
 --- FIM ISSUE 5 ---</div>
 </div>
 
-<div style="margin-top: 25px; border-top: 1px solid #E2E8F0; padding-top: 12px; font-size: 8pt; color: #94A3B8; text-align: center;">
-  Fim do Relatório de Auditoria de Segurança — Procard / Arms Web • Gerado em 08/09/2026
+<div style="margin-top: 20px; border-top: 1px solid #E2E8F0; padding-top: 10px; font-size: 7.5pt; color: #94A3B8; text-align: center;">
+  Fim do Relatório de Auditoria de Segurança — Procard / Arms Web • Gerado em 10/09/2026
 </div>
 
 </body>

@@ -187,7 +187,7 @@ List<dynamic>? obterClientes(List<dynamic>? clientes) {
   return clientes.where((cliente) => cliente['partner'] == null).toList();
 }
 
-/// Retorna os nomes dos planos Arms Pró em que o parceiro está credenciado
+/// Retorna os nomes dos planos Arms Pro em que o parceiro está credenciado
 List<String> obterNomesPlanosDoParceiro(int? partnerId) {
   if (partnerId == null || partnerId <= 0) return [];
   return PlansAndSubscriptionsService()
@@ -196,7 +196,7 @@ List<String> obterNomesPlanosDoParceiro(int? partnerId) {
       .toList();
 }
 
-/// Verifica se o parceiro possui elegibilidade em um plano Arms Pró específico
+/// Verifica se o parceiro possui elegibilidade em um plano Arms Pro específico
 bool parceiroElegivelNoPlano(int? partnerId, String? planId) {
   if (partnerId == null || planId == null) return false;
   return PlansAndSubscriptionsService().isPartnerEligibleInPlan(partnerId, planId);
@@ -208,13 +208,13 @@ int totalAssinantesAtivosDoParceiro(int? partnerId) {
   return PlansAndSubscriptionsService().getPartnerSubscribersCount(partnerId);
 }
 
-/// Verifica se o parceiro está vinculado a pelo menos um plano Arms Pró
+/// Verifica se o parceiro está vinculado a pelo menos um plano Arms Pro
 bool parceiroTemPlanoAtivo(int? partnerId) {
   if (partnerId == null || partnerId <= 0) return false;
   return PlansAndSubscriptionsService().getPlansForPartner(partnerId).isNotEmpty;
 }
 
-/// Retorna um resumo em Map do parceiro no ecossistema Arms Pró
+/// Retorna um resumo em Map do parceiro no ecossistema Arms Pro
 dynamic obterResumoParceiroPlanos(int? partnerId) {
   if (partnerId == null || partnerId <= 0) {
     return {

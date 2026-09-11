@@ -82,10 +82,7 @@ class _MyAppState extends State<MyApp> {
         _appStateNotifier.update(user);
       });
 
-    Future.delayed(
-      Duration(milliseconds: 1000),
-      () => _appStateNotifier.stopShowingSplashImage(),
-    );
+    _appStateNotifier.stopShowingSplashImage();
   }
 
   void setLocale(String language) {

@@ -39,6 +39,25 @@ class _ModalEditarParceiroWidgetState extends State<ModalEditarParceiroWidget> {
   bool _senhaOculta = true;
   bool _salvando = false;
   bool _buscandoCnpj = false;
+  bool _carregandoDescontos = false;
+  List<dynamic> _descontosDoParceiro = [];
+
+  Future<void> _carregarDescontosDoParceiro(String partnerId) async {
+    setState(() => _carregandoDescontos = true);
+    try {
+      final res = await ObterDescontosDoParceiroPorIdCall.call(partnerId: partnerId);
+      if (res.succeeded && res.jsonBody is List) {
+        setState(() {
+          _descontosDoParceiro = (res.jsonBody as List<dynamic>)
+              .map((e) => e is Map ? e : <dynamic, dynamic>{})
+              .toList();
+        });
+      }
+    } catch (_) {
+    } finally {
+      if (mounted) setState(() => _carregandoDescontos = false);
+    }
+  }
 
   Future<void> _consultarCnpj(String val) async {
     final digits = val.replaceAll(RegExp(r'[^0-9]'), '');
@@ -215,6 +234,17 @@ class _ModalEditarParceiroWidgetState extends State<ModalEditarParceiroWidget> {
     _model.imagemUrll = _cleanNull(getJsonField(partner, r'''$.photo'''));
     _model.fileUrl = _cleanNull(getJsonField(partner, r'''$.contract'''));
 
+    final rawProposal = _cleanNull(getJsonField(partner, r'''$.proposal'''));
+    _model.proposalTextController ??= TextEditingController(
+      text: (rawProposal == 'off' || rawProposal == 'null') ? '' : rawProposal,
+    );
+    _model.proposalFocusNode ??= FocusNode();
+
+    final partnerId = getJsonField(partner, r'''$.id''')?.toString() ?? '';
+    if (partnerId.isNotEmpty) {
+      _carregarDescontosDoParceiro(partnerId);
+    }
+
     WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));
   }
 
@@ -339,7 +369,9 @@ class _ModalEditarParceiroWidgetState extends State<ModalEditarParceiroWidget> {
         emailRepresentante: _model.mailRepTextController.text,
         fantasia: _model.nomeTextController.text,
         idSegmento: _model.segmentoId?.toString(),
-        proposal: ' ',
+        proposal: _model.proposalTextController?.text.trim().isNotEmpty ?? false
+            ? _model.proposalTextController!.text.trim()
+            : 'off',
         idCustomer: getJsonField(widget.dados, r'''$.id''').toString(),
         phone: _model.phoneTextController.text,
         idPartner: getJsonField(widget.dados, r'''$.partner.id''').toString(),
@@ -894,6 +926,52 @@ class _ModalEditarParceiroWidgetState extends State<ModalEditarParceiroWidget> {
                                 ),
                               ],
                             ),
+                            const SizedBox(height: 14.0),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 10.0),
+                              decoration: BoxDecoration(
+                                color: theme.secondary.withOpacity(0.08),
+                                borderRadius: BorderRadius.circular(8.0),
+                                border: Border.all(color: theme.secondary.withOpacity(0.2)),
+                              ),
+                              child: Row(
+                                children: [
+                                  Icon(Icons.radar_rounded, color: theme.secondary, size: 20.0),
+                                  const SizedBox(width: 10.0),
+                                  Expanded(
+                                    child: Text(
+                                      'Geolocalização & Cerca Digital: o endereço cadastrado alimenta o radar de ofertas por raio no app dos assinantes.',
+                                      style: GoogleFonts.readexPro(
+                                        fontSize: 12.0,
+                                        color: theme.primaryText,
+                                      ),
+                                    ),
+                                  ),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+                                    decoration: BoxDecoration(
+                                      color: theme.success.withOpacity(0.15),
+                                      borderRadius: BorderRadius.circular(6.0),
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(Icons.check_circle_rounded, size: 13.0, color: theme.success),
+                                        const SizedBox(width: 4.0),
+                                        Text(
+                                          'Radar Ativo',
+                                          style: GoogleFonts.readexPro(
+                                            fontSize: 11.0,
+                                            fontWeight: FontWeight.w600,
+                                            color: theme.success,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
                           ],
                         ),
                       ),
@@ -999,6 +1077,177 @@ class _ModalEditarParceiroWidgetState extends State<ModalEditarParceiroWidget> {
                                   ),
                                 ),
                               ],
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      const SizedBox(height: 24.0),
+
+                      // Seção 4: Benefícios & Regras de Desconto
+                      _buildSectionHeader('4. Benefícios & Regras de Desconto', Icons.discount_rounded, theme),
+                      Container(
+                        padding: const EdgeInsets.all(18.0),
+                        decoration: BoxDecoration(
+                          color: theme.primaryBackground.withOpacity(0.5),
+                          borderRadius: BorderRadius.circular(12.0),
+                          border: Border.all(color: theme.alternate),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Cupons e Descontos Ativos da tabela tb_discount
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  'Cupons & Descontos Cadastrados no Banco',
+                                  style: GoogleFonts.readexPro(
+                                    fontSize: 13.0,
+                                    fontWeight: FontWeight.bold,
+                                    color: theme.primaryText,
+                                  ),
+                                ),
+                                if (_carregandoDescontos)
+                                  SizedBox(
+                                    width: 14.0,
+                                    height: 14.0,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2.0,
+                                      color: theme.secondary,
+                                    ),
+                                  ),
+                              ],
+                            ),
+                            const SizedBox(height: 10.0),
+                            if (_carregandoDescontos)
+                              const Padding(
+                                padding: EdgeInsets.symmetric(vertical: 12.0),
+                                child: Center(
+                                  child: SizedBox(
+                                    width: 20.0,
+                                    height: 20.0,
+                                    child: CircularProgressIndicator(strokeWidth: 2.0),
+                                  ),
+                                ),
+                              )
+                            else if (_descontosDoParceiro.isEmpty)
+                              Container(
+                                padding: const EdgeInsets.all(12.0),
+                                decoration: BoxDecoration(
+                                  color: theme.secondaryBackground,
+                                  borderRadius: BorderRadius.circular(8.0),
+                                  border: Border.all(color: theme.alternate),
+                                ),
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.info_outline_rounded, size: 18.0, color: theme.secondaryText),
+                                    const SizedBox(width: 10.0),
+                                    Expanded(
+                                      child: Text(
+                                        'Nenhum desconto percentual ativo registrado para este parceiro na tabela de cupons.',
+                                        style: GoogleFonts.readexPro(fontSize: 12.5, color: theme.secondaryText),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              )
+                            else
+                              Column(
+                                children: _descontosDoParceiro.map((d) {
+                                  final discVal = d['discount']?.toString() ?? '0';
+                                  final desc = d['description']?.toString() ?? 'Desconto';
+                                  final validityRaw = d['validity']?.toString() ?? '';
+                                  String validityFormatted = validityRaw;
+                                  if (validityRaw.isNotEmpty && validityRaw.length >= 10) {
+                                    validityFormatted = validityRaw.substring(0, 10);
+                                  }
+                                  final isActive = d['isActive'] == true;
+
+                                  return Container(
+                                    margin: const EdgeInsets.only(bottom: 8.0),
+                                    padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 10.0),
+                                    decoration: BoxDecoration(
+                                      color: theme.secondaryBackground,
+                                      borderRadius: BorderRadius.circular(8.0),
+                                      border: Border.all(
+                                        color: isActive ? const Color(0xFF00C853).withOpacity(0.3) : theme.alternate,
+                                        width: 1.0,
+                                      ),
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 4.0),
+                                          decoration: BoxDecoration(
+                                            color: const Color(0xFF00C853).withOpacity(0.12),
+                                            borderRadius: BorderRadius.circular(6.0),
+                                          ),
+                                          child: Text(
+                                            '$discVal% OFF',
+                                            style: GoogleFonts.readexPro(
+                                              fontSize: 13.0,
+                                              fontWeight: FontWeight.bold,
+                                              color: const Color(0xFF00C853),
+                                            ),
+                                          ),
+                                        ),
+                                        const SizedBox(width: 12.0),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                desc,
+                                                style: GoogleFonts.readexPro(
+                                                  fontSize: 13.0,
+                                                  fontWeight: FontWeight.w600,
+                                                  color: theme.primaryText,
+                                                ),
+                                              ),
+                                              if (validityFormatted.isNotEmpty)
+                                                Text(
+                                                  'Válido até: $validityFormatted',
+                                                  style: GoogleFonts.readexPro(
+                                                    fontSize: 11.5,
+                                                    color: theme.secondaryText,
+                                                  ),
+                                                ),
+                                            ],
+                                          ),
+                                        ),
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 3.0),
+                                          decoration: BoxDecoration(
+                                            color: isActive ? const Color(0x2000C853) : const Color(0x15909090),
+                                            borderRadius: BorderRadius.circular(4.0),
+                                          ),
+                                          child: Text(
+                                            isActive ? 'ATIVO' : 'INATIVO',
+                                            style: GoogleFonts.readexPro(
+                                              fontSize: 10.5,
+                                              fontWeight: FontWeight.bold,
+                                              color: isActive ? const Color(0xFF00C853) : theme.secondaryText,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                }).toList(),
+                              ),
+                            const SizedBox(height: 14.0),
+                            // Proposta Comercial / Descrição do Benefício
+                            TextFormField(
+                              controller: _model.proposalTextController,
+                              focusNode: _model.proposalFocusNode,
+                              maxLines: 2,
+                              decoration: _buildInputDecoration(
+                                'Descrição do Benefício / Regras da Proposta (App)',
+                                theme,
+                                hint: 'Ex: 10% de desconto em todo o cardápio aos assinantes Arms Pro',
+                              ),
+                              style: GoogleFonts.readexPro(fontSize: 13.0, color: theme.primaryText),
                             ),
                           ],
                         ),

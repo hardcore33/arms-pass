@@ -781,40 +781,62 @@ Future<bool> showConfirmationDialog(
     context: context,
     barrierDismissible: true,
     builder: (dialogContext) {
-      return AlertDialog(
-        backgroundColor: theme.secondaryBackground,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8.0),
+      // Usa Dialog com SizedBox de largura fixa para evitar RenderIntrinsicWidth
+      // que causa crash no Flutter Web quando o widget pai é reconstruído
+      return Dialog(
+        backgroundColor: Colors.transparent,
+        insetPadding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 24.0),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 480.0),
+          child: Material(
+            color: theme.secondaryBackground,
+            borderRadius: BorderRadius.circular(8.0),
+            child: Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title, style: theme.titleMedium),
+                  const SizedBox(height: 12.0),
+                  Text(message, style: theme.bodyMedium),
+                  const SizedBox(height: 24.0),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      FFButtonWidget(
+                        onPressed: () => Navigator.pop(dialogContext, false),
+                        text: cancelText,
+                        options: FFButtonOptions(
+                          height: 40.0,
+                          padding: const EdgeInsetsDirectional.fromSTEB(16.0, 0.0, 16.0, 0.0),
+                          color: Colors.transparent,
+                          textStyle: theme.bodyMedium.override(color: theme.secondaryText),
+                          elevation: 0.0,
+                          borderSide: BorderSide(color: theme.alternate, width: 1.0),
+                          borderRadius: BorderRadius.circular(8.0),
+                        ),
+                      ),
+                      const SizedBox(width: 8.0),
+                      FFButtonWidget(
+                        onPressed: () => Navigator.pop(dialogContext, true),
+                        text: confirmText,
+                        options: FFButtonOptions(
+                          height: 40.0,
+                          padding: const EdgeInsetsDirectional.fromSTEB(16.0, 0.0, 16.0, 0.0),
+                          color: isDestructive ? theme.error : theme.secondary,
+                          textStyle: theme.titleSmall.override(color: theme.primary),
+                          elevation: 0.0,
+                          borderRadius: BorderRadius.circular(8.0),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
         ),
-        title: Text(title, style: theme.titleMedium),
-        content: Text(message, style: theme.bodyMedium),
-        actions: [
-          FFButtonWidget(
-            onPressed: () => Navigator.pop(dialogContext, false),
-            text: cancelText,
-            options: FFButtonOptions(
-              height: 40.0,
-              padding: EdgeInsetsDirectional.fromSTEB(16.0, 0.0, 16.0, 0.0),
-              color: Colors.transparent,
-              textStyle: theme.bodyMedium.override(color: theme.secondaryText),
-              elevation: 0.0,
-              borderSide: BorderSide(color: theme.alternate, width: 1.0),
-              borderRadius: BorderRadius.circular(8.0),
-            ),
-          ),
-          FFButtonWidget(
-            onPressed: () => Navigator.pop(dialogContext, true),
-            text: confirmText,
-            options: FFButtonOptions(
-              height: 40.0,
-              padding: EdgeInsetsDirectional.fromSTEB(16.0, 0.0, 16.0, 0.0),
-              color: isDestructive ? theme.error : theme.secondary,
-              textStyle: theme.titleSmall.override(color: theme.primary),
-              elevation: 0.0,
-              borderRadius: BorderRadius.circular(8.0),
-            ),
-          ),
-        ],
       );
     },
   );

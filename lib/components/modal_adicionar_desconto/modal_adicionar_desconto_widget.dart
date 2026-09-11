@@ -570,7 +570,7 @@ class _ModalAdicionarDescontoWidgetState
 
                       const SizedBox(height: 18.0),
 
-                      // Card de Exclusividade Arms Pró ⭐
+                      // Card de Exclusividade Arms Pro ⭐
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
                         decoration: BoxDecoration(
@@ -607,7 +607,7 @@ class _ModalAdicionarDescontoWidgetState
                                   Row(
                                     children: [
                                       Text(
-                                        'Exclusivo Membros Arms Pró',
+                                        'Exclusivo Membros Arms Pro',
                                         style: GoogleFonts.readexPro(
                                           fontSize: 13.5,
                                           fontWeight: FontWeight.bold,
@@ -634,7 +634,7 @@ class _ModalAdicionarDescontoWidgetState
                                   ),
                                   const SizedBox(height: 2.0),
                                   Text(
-                                    'Apenas assinantes Arms Pró poderão visualizar e resgatar este benefício',
+                                    'Apenas assinantes Arms Pro poderão visualizar e resgatar este benefício',
                                     style: TextStyle(
                                       fontSize: 11.5,
                                       color: theme.secondaryText,

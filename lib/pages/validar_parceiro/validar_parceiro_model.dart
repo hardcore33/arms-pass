@@ -45,6 +45,11 @@ class ValidarParceiroModel extends FlutterFlowModel<ValidarParceiroWidget> {
   // Stores action output result for [Backend Call - API (validarCupom)] action in Button widget.
   ApiCallResponse? apiResultr699;
 
+  // Lista de descontos ativos do parceiro logado para escolha no caixa
+  List<dynamic> partnerDiscounts = [];
+  String? selectedDiscountId;
+  bool isLoadingDiscounts = false;
+
   @override
   void initState(BuildContext context) {
     menuParceiroModel = createModel(context, () => MenuParceiroModel());

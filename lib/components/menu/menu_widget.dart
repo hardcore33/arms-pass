@@ -103,15 +103,19 @@ class _MenuWidgetState extends State<MenuWidget> {
             ),
             if (!isCollapsed) ...[
               const SizedBox(width: 10.0),
-              Text(
-                title,
-                style: theme.bodyMedium.override(
-                  fontFamily: 'Open Sans',
-                  fontSize: 14.0,
-                  fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
-                  color: isActive
-                      ? theme.primary
-                      : theme.primaryText.withValues(alpha: 0.85),
+              Expanded(
+                child: Text(
+                  title,
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
+                  style: theme.bodyMedium.override(
+                    fontFamily: 'Open Sans',
+                    fontSize: 14.0,
+                    fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
+                    color: isActive
+                        ? theme.primary
+                        : theme.primaryText.withValues(alpha: 0.85),
+                  ),
                 ),
               ),
             ],
@@ -229,7 +233,7 @@ class _MenuWidgetState extends State<MenuWidget> {
                   const SizedBox(height: 6.0),
                   _buildMenuItem(
                     context: context,
-                    title: 'Planos Arms Pró',
+                    title: 'Planos Arms Pro',
                     icon: Icons.workspace_premium_rounded,
                     isActive: activeIndex == 12,
                     onTap: () {

@@ -169,7 +169,7 @@ class _AssinaturasWidgetState extends State<AssinaturasWidget> {
                           const HeaderPaginaWidget(
                             titulo: 'Gestão de Assinaturas e Membros',
                             breadcrumb: 'Painel',
-                            descricao: 'Acompanhe a base de membros Arms Pró, renovações, faturamentos e ações de suporte.',
+                            descricao: 'Acompanhe a base de membros Arms Pro, renovações, faturamentos e ações de suporte.',
                           ),
 
                           // Cards de Métricas

@@ -34,7 +34,7 @@ class AppStateNotifier extends ChangeNotifier {
 
   ProcardTesteDeMelhoriasAuthUser? initialUser;
   ProcardTesteDeMelhoriasAuthUser? user;
-  bool showSplashImage = true;
+  bool showSplashImage = false;
   String? _redirectLocation;
 
   /// Determines whether the app will refresh and build again when a sign
@@ -44,7 +44,7 @@ class AppStateNotifier extends ChangeNotifier {
   /// Otherwise, this will trigger a refresh and interrupt the action(s).
   bool notifyOnAuthChange = true;
 
-  bool get loading => user == null || showSplashImage;
+  bool get loading => false;
   bool get loggedIn => user?.loggedIn ?? false;
   bool get initiallyLoggedIn => initialUser?.loggedIn ?? false;
   bool get shouldRedirect => loggedIn && _redirectLocation != null;

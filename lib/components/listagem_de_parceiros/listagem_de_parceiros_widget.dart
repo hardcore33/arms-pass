@@ -70,6 +70,40 @@ class _ListagemDeParceirosWidgetState extends State<ListagemDeParceirosWidget> {
     super.dispose();
   }
 
+  Future<void> _abrirModalEditar(dynamic item) async {
+    _model.segmentosEditar = await ObterSegmentosCall.call();
+    _model.nomeDeSegmentosEditar = await actions.obterListaDeSegmentos(
+      (_model.segmentosEditar?.jsonBody ?? ''),
+    );
+    if (!mounted) return;
+    await showDialog(
+      context: context,
+      builder: (dialogContext) {
+        return Dialog(
+          elevation: 0,
+          insetPadding: EdgeInsets.zero,
+          backgroundColor: Colors.transparent,
+          alignment: const AlignmentDirectional(0.0, 0.0)
+              .resolve(Directionality.of(context)),
+          child: ModalEditarParceiroWidget(
+            titulo: 'parceiros',
+            dados: item,
+            nomeDeSegmentos: _model.nomeDeSegmentosEditar ?? [],
+            segmentos: (_model.segmentosEditar?.jsonBody ?? ''),
+            nomeDeEstados: functions.obterEstados(),
+          ),
+        );
+      },
+    );
+
+    _model.apiResultl4k = await ObterUsuariosCall.call();
+    if ((_model.apiResultl4k?.succeeded ?? true)) {
+      _model.parceirosLocal = functions.obterParceiros(
+              (_model.apiResultl4k?.jsonBody ?? ''))?.toList().cast<dynamic>() ?? [];
+      safeSetState(() {});
+    }
+  }
+
   List<dynamic> _filtrarEOrdenar(List<dynamic> input) {
     final termoBusca = _model.textController?.text.toLowerCase().trim() ?? '';
 
@@ -454,85 +488,117 @@ class _ListagemDeParceirosWidgetState extends State<ListagemDeParceirosWidget> {
                 final state = getJsonField(item, r'''$.partner.state''')?.toString() ?? '';
                 final isActive = getJsonField(item, r'''$.isActive''') == true;
 
-                return Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
-                  child: Row(
-                    children: [
-                      // ID
-                      SizedBox(
-                        width: 65.0,
-                        child: Text(
-                          id,
-                          textAlign: TextAlign.center,
-                          style: GoogleFonts.readexPro(
-                            fontSize: 13.0,
-                            fontWeight: FontWeight.w600,
-                            color: theme.primaryText,
+                return InkWell(
+                  onTap: () => _abrirModalEditar(item),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
+                    child: Row(
+                      children: [
+                        // ID
+                        SizedBox(
+                          width: 65.0,
+                          child: Text(
+                            id,
+                            textAlign: TextAlign.center,
+                            style: GoogleFonts.readexPro(
+                              fontSize: 13.0,
+                              fontWeight: FontWeight.w600,
+                              color: theme.primaryText,
+                            ),
                           ),
                         ),
-                      ),
 
-                      // Estabelecimento (Logo + Nome + Razão)
-                      Expanded(
-                        flex: 5,
-                        child: Row(
-                          children: [
-                            Container(
-                              width: 36.0,
-                              height: 36.0,
-                              decoration: BoxDecoration(
-                                color: theme.primary.withOpacity(0.06),
-                                shape: BoxShape.circle,
-                                border: Border.all(color: theme.secondary.withOpacity(0.3), width: 1.0),
-                              ),
-                              child: photo.isNotEmpty && photo != 'null'
-                                  ? ClipOval(
-                                      child: Image.network(
-                                        photo,
-                                        width: 36.0,
-                                        height: 36.0,
-                                        fit: BoxFit.cover,
-                                        errorBuilder: (_, __, ___) => Icon(
-                                          Icons.storefront_rounded,
-                                          color: theme.secondary,
-                                          size: 18.0,
+                        // Estabelecimento (Logo + Nome + Razão)
+                        Expanded(
+                          flex: 5,
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 36.0,
+                                height: 36.0,
+                                decoration: BoxDecoration(
+                                  color: theme.primary.withOpacity(0.06),
+                                  shape: BoxShape.circle,
+                                  border: Border.all(color: theme.secondary.withOpacity(0.3), width: 1.0),
+                                ),
+                                child: photo.isNotEmpty && photo != 'null'
+                                    ? ClipOval(
+                                        child: Image.network(
+                                          photo,
+                                          width: 36.0,
+                                          height: 36.0,
+                                          fit: BoxFit.cover,
+                                          errorBuilder: (_, __, ___) => Icon(
+                                            Icons.storefront_rounded,
+                                            color: theme.secondary,
+                                            size: 18.0,
+                                          ),
                                         ),
-                                      ),
-                                    )
-                                  : Icon(Icons.storefront_rounded, color: theme.secondary, size: 18.0),
-                            ),
-                            const SizedBox(width: 10.0),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text(
-                                    fantasia,
-                                    style: GoogleFonts.readexPro(
-                                      fontWeight: FontWeight.w600,
-                                      fontSize: 13.0,
-                                      color: theme.primaryText,
-                                    ),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                  if (razao.isNotEmpty && razao != fantasia)
+                                      )
+                                    : Icon(Icons.storefront_rounded, color: theme.secondary, size: 18.0),
+                              ),
+                              const SizedBox(width: 10.0),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
                                     Text(
-                                      razao,
+                                      fantasia,
                                       style: GoogleFonts.readexPro(
-                                        fontSize: 11.0,
-                                        color: theme.secondaryText,
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 13.0,
+                                        color: theme.primaryText,
                                       ),
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
                                     ),
-                                ],
+                                    if (razao.isNotEmpty && razao != fantasia)
+                                      Text(
+                                        razao,
+                                        style: GoogleFonts.readexPro(
+                                          fontSize: 11.0,
+                                          color: theme.secondaryText,
+                                        ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    Builder(
+                                      builder: (context) {
+                                        final proposal = getJsonField(item, r'''$.partner.proposal''')?.toString().trim() ?? '';
+                                        if (proposal.isNotEmpty && proposal != 'off' && proposal != 'null') {
+                                          return Padding(
+                                            padding: const EdgeInsets.only(top: 3.0),
+                                            child: Row(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                const Icon(Icons.local_offer_outlined, size: 11.0, color: Color(0xFF00C853)),
+                                                const SizedBox(width: 3.0),
+                                                Flexible(
+                                                  child: Text(
+                                                    proposal,
+                                                    style: GoogleFonts.readexPro(
+                                                      fontSize: 11.0,
+                                                      fontWeight: FontWeight.w600,
+                                                      color: const Color(0xFF00C853),
+                                                    ),
+                                                    maxLines: 1,
+                                                    overflow: TextOverflow.ellipsis,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          );
+                                        }
+                                        return const SizedBox.shrink();
+                                      },
+                                    ),
+                                  ],
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
-                      ),
 
                       // CNPJ
                       Expanded(
@@ -676,8 +742,9 @@ class _ListagemDeParceirosWidgetState extends State<ListagemDeParceirosWidget> {
                       ),
                     ],
                   ),
-                );
-              },
+                ),
+              );
+            },
             ),
 
           // Rodapé Conectado de Paginação

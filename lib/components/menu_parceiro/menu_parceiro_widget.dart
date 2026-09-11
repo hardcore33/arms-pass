@@ -100,15 +100,19 @@ class _MenuParceiroWidgetState extends State<MenuParceiroWidget> {
             ),
             if (!isCollapsed) ...[
               const SizedBox(width: 10.0),
-              Text(
-                title,
-                style: theme.bodyMedium.override(
-                  fontFamily: 'Open Sans',
-                  fontSize: 14.0,
-                  fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
-                  color: isActive
-                      ? theme.primary
-                      : theme.primaryText.withValues(alpha: 0.85),
+              Expanded(
+                child: Text(
+                  title,
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
+                  style: theme.bodyMedium.override(
+                    fontFamily: 'Open Sans',
+                    fontSize: 14.0,
+                    fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
+                    color: isActive
+                        ? theme.primary
+                        : theme.primaryText.withValues(alpha: 0.85),
+                  ),
                 ),
               ),
             ],

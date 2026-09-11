@@ -80,7 +80,7 @@ class _ModalAdicionarDescontoParceiroWidgetState
         // Fallback seguro usando tenantId padrão
       }
 
-      // Formatar regras com metadata de Arms Pró e Limite de Quantidade
+      // Formatar regras com metadata de Arms Pro e Limite de Quantidade
       String regrasFormatadas = _model.regrasTextController?.text.trim() ?? '';
       final limite = _model.limiteQuantidadeTextController?.text.trim();
       if (_model.isArmsPro) {
@@ -354,7 +354,7 @@ class _ModalAdicionarDescontoParceiroWidgetState
                             ],
                           ),
                           const SizedBox(height: 18.0),
-                          // Card de Exclusividade Arms Pró ⭐
+                          // Card de Exclusividade Arms Pro ⭐
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
                             decoration: BoxDecoration(
@@ -391,7 +391,7 @@ class _ModalAdicionarDescontoParceiroWidgetState
                                       Row(
                                         children: [
                                           Text(
-                                            'Exclusivo Membros Arms Pró',
+                                            'Exclusivo Membros Arms Pro',
                                             style: GoogleFonts.readexPro(
                                               fontSize: 13.5,
                                               fontWeight: FontWeight.bold,
@@ -418,7 +418,7 @@ class _ModalAdicionarDescontoParceiroWidgetState
                                       ),
                                       const SizedBox(height: 2.0),
                                       Text(
-                                        'Apenas assinantes Arms Pró poderão visualizar e resgatar este benefício',
+                                        'Apenas assinantes Arms Pro poderão visualizar e resgatar este benefício',
                                         style: TextStyle(
                                           fontSize: 11.5,
                                           color: FlutterFlowTheme.of(context).secondaryText,

@@ -21,7 +21,7 @@ class ModalDeAlterarCustomerModel
   FocusNode? emailFocusNode;
   TextEditingController? emailTextController;
 
-  // Status Arms Pró
+  // Status Arms Pro
   bool armspassValue = false;
 
   ApiCallResponse? apiResult005;

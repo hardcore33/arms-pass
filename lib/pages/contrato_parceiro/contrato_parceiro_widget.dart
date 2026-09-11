@@ -39,43 +39,63 @@ class _ContratoParceiroWidgetState extends State<ContratoParceiroWidget> {
   }
 
   Widget _buildContractCard(BuildContext context, {required bool isDesktop}) {
-    final contractUrl = getJsonField(
-      FFAppState().parceiro,
-      r'''$.partner.contract''',
-    )?.toString().trim() ?? '';
+    final theme = FlutterFlowTheme.of(context);
+    final parceiroJson = FFAppState().parceiro;
 
-    final partnerName = getJsonField(
-      FFAppState().parceiro,
-      r'''$.partner.name''',
-    )?.toString() ??
-    getJsonField(
-      FFAppState().parceiro,
-      r'''$.partner.fantasy_name''',
-    )?.toString() ??
-    'Estabelecimento Parceiro';
+    // O jsonBody do login tem estrutura { token, user: { name, partner: { fantasy, cnpj, ... } } }
+    final String partnerFantasy = (getJsonField(parceiroJson, r'''$.user.partner.fantasy''') ??
+                                   getJsonField(parceiroJson, r'''$.user.partner.nomeFantasia''') ??
+                                   getJsonField(parceiroJson, r'''$.partner.fantasy''') ??
+                                   getJsonField(parceiroJson, r'''$.partner.nomeFantasia''') ??
+                                   '').toString().trim();
+    final String partnerRazao = (getJsonField(parceiroJson, r'''$.user.partner.razao''') ??
+                                 getJsonField(parceiroJson, r'''$.user.partner.razaoSocial''') ??
+                                 getJsonField(parceiroJson, r'''$.partner.razao''') ??
+                                 getJsonField(parceiroJson, r'''$.partner.razaoSocial''') ??
+                                 '').toString().trim();
+    final String customerName = (getJsonField(parceiroJson, r'''$.user.name''') ??
+                                 getJsonField(parceiroJson, r'''$.name'''))?.toString().trim() ?? '';
 
-    final partnerCnpj = getJsonField(
-      FFAppState().parceiro,
-      r'''$.partner.cnpj''',
-    )?.toString() ?? 'Não informado';
+    final String partnerName = partnerFantasy.isNotEmpty
+        ? partnerFantasy
+        : (partnerRazao.isNotEmpty ? partnerRazao : (customerName.isNotEmpty ? customerName : 'Parceiro Credenciado'));
 
-    final cardBgColor = const Color(0xFF1E1E1E);
-    final borderColor = const Color(0xFF2C2C2C);
-    final goldColor = FlutterFlowTheme.of(context).secondary;
+    final String partnerCnpj = (getJsonField(parceiroJson, r'''$.user.partner.cnpj''') ??
+                                getJsonField(parceiroJson, r'''$.partner.cnpj''') ??
+                                getJsonField(parceiroJson, r'''$.cnpj'''))?.toString().trim() ?? 'Não informado';
+
+    final String partnerCity = (getJsonField(parceiroJson, r'''$.user.partner.city''') ??
+                                getJsonField(parceiroJson, r'''$.partner.city''') ??
+                                getJsonField(parceiroJson, r'''$.city'''))?.toString().trim() ?? '';
+    final String partnerState = (getJsonField(parceiroJson, r'''$.user.partner.state''') ??
+                                 getJsonField(parceiroJson, r'''$.partner.state''') ??
+                                 getJsonField(parceiroJson, r'''$.state'''))?.toString().trim() ?? '';
+
+    final String segmentName = (getJsonField(parceiroJson, r'''$.user.partner.segment.name''') ??
+                                getJsonField(parceiroJson, r'''$.partner.segment.name''') ??
+                                getJsonField(parceiroJson, r'''$.segment.name'''))?.toString().trim() ?? 'Gastronomia & Alimentação';
+
+    final String contractUrl = (getJsonField(parceiroJson, r'''$.user.partner.contract''') ??
+                                getJsonField(parceiroJson, r'''$.user.partner.contractUrl''') ??
+                                getJsonField(parceiroJson, r'''$.partner.contract''') ??
+                                getJsonField(parceiroJson, r'''$.partner.contractUrl''') ??
+                                getJsonField(parceiroJson, r'''$.contract'''))?.toString().trim() ?? '';
+
+    final bool hasValidContractUrl = contractUrl.isNotEmpty && contractUrl != 'null';
 
     return Material(
       color: Colors.transparent,
-      elevation: 4.0,
+      elevation: 3.0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16.0),
       ),
       child: Container(
-        width: isDesktop ? 860.0 : double.infinity,
+        width: double.infinity,
         decoration: BoxDecoration(
-          color: cardBgColor,
+          color: theme.secondaryBackground,
           borderRadius: BorderRadius.circular(16.0),
           border: Border.all(
-            color: borderColor,
+            color: theme.alternate,
             width: 1.0,
           ),
         ),
@@ -89,20 +109,20 @@ class _ContratoParceiroWidgetState extends State<ContratoParceiroWidget> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Container(
-                  width: 48.0,
-                  height: 48.0,
+                  width: 52.0,
+                  height: 52.0,
                   decoration: BoxDecoration(
-                    color: goldColor.withOpacity(0.12),
+                    color: theme.secondary.withOpacity(0.12),
                     borderRadius: BorderRadius.circular(12.0),
                     border: Border.all(
-                      color: goldColor.withOpacity(0.3),
+                      color: theme.secondary.withOpacity(0.3),
                       width: 1.0,
                     ),
                   ),
                   child: Icon(
                     Icons.description_rounded,
-                    color: goldColor,
-                    size: 26.0,
+                    color: theme.secondary,
+                    size: 28.0,
                   ),
                 ),
                 const SizedBox(width: 16.0),
@@ -111,8 +131,8 @@ class _ContratoParceiroWidgetState extends State<ContratoParceiroWidget> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Contrato de Adesão & Termos Comerciais',
-                        style: GoogleFonts.openSans(
+                        'Termo de Adesão & Parceria Comercial',
+                        style: GoogleFonts.readexPro(
                           color: Colors.white,
                           fontSize: isDesktop ? 18.0 : 16.0,
                           fontWeight: FontWeight.bold,
@@ -120,9 +140,9 @@ class _ContratoParceiroWidgetState extends State<ContratoParceiroWidget> {
                       ),
                       const SizedBox(height: 4.0),
                       Text(
-                        'Instrumento particular de parceria com o Clube Procard',
-                        style: GoogleFonts.openSans(
-                          color: const Color(0xFF9E9E9E),
+                        'Instrumento oficial de credenciamento junto ao Clube Procard',
+                        style: GoogleFonts.readexPro(
+                          color: theme.secondaryText,
                           fontSize: 13.0,
                         ),
                       ),
@@ -131,7 +151,7 @@ class _ContratoParceiroWidgetState extends State<ContratoParceiroWidget> {
                 ),
                 // Status Badge
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 6.0),
+                  padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 6.0),
                   decoration: BoxDecoration(
                     color: const Color(0xFF1B382B),
                     borderRadius: BorderRadius.circular(20.0),
@@ -154,7 +174,7 @@ class _ContratoParceiroWidgetState extends State<ContratoParceiroWidget> {
                       const SizedBox(width: 6.0),
                       Text(
                         'Vigente',
-                        style: GoogleFonts.openSans(
+                        style: GoogleFonts.readexPro(
                           color: const Color(0xFF81C784),
                           fontSize: 12.0,
                           fontWeight: FontWeight.bold,
@@ -167,43 +187,72 @@ class _ContratoParceiroWidgetState extends State<ContratoParceiroWidget> {
             ),
 
             const SizedBox(height: 24.0),
-            const Divider(color: Color(0xFF2C2C2C), thickness: 1.0),
+            Divider(color: theme.alternate, thickness: 1.0),
             const SizedBox(height: 20.0),
 
-            // Metadata Grid
+            // Informações Cadastrais da Unidade Parceira
+            Text(
+              'Dados Cadastrais do Estabelecimento',
+              style: GoogleFonts.readexPro(
+                color: theme.secondary,
+                fontSize: 13.5,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 0.3,
+              ),
+            ),
+            const SizedBox(height: 12.0),
+
             Container(
-              padding: const EdgeInsets.all(16.0),
+              width: double.infinity,
+              padding: const EdgeInsets.all(18.0),
               decoration: BoxDecoration(
-                color: const Color(0xFF141414),
+                color: theme.primary,
                 borderRadius: BorderRadius.circular(12.0),
                 border: Border.all(
-                  color: const Color(0xFF262626),
+                  color: theme.alternate,
                   width: 1.0,
                 ),
               ),
               child: Wrap(
-                spacing: 24.0,
-                runSpacing: 16.0,
+                spacing: 32.0,
+                runSpacing: 18.0,
                 children: [
                   _buildMetadataItem(
-                    label: 'Razão Social / Parceiro',
-                    value: partnerName,
-                    icon: Icons.store_rounded,
+                    theme: theme,
+                    label: 'Razão Social',
+                    value: partnerRazao.isNotEmpty ? partnerRazao : partnerName,
+                    icon: Icons.business_rounded,
                   ),
                   _buildMetadataItem(
-                    label: 'CNPJ Cadastrado',
+                    theme: theme,
+                    label: 'Nome Fantasia',
+                    value: partnerName,
+                    icon: Icons.storefront_rounded,
+                  ),
+                  _buildMetadataItem(
+                    theme: theme,
+                    label: 'CNPJ',
                     value: partnerCnpj,
                     icon: Icons.badge_outlined,
                   ),
                   _buildMetadataItem(
-                    label: 'Tipo de Adesão',
-                    value: 'Credenciamento Oficial Procard',
-                    icon: Icons.verified_outlined,
+                    theme: theme,
+                    label: 'Segmento',
+                    value: segmentName,
+                    icon: Icons.category_outlined,
                   ),
+                  if (partnerCity.isNotEmpty)
+                    _buildMetadataItem(
+                      theme: theme,
+                      label: 'Localidade',
+                      value: partnerState.isNotEmpty ? '$partnerCity - $partnerState' : partnerCity,
+                      icon: Icons.location_on_outlined,
+                    ),
                   _buildMetadataItem(
-                    label: 'Formato do Documento',
-                    value: 'PDF Assinado Digitalmente',
-                    icon: Icons.picture_as_pdf_outlined,
+                    theme: theme,
+                    label: 'Status do Credenciamento',
+                    value: 'Homologado & Ativo',
+                    icon: Icons.verified_rounded,
                   ),
                 ],
               ),
@@ -211,14 +260,67 @@ class _ContratoParceiroWidgetState extends State<ContratoParceiroWidget> {
 
             const SizedBox(height: 24.0),
 
-            // Description Box
+            // Diretrizes Operacionais da Parceria
             Text(
-              'Este instrumento legal regulamenta a concessão de benefícios, regras de aceitação de cupons promocionais e obrigações mútuas entre sua empresa e os associados Procard. Mantenha uma cópia deste documento para controle contábil e conformidade jurídica.',
-              style: GoogleFonts.openSans(
-                color: const Color(0xFFB0B0B0),
+              'Diretrizes e Regras do Convênio',
+              style: GoogleFonts.readexPro(
+                color: theme.secondary,
                 fontSize: 13.5,
-                height: 1.5,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 0.3,
               ),
+            ),
+            const SizedBox(height: 12.0),
+
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final isNarrow = constraints.maxWidth < 650;
+                final cards = [
+                  _buildGuidelineCard(
+                    theme: theme,
+                    icon: Icons.qr_code_scanner_rounded,
+                    title: 'Validação no Caixa',
+                    description:
+                        'A aplicação dos benefícios e descontos é feita mediante validação do código do cupom ou do CPF do associado no validador.',
+                  ),
+                  _buildGuidelineCard(
+                    theme: theme,
+                    icon: Icons.local_offer_outlined,
+                    title: 'Controle de Promoções',
+                    description:
+                        'A unidade parceira gerencia livremente suas promoções, prazos e quantidades de cupons através da aba Meus Cupons.',
+                  ),
+                  _buildGuidelineCard(
+                    theme: theme,
+                    icon: Icons.support_agent_rounded,
+                    title: 'Canal de Atendimento',
+                    description:
+                        'Dúvidas sobre o convênio, alterações cadastrais ou solicitações de banners são atendidas pelo suporte oficial Procard.',
+                  ),
+                ];
+
+                if (isNarrow) {
+                  return Column(
+                    children: cards
+                        .map((c) => Padding(
+                              padding: const EdgeInsets.only(bottom: 10.0),
+                              child: c,
+                            ))
+                        .toList(),
+                  );
+                }
+
+                return Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(child: cards[0]),
+                    const SizedBox(width: 14.0),
+                    Expanded(child: cards[1]),
+                    const SizedBox(width: 14.0),
+                    Expanded(child: cards[2]),
+                  ],
+                );
+              },
             ),
 
             const SizedBox(height: 28.0),
@@ -227,25 +329,34 @@ class _ContratoParceiroWidgetState extends State<ContratoParceiroWidget> {
             Wrap(
               spacing: 16.0,
               runSpacing: 12.0,
+              crossAxisAlignment: WrapCrossAlignment.center,
               children: [
                 // Primary Action: Open/Download PDF
                 FFButtonWidget(
                   onPressed: () async {
-                    if (contractUrl.isNotEmpty && contractUrl != 'null') {
+                    if (hasValidContractUrl) {
                       await launchURL(contractUrl);
                     } else {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text(
-                            'O link do contrato está em processamento pela equipe Procard.',
+                        SnackBar(
+                          content: Row(
+                            children: [
+                              Icon(Icons.info_outline_rounded, color: Colors.white, size: 20.0),
+                              const SizedBox(width: 10.0),
+                              const Expanded(
+                                child: Text(
+                                  'Contrato digital homologado no sistema. O documento em PDF está disponível junto à equipe Procard.',
+                                ),
+                              ),
+                            ],
                           ),
-                          backgroundColor: Color(0xFFD97706),
+                          backgroundColor: const Color(0xFFD97706),
                           behavior: SnackBarBehavior.floating,
                         ),
                       );
                     }
                   },
-                  text: 'Visualizar / Baixar Contrato (PDF)',
+                  text: 'Visualizar Contrato Digital (PDF)',
                   icon: const Icon(
                     Icons.picture_as_pdf_rounded,
                     size: 20.0,
@@ -253,9 +364,9 @@ class _ContratoParceiroWidgetState extends State<ContratoParceiroWidget> {
                   options: FFButtonOptions(
                     height: 48.0,
                     padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                    color: goldColor,
-                    textStyle: GoogleFonts.openSans(
-                      color: FlutterFlowTheme.of(context).primary,
+                    color: theme.secondary,
+                    textStyle: GoogleFonts.readexPro(
+                      color: theme.primary,
                       fontSize: 14.0,
                       fontWeight: FontWeight.bold,
                     ),
@@ -265,7 +376,7 @@ class _ContratoParceiroWidgetState extends State<ContratoParceiroWidget> {
                 ),
 
                 // Secondary Action: Copy Link
-                if (contractUrl.isNotEmpty && contractUrl != 'null')
+                if (hasValidContractUrl)
                   OutlinedButton.icon(
                     onPressed: () {
                       Clipboard.setData(ClipboardData(text: contractUrl));
@@ -280,18 +391,18 @@ class _ContratoParceiroWidgetState extends State<ContratoParceiroWidget> {
                     icon: Icon(
                       Icons.copy_rounded,
                       size: 18.0,
-                      color: goldColor,
+                      color: theme.secondary,
                     ),
                     label: Text(
                       'Copiar Link Seguro',
-                      style: GoogleFonts.openSans(
-                        color: goldColor,
+                      style: GoogleFonts.readexPro(
+                        color: theme.secondary,
                         fontSize: 13.5,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
                     style: OutlinedButton.styleFrom(
-                      side: BorderSide(color: goldColor.withOpacity(0.5), width: 1.2),
+                      side: BorderSide(color: theme.secondary.withOpacity(0.5), width: 1.2),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10.0),
                       ),
@@ -302,21 +413,23 @@ class _ContratoParceiroWidgetState extends State<ContratoParceiroWidget> {
             ),
 
             const SizedBox(height: 24.0),
+            Divider(color: theme.alternate, thickness: 0.8),
+            const SizedBox(height: 16.0),
 
             // Security note footer
             Row(
               children: [
-                const Icon(
-                  Icons.lock_outline_rounded,
-                  color: Color(0xFF757575),
+                Icon(
+                  Icons.verified_outlined,
+                  color: theme.secondaryText,
                   size: 16.0,
                 ),
                 const SizedBox(width: 8.0),
                 Expanded(
                   child: Text(
-                    'Documento assinado digitalmente com validade jurídica em conformidade com a MP nº 2.200-2/2001.',
-                    style: GoogleFonts.openSans(
-                      color: const Color(0xFF757575),
+                    'Termo de credenciamento homologado e vinculado à conta do estabelecimento parceiro no Clube Procard.',
+                    style: GoogleFonts.readexPro(
+                      color: theme.secondaryText,
                       fontSize: 12.0,
                     ),
                   ),
@@ -329,30 +442,90 @@ class _ContratoParceiroWidgetState extends State<ContratoParceiroWidget> {
     );
   }
 
+  Widget _buildGuidelineCard({
+    required FlutterFlowTheme theme,
+    required IconData icon,
+    required String title,
+    required String description,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(16.0),
+      decoration: BoxDecoration(
+        color: theme.primary,
+        borderRadius: BorderRadius.circular(10.0),
+        border: Border.all(
+          color: theme.alternate,
+          width: 1.0,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(icon, size: 18.0, color: theme.secondary),
+              const SizedBox(width: 8.0),
+              Expanded(
+                child: Text(
+                  title,
+                  style: GoogleFonts.readexPro(
+                    color: Colors.white,
+                    fontSize: 13.0,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8.0),
+          Text(
+            description,
+            style: GoogleFonts.readexPro(
+              color: theme.secondaryText,
+              fontSize: 12.0,
+              height: 1.4,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildMetadataItem({
+    required FlutterFlowTheme theme,
     required String label,
     required String value,
     required IconData icon,
   }) {
     return Row(
       mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Icon(icon, size: 18.0, color: const Color(0xFF888888)),
-        const SizedBox(width: 8.0),
+        Container(
+          width: 34.0,
+          height: 34.0,
+          decoration: BoxDecoration(
+            color: theme.secondary.withOpacity(0.08),
+            borderRadius: BorderRadius.circular(8.0),
+          ),
+          child: Icon(icon, size: 18.0, color: theme.secondary),
+        ),
+        const SizedBox(width: 10.0),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               label,
-              style: GoogleFonts.openSans(
-                color: const Color(0xFF888888),
+              style: GoogleFonts.readexPro(
+                color: theme.secondaryText,
                 fontSize: 11.5,
                 fontWeight: FontWeight.w500,
               ),
             ),
+            const SizedBox(height: 2.0),
             Text(
               value,
-              style: GoogleFonts.openSans(
+              style: GoogleFonts.readexPro(
                 color: Colors.white,
                 fontSize: 13.5,
                 fontWeight: FontWeight.w600,
@@ -422,7 +595,7 @@ class _ContratoParceiroWidgetState extends State<ContratoParceiroWidget> {
                               const HeaderPaginaWidget(
                                 titulo: 'Termo & Contrato',
                                 breadcrumb: 'Parceiro',
-                                descricao: 'Gerencie e visualize o contrato de adesão firmado com o Clube Procard',
+                                descricao: 'Consulte os dados cadastrais da sua empresa e o termo de credenciamento oficial junto ao Clube Procard',
                               ),
                               const SizedBox(height: 24.0),
                               _buildContractCard(context, isDesktop: true),

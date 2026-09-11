@@ -3,11 +3,9 @@ import '/components/listagem_de_propostas/listagem_de_propostas_widget.dart';
 import '/components/menu/menu_widget.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
 import '/components/header_pagina/header_pagina_widget.dart';
 import '/components/loading_table_shimmer/loading_table_shimmer_widget.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'propostas_model.dart';
 export 'propostas_model.dart';
@@ -33,10 +31,10 @@ class _PropostasWidgetState extends State<PropostasWidget> {
     super.initState();
     _model = createModel(context, () => PropostasModel());
     _propostasFuture = ObterPropostasCall.call();
-    WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));
   }
 
   void _recarregar() {
+    ApiManager.clearCache('obterPropostas');
     setState(() {
       _propostasFuture = ObterPropostasCall.call();
     });
@@ -111,47 +109,10 @@ class _PropostasWidgetState extends State<PropostasWidget> {
                               final propostasList = propostasObterPropostasResponse.jsonBody is List
                                   ? (propostasObterPropostasResponse.jsonBody as List)
                                   : [];
-                              if (propostasList.isEmpty) {
-                                return Container(
-                                  width: double.infinity,
-                                  height: 300.0,
-                                  decoration: BoxDecoration(
-                                    color: FlutterFlowTheme.of(context).primary,
-                                    borderRadius: BorderRadius.circular(16.0),
-                                    border: Border.all(
-                                      color: FlutterFlowTheme.of(context).secondary,
-                                      width: 1.0,
-                                    ),
-                                  ),
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Icon(
-                                        Icons.inbox_outlined,
-                                        color: FlutterFlowTheme.of(context).secondary,
-                                        size: 64.0,
-                                      ),
-                                      const SizedBox(height: 16.0),
-                                      Text(
-                                        'Nenhuma proposta cadastrada ainda',
-                                        style: FlutterFlowTheme.of(context).bodyMedium.override(
-                                              font: GoogleFonts.openSans(
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                              color: Colors.white,
-                                              fontSize: 16.0,
-                                            ),
-                                      ),
-                                    ],
-                                  ),
-                                );
-                              }
-                              return wrapWithModel(
-                                model: _model.listagemDePropostasModel,
-                                updateCallback: () => safeSetState(() {}),
-                                child: ListagemDePropostasWidget(
-                                  propostas: propostasList,
-                                ),
+                              return ListagemDePropostasWidget(
+                                key: ValueKey(_propostasFuture.hashCode),
+                                propostas: propostasList,
+                                onAction: () async => _recarregar(),
                               );
                             },
                           ),

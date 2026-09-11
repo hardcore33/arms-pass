@@ -29,7 +29,7 @@ class ModalAlterarDescontoModel
   FocusNode? porcentagemFocusNode;
   TextEditingController? porcentagemTextController;
 
-  // Arms Pró & Limite
+  // Arms Pro & Limite
   bool isArmsPro = false;
   FocusNode? limiteQuantidadeFocusNode;
   TextEditingController? limiteQuantidadeTextController;

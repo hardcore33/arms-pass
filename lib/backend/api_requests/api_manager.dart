@@ -2,8 +2,6 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:core';
-import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:collection/collection.dart';
@@ -16,6 +14,7 @@ import 'package:http/browser_client.dart'
     if (dart.library.io) 'browser_client_stub.dart';
 
 import '/flutter_flow/uploaded_file.dart';
+import '/auth/custom_auth/auth_util.dart';
 
 import 'get_streamed_response.dart';
 
@@ -266,9 +265,9 @@ class ApiManager {
     return http.Client();
   }
 
-  // If your API calls need authentication, populate this field once
-  // the user has authenticated. Alter this as needed.
   static String? _accessToken;
+  static void setAccessToken(String? token) => _accessToken = token;
+  static String? get accessToken => _accessToken ?? currentAuthenticationToken;
   // You may want to call this if, for example, you make a change to the
   // database and no longer want the cached result of a call that may
   // have changed.
@@ -525,12 +524,21 @@ class ApiManager {
     ApiCallOptions? options,
     http.Client? client,
   }) async {
+    // Automatically attach Bearer token if user is authenticated
+    final requestHeaders = Map<String, dynamic>.from(headers);
+    final token = currentAuthenticationToken ?? _accessToken;
+    if (token != null && token.isNotEmpty) {
+      if (!requestHeaders.keys.any((k) => k.toLowerCase() == 'authorization')) {
+        requestHeaders['Authorization'] = 'Bearer $token';
+      }
+    }
+
     final callOptions = options ??
         ApiCallOptions(
           callName: callName,
           callType: callType,
           apiUrl: apiUrl,
-          headers: headers,
+          headers: requestHeaders,
           params: params,
           bodyType: bodyType,
           body: body,
@@ -541,10 +549,7 @@ class ApiManager {
           cache: cache,
           isStreamingApi: isStreamingApi,
         );
-    // Modify for your specific needs if this differs from your API.
-    if (_accessToken != null) {
-      headers[HttpHeaders.authorizationHeader] = 'Bearer $_accessToken';
-    }
+
     if (!apiUrl.startsWith('http')) {
       apiUrl = 'https://$apiUrl';
     }
@@ -576,7 +581,7 @@ class ApiManager {
           result = await urlRequest(
             callType,
             apiUrl,
-            headers,
+            requestHeaders,
             params,
             returnBody,
             decodeUtf8,
@@ -589,7 +594,7 @@ class ApiManager {
               ? await requestWithBody(
                   callType,
                   apiUrl,
-                  headers,
+                  requestHeaders,
                   params,
                   body,
                   bodyType,
@@ -603,7 +608,7 @@ class ApiManager {
               : await urlRequest(
                   callType,
                   apiUrl,
-                  headers,
+                  requestHeaders,
                   params,
                   returnBody,
                   decodeUtf8,
@@ -617,7 +622,7 @@ class ApiManager {
           result = await requestWithBody(
             callType,
             apiUrl,
-            headers,
+            requestHeaders,
             params,
             body,
             bodyType,

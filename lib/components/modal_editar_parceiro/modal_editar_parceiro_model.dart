@@ -271,6 +271,10 @@ class ModalEditarParceiroModel
     return null;
   }
 
+  // State field(s) for proposal / desconto widget
+  FocusNode? proposalFocusNode;
+  TextEditingController? proposalTextController;
+
   bool isDataUploading_uploadDataFt8 = false;
   FFUploadedFile uploadedLocalFile_uploadDataFt8 =
       FFUploadedFile(bytes: Uint8List.fromList([]), originalFilename: '');
@@ -361,5 +365,8 @@ class ModalEditarParceiroModel
 
     passRepFocusNode?.dispose();
     passRepTextController?.dispose();
+
+    proposalFocusNode?.dispose();
+    proposalTextController?.dispose();
   }
 }

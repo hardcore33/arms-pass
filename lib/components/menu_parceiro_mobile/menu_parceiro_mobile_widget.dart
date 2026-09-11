@@ -230,6 +230,69 @@ class _MenuParceiroMobileWidgetState extends State<MenuParceiroMobileWidget> {
                   highlightColor: Colors.transparent,
                   onTap: () async {
                     Navigator.pop(context);
+                    FFAppState().indexPage = 2;
+                    safeSetState(() {});
+
+                    context.pushNamed(
+                      CuponsParceiroWidget.routeName,
+                      extra: <String, dynamic>{
+                        '__transition_info__': TransitionInfo(
+                          hasTransition: true,
+                          transitionType: PageTransitionType.fade,
+                          duration: Duration(milliseconds: 0),
+                        ),
+                      },
+                    );
+                  },
+                  child: Container(
+                    width: MediaQuery.sizeOf(context).width * 0.65,
+                    height: 50.0,
+                    decoration: BoxDecoration(
+                      color: FlutterFlowTheme.of(context).primary,
+                      borderRadius: BorderRadius.circular(6.0),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.max,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.confirmation_number_outlined,
+                          color: FlutterFlowTheme.of(context).secondary,
+                          size: 24.0,
+                        ),
+                        Align(
+                          alignment: AlignmentDirectional(0.0, 0.0),
+                          child: Container(
+                            width: 100.0,
+                            decoration: BoxDecoration(),
+                            child: Padding(
+                              padding: EdgeInsetsDirectional.fromSTEB(
+                                  10.0, 0.0, 0.0, 0.0),
+                              child: Text(
+                                'Cupons',
+                                style: FlutterFlowTheme.of(context)
+                                    .bodyMedium
+                                    .override(
+                                      font: GoogleFonts.readexPro(),
+                                      color: FlutterFlowTheme.of(context)
+                                          .secondary,
+                                      letterSpacing: 0.0,
+                                    ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                InkWell(
+                  splashColor: Colors.transparent,
+                  focusColor: Colors.transparent,
+                  hoverColor: Colors.transparent,
+                  highlightColor: Colors.transparent,
+                  onTap: () async {
+                    Navigator.pop(context);
                     FFAppState().indexPage = 4;
                     safeSetState(() {});
 

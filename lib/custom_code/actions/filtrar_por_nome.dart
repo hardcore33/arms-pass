@@ -36,7 +36,10 @@ Future<List<dynamic>?> filtrarPorNome(
     return jsonList
         .where((element) =>
             element is Map &&
-            (element['razao'] ?? '').toString().toLowerCase().contains(termoLower))
+            (element['razao'] ?? element['razaoSocial'] ?? element['nomeRepresentante'] ?? element['responsavel'] ?? element['cnpj'] ?? '')
+                .toString()
+                .toLowerCase()
+                .contains(termoLower))
         .toList();
   } else if (searchType == 3) {
     return jsonList

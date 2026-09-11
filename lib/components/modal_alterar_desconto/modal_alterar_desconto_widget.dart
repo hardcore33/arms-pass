@@ -53,13 +53,19 @@ class _ModalAlterarDescontoWidgetState
       _model.idParceiro = castToType<int>(getJsonField(widget.desconto, r'''$.partner.id'''));
 
       // Tentar encontrar o parceiro na lista
-      if (widget.parceiros is List) {
+      if (widget.parceiros is List && (widget.parceiros as List).isNotEmpty) {
         for (final p in (widget.parceiros as List)) {
           final pId = getJsonField(p, r'''$.id''') ?? getJsonField(p, r'''$.partner.id''');
           if (pId != null && pId.toString() == _model.idParceiro?.toString()) {
             _parceiroSelecionado = p;
             break;
           }
+        }
+      }
+      if (_parceiroSelecionado == null) {
+        final partnerObj = getJsonField(widget.desconto, r'''$.partner''');
+        if (partnerObj != null) {
+          _parceiroSelecionado = partnerObj;
         }
       }
 
@@ -248,7 +254,10 @@ class _ModalAlterarDescontoWidgetState
   @override
   Widget build(BuildContext context) {
     final theme = FlutterFlowTheme.of(context);
-    final parceirosList = widget.parceiros ?? [];
+    final List<dynamic> parceirosList = List.from(widget.parceiros ?? []);
+    if (parceirosList.isEmpty && _parceiroSelecionado != null) {
+      parceirosList.add(_parceiroSelecionado);
+    }
 
     final segNome = _parceiroSelecionado != null
         ? (getJsonField(_parceiroSelecionado, r'''$.segment.name''') ?? getJsonField(_parceiroSelecionado, r'''$.partner.segment.name''') ?? _model.segmentoValue ?? 'Geral').toString()
@@ -592,7 +601,7 @@ class _ModalAlterarDescontoWidgetState
 
                       const SizedBox(height: 18.0),
 
-                      // Card de Exclusividade Arms Pró ⭐
+                      // Card de Exclusividade Arms Pro ⭐
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
                         decoration: BoxDecoration(
@@ -629,7 +638,7 @@ class _ModalAlterarDescontoWidgetState
                                   Row(
                                     children: [
                                       Text(
-                                        'Exclusivo Membros Arms Pró',
+                                        'Exclusivo Membros Arms Pro',
                                         style: GoogleFonts.readexPro(
                                           fontSize: 13.5,
                                           fontWeight: FontWeight.bold,
@@ -656,7 +665,7 @@ class _ModalAlterarDescontoWidgetState
                                   ),
                                   const SizedBox(height: 2.0),
                                   Text(
-                                    'Apenas assinantes Arms Pró poderão visualizar e resgatar este benefício',
+                                    'Apenas assinantes Arms Pro poderão visualizar e resgatar este benefício',
                                     style: TextStyle(
                                       fontSize: 11.5,
                                       color: theme.secondaryText,

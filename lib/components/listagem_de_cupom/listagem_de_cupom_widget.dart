@@ -713,49 +713,51 @@ class _ListagemDeCupomWidgetState extends State<ListagemDeCupomWidget> {
                           Expanded(
                             flex: 3,
                             child: Row(
-                              mainAxisSize: MainAxisSize.min,
+                              mainAxisSize: MainAxisSize.max,
                               children: [
-                                Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
-                                  decoration: BoxDecoration(
-                                    color: theme.primaryBackground,
-                                    borderRadius: BorderRadius.circular(6.0),
-                                    border: Border.all(color: theme.alternate),
-                                  ),
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      if (segmentPhoto.isNotEmpty && segmentPhoto != 'null')
-                                        ClipRRect(
-                                          borderRadius: BorderRadius.circular(4.0),
-                                          child: Image.network(
-                                            segmentPhoto,
-                                            width: 14.0,
-                                            height: 14.0,
-                                            fit: BoxFit.cover,
-                                            errorBuilder: (_, __, ___) => Icon(
-                                              Icons.category_outlined,
-                                              size: 13.0,
-                                              color: theme.secondary,
+                                Flexible(
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+                                    decoration: BoxDecoration(
+                                      color: theme.primaryBackground,
+                                      borderRadius: BorderRadius.circular(6.0),
+                                      border: Border.all(color: theme.alternate),
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        if (segmentPhoto.isNotEmpty && segmentPhoto != 'null')
+                                          ClipRRect(
+                                            borderRadius: BorderRadius.circular(4.0),
+                                            child: Image.network(
+                                              segmentPhoto,
+                                              width: 14.0,
+                                              height: 14.0,
+                                              fit: BoxFit.cover,
+                                              errorBuilder: (_, __, ___) => Icon(
+                                                Icons.category_outlined,
+                                                size: 13.0,
+                                                color: theme.secondary,
+                                              ),
                                             ),
+                                          )
+                                        else
+                                          Icon(Icons.category_outlined, size: 13.0, color: theme.secondary),
+                                        const SizedBox(width: 5.0),
+                                        Flexible(
+                                          child: Text(
+                                            segmentName,
+                                            style: GoogleFonts.readexPro(
+                                              fontSize: 11.5,
+                                              color: theme.primaryText,
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
                                           ),
-                                        )
-                                      else
-                                        Icon(Icons.category_outlined, size: 13.0, color: theme.secondary),
-                                      const SizedBox(width: 5.0),
-                                      Flexible(
-                                        child: Text(
-                                          segmentName,
-                                          style: GoogleFonts.readexPro(
-                                            fontSize: 11.5,
-                                            color: theme.primaryText,
-                                            fontWeight: FontWeight.w500,
-                                          ),
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
                                         ),
-                                      ),
-                                    ],
+                                      ],
+                                    ),
                                   ),
                                 ),
                               ],
@@ -798,7 +800,7 @@ class _ListagemDeCupomWidgetState extends State<ListagemDeCupomWidget> {
                                               Icon(Icons.star_rounded, color: theme.secondary, size: 12.0),
                                               const SizedBox(width: 3.0),
                                               Text(
-                                                'Arms Pró VIP',
+                                                'Arms Pro VIP',
                                                 style: GoogleFonts.readexPro(
                                                   color: theme.secondary,
                                                   fontSize: 10.5,
