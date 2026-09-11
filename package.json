@@ -1,0 +1,8 @@
+{
+  "name": "arms-pass-web",
+  "version": "1.0.0",
+  "description": "Arms Pass Web Application",
+  "scripts": {
+    "build": "./build.sh"
+  }
+}
