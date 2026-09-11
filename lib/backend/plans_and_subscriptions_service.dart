@@ -248,7 +248,7 @@ class PlansAndSubscriptionsService extends ChangeNotifier {
       } else {
         // Fallback local caso a VPS ainda não tenha recebido o deploy do novo JAR
         try {
-          final resLocal = await http.get(Uri.parse('http://localhost:8181/api/v1/plans'));
+          final resLocal = await http.get(Uri.parse('https://codeflowbr.online:8080/api/v1/plans'));
           if (resLocal.statusCode == 200) {
             final decoded = jsonDecode(utf8.decode(resLocal.bodyBytes));
             if (decoded is List && decoded.isNotEmpty) {
@@ -275,7 +275,7 @@ class PlansAndSubscriptionsService extends ChangeNotifier {
         await _saveSubscriptionsToStorage();
       } else {
         try {
-          final resLocal = await http.get(Uri.parse('http://localhost:8181/api/v1/subscriptions'));
+          final resLocal = await http.get(Uri.parse('https://codeflowbr.online:8080/api/v1/subscriptions'));
           if (resLocal.statusCode == 200) {
             final decoded = jsonDecode(utf8.decode(resLocal.bodyBytes));
             if (decoded is List) {

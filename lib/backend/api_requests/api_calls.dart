@@ -485,7 +485,7 @@ class ValidarCupomCall {
 }''';
     return ApiManager.instance.makeApiCall(
       callName: 'validarCupom',
-      apiUrl: 'http://localhost:8181/api/v1/cupom/validar',
+      apiUrl: 'https://codeflowbr.online:8080/api/v1/cupom/validar',
       callType: ApiCallType.POST,
       headers: {},
       params: {},
@@ -1291,7 +1291,7 @@ class ObterDashboardParceiroCall {
     return ApiManager.instance.makeApiCall(
       callName: 'obterDashboardParceiro',
       apiUrl:
-          'http://localhost:8181/api/v1/dashboard/partner/${partnerId}',
+          'https://codeflowbr.online:8080/api/v1/dashboard/partner/${partnerId}',
       callType: ApiCallType.GET,
       headers: {},
       params: {},
@@ -1480,7 +1480,7 @@ class GetHistoricoRecenteCall {
   }) async {
     return ApiManager.instance.makeApiCall(
       callName: 'GetHistoricoRecente',
-      apiUrl: 'http://localhost:8181/api/v1/history/recentes',
+      apiUrl: 'https://codeflowbr.online:8080/api/v1/history/recentes',
       callType: ApiCallType.GET,
       headers: {},
       params: {

@@ -62,13 +62,24 @@ class _ValidarParceiroWidgetState extends State<ValidarParceiroWidget> {
     super.dispose();
   }
 
+  String get _effectivePartnerId {
+    final parceiroJson = FFAppState().parceiro;
+    final partnerIdDynamic = getJsonField(parceiroJson, r'$.partner.id') ??
+                             getJsonField(parceiroJson, r'$.user.partner.id') ??
+                             getJsonField(parceiroJson, r'$.id');
+    if (partnerIdDynamic != null && partnerIdDynamic.toString().isNotEmpty) {
+      return partnerIdDynamic.toString();
+    }
+    return currentUserUid;
+  }
+
   Future<void> _carregarDescontos() async {
     safeSetState(() {
       _model.isLoadingDiscounts = true;
     });
     try {
       final res = await ObterDescontosDoParceiroPorIdCall.call(
-        partnerId: currentUserUid,
+        partnerId: _effectivePartnerId,
       );
       if (res.succeeded && res.jsonBody is List) {
         final list = (res.jsonBody as List)
@@ -529,7 +540,7 @@ class _ValidarParceiroWidgetState extends State<ValidarParceiroWidget> {
                                                 code: code,
                                                 value: _model.textController2?.text ?? '',
                                                 paidValue: _model.textController2?.text ?? '',
-                                                partnerId: currentUserUid,
+                                                partnerId: _effectivePartnerId,
                                                 discountId: _model.selectedDiscountId,
                                               );
 
@@ -793,7 +804,7 @@ class _ValidarParceiroWidgetState extends State<ValidarParceiroWidget> {
                                           code: _model.codigoMobileTextController?.text ?? '',
                                           value: _model.valorMobileTextController?.text ?? '',
                                           paidValue: _model.valorMobileTextController?.text ?? '',
-                                          partnerId: currentUserUid,
+                                          partnerId: _effectivePartnerId,
                                         );
 
                                         if ((_model.apiResultr699?.succeeded ?? true)) {
@@ -896,7 +907,7 @@ class _ValidarParceiroWidgetState extends State<ValidarParceiroWidget> {
     return FutureBuilder<ApiCallResponse>(
       key: _historyKey,
       future: GetHistoricoRecenteCall.call(
-        partnerId: int.tryParse(currentUserUid),
+        partnerId: int.tryParse(_effectivePartnerId),
       ),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {

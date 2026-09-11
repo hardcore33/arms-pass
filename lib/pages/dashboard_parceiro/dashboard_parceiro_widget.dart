@@ -256,9 +256,17 @@ class _DashboardParceiroWidgetState extends State<DashboardParceiroWidget> {
     Color highlightColor, {
     required bool isMobile,
   }) {
+    final parceiroJson = FFAppState().parceiro;
+    final partnerIdDynamic = getJsonField(parceiroJson, r'$.partner.id') ??
+                             getJsonField(parceiroJson, r'$.user.partner.id') ??
+                             getJsonField(parceiroJson, r'$.id');
+    final effectivePartnerId = (partnerIdDynamic != null && partnerIdDynamic.toString().isNotEmpty)
+        ? partnerIdDynamic.toString()
+        : currentUserUid;
+
     return FutureBuilder<ApiCallResponse>(
       future: ObterDashboardParceiroCall.call(
-        partnerId: currentUserUid,
+        partnerId: effectivePartnerId,
       ),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
