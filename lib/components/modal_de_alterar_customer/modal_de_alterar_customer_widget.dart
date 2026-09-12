@@ -116,12 +116,57 @@ class _ModalDeAlterarCustomerWidgetState
 
     setState(() => _enviandoReset = true);
     try {
+      final originalEmail =
+          (getJsonField(widget.customer, r'''$.user.login''') ?? '')
+              .toString()
+              .trim();
+      final originalName =
+          (getJsonField(widget.customer, r'''$.name''') ?? '')
+              .toString()
+              .trim();
+      final currentName = _model.nomeTextController?.text.trim() ?? '';
+
+      final hasChanges = email.toLowerCase() != originalEmail.toLowerCase() ||
+          currentName != originalName;
+
+      // Se o e-mail ou nome foram alterados, salva o cadastro antes de enviar o link
+      if (hasChanges) {
+        final editRes = await EditarCustomerCall.call(
+          id: getJsonField(widget.customer, r'''$.id'''),
+          name: currentName,
+          armspass: _model.armspassValue,
+          cardNumber: _model.identificacaoTextController?.text.trim() ?? '',
+          cpf: _model.identificacaoTextController?.text.trim() ?? '',
+          isActive: getJsonField(widget.customer, r'''$.isActive'''),
+          tenantJson: getJsonField(widget.customer, r'''$.tenant'''),
+          walletJson: getJsonField(widget.customer, r'''$.wallet'''),
+          partnerJson: getJsonField(widget.customer, r'''$.partner'''),
+          userId: getJsonField(widget.customer, r'''$.user.id'''),
+          userIsActive: getJsonField(widget.customer, r'''$.user.isActive'''),
+          userInviteCode:
+              (getJsonField(widget.customer, r'''$.user.inviteCode''') ?? '')
+                  .toString(),
+          userLogin: email,
+          userRole: getJsonField(widget.customer, r'''$.user.role'''),
+        );
+
+        if (!editRes.succeeded) {
+          if (mounted) {
+            showErrorToast(
+              context,
+              'Não foi possível atualizar o e-mail no sistema antes do envio.',
+            );
+          }
+          return;
+        }
+      }
+
       final res = await EsqueceuASenhaCall.call(login: email);
       if (res.succeeded) {
         if (mounted) {
           showSuccessToast(
             context,
-            'Instruções para redefinição de senha enviadas para "$email"!',
+            'Instruções e dados de acesso enviados com sucesso para "$email"!',
             title: 'E-mail Enviado',
           );
         }
