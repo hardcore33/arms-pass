@@ -26,6 +26,9 @@ class CustomAuthManager {
     refreshToken = null;
     tokenExpiration = null;
     uid = null;
+    try {
+      _prefs.remove('ff_parceiro');
+    } catch (_) {}
 
     // Update the current user.
     procardTesteDeMelhoriasAuthUserSubject.add(

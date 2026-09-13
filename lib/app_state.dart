@@ -18,7 +18,31 @@ class FFAppState extends ChangeNotifier {
     _instance = FFAppState._internal();
   }
 
-  Future initializePersistedState() async {}
+  late SharedPreferences prefs;
+
+  Future initializePersistedState() async {
+    prefs = await SharedPreferences.getInstance();
+    _safeInit(() {
+      final rawParceiro = prefs.getString('ff_parceiro');
+      if (rawParceiro != null && rawParceiro.isNotEmpty) {
+        try {
+          _parceiro = jsonDecode(rawParceiro);
+        } catch (_) {
+          _parceiro = rawParceiro;
+        }
+      }
+    });
+    _safeInit(() {
+      _sidebarCollapsed =
+          prefs.getBool('ff_sidebarCollapsed') ?? _sidebarCollapsed;
+    });
+  }
+
+  void _safeInit(Function() initializeField) {
+    try {
+      initializeField();
+    } catch (_) {}
+  }
 
   void update(VoidCallback callback) {
     callback();
@@ -36,12 +60,24 @@ class FFAppState extends ChangeNotifier {
   dynamic get parceiro => _parceiro;
   set parceiro(dynamic value) {
     _parceiro = value;
+    try {
+      if (value != null) {
+        if (value is String) {
+          prefs.setString('ff_parceiro', value);
+        } else {
+          prefs.setString('ff_parceiro', jsonEncode(value));
+        }
+      } else {
+        prefs.remove('ff_parceiro');
+      }
+    } catch (_) {}
   }
 
   bool _sidebarCollapsed = false;
   bool get sidebarCollapsed => _sidebarCollapsed;
   set sidebarCollapsed(bool value) {
     _sidebarCollapsed = value;
+    prefs.setBool('ff_sidebarCollapsed', value);
     notifyListeners();
   }
 }
