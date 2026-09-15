@@ -5,6 +5,7 @@ import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
 import '/index.dart';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'login_model.dart';
@@ -59,6 +60,31 @@ class _LoginWidgetState extends State<LoginWidget> {
       child: Scaffold(
         key: scaffoldKey,
         backgroundColor: Colors.black,
+        floatingActionButton: FloatingActionButton.extended(
+          onPressed: () async {
+            final message = Uri.encodeComponent(
+                'Olá, estou com dificuldades para acessar o painel do Clube Procard e preciso de ajuda.');
+            await launchURL(
+                'https://wa.me/${FFAppConstants.whatsappSupportNumber}?text=$message');
+          },
+          backgroundColor: const Color(0xFF25D366),
+          elevation: 6.0,
+          highlightElevation: 8.0,
+          icon: const FaIcon(
+            FontAwesomeIcons.whatsapp,
+            color: Colors.white,
+            size: 22.0,
+          ),
+          label: Text(
+            'Suporte WhatsApp',
+            style: GoogleFonts.openSans(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              fontSize: 13.5,
+              letterSpacing: 0.2,
+            ),
+          ),
+        ),
         body: isDesktop
             ? Row(
                 children: [
@@ -460,6 +486,45 @@ class _LoginWidgetState extends State<LoginWidget> {
                     fontWeight: FontWeight.bold,
                     color: const Color(0xFF14181B),
                     fontSize: 13.5,
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 20.0),
+
+              // Link direto de suporte em caso de problemas
+              Center(
+                child: InkWell(
+                  onTap: () async {
+                    final message = Uri.encodeComponent(
+                        'Olá, estou com dificuldades para acessar o painel do Clube Procard e preciso de ajuda.');
+                    await launchURL(
+                        'https://wa.me/${FFAppConstants.whatsappSupportNumber}?text=$message');
+                  },
+                  borderRadius: BorderRadius.circular(8.0),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 6.0),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const FaIcon(
+                          FontAwesomeIcons.whatsapp,
+                          color: Color(0xFF25D366),
+                          size: 16.0,
+                        ),
+                        const SizedBox(width: 8.0),
+                        Text(
+                          'Dificuldades para acessar? Chame no WhatsApp',
+                          style: GoogleFonts.openSans(
+                            fontSize: 12.5,
+                            fontWeight: FontWeight.w600,
+                            color: const Color(0xFF5D5950),
+                            decoration: TextDecoration.underline,
+                            decorationColor: const Color(0xFF25D366),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
