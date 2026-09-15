@@ -70,7 +70,7 @@ class _ModalSolicitarBannerWidgetState
           '🖼️ *Estou enviando a imagem do banner em anexo a esta conversa para análise e publicação.*';
 
       // WhatsApp real do Administrador (configurável)
-      final String whatsappNum = '5551999999999'; 
+      final String whatsappNum = FFAppConstants.whatsappSupportNumber; 
       final String whatsappUrl = 'https://wa.me/$whatsappNum?text=${Uri.encodeComponent(mensagem)}';
 
       // 3. Abrir o link

@@ -6,6 +6,7 @@ import 'dart:ui';
 import '/index.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'menu_parceiro_model.dart';
@@ -236,14 +237,66 @@ class _MenuParceiroWidgetState extends State<MenuParceiroWidget> {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.symmetric(vertical: 10.0),
+            padding: const EdgeInsets.symmetric(vertical: 8.0),
             child: Divider(
               color: theme.alternate,
               thickness: 1.0,
             ),
           ),
           Padding(
-            padding: const EdgeInsetsDirectional.fromSTEB(0.0, 5.0, 0.0, 15.0),
+            padding: const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 6.0),
+            child: InkWell(
+              splashColor: Colors.transparent,
+              focusColor: Colors.transparent,
+              hoverColor: const Color(0x1A25D366),
+              highlightColor: Colors.transparent,
+              borderRadius: BorderRadius.circular(8.0),
+              onTap: () async {
+                final message = Uri.encodeComponent('Olá, sou parceiro do Clube Procard e preciso de suporte.');
+                await launchURL('https://wa.me/${FFAppConstants.whatsappSupportNumber}?text=$message');
+              },
+              child: Container(
+                width: double.infinity,
+                height: 48.0,
+                decoration: BoxDecoration(
+                  color: const Color(0x1525D366),
+                  borderRadius: BorderRadius.circular(8.0),
+                  border: Border.all(
+                    color: const Color(0x4025D366),
+                    width: 1.0,
+                  ),
+                ),
+                child: Row(
+                  mainAxisAlignment: isCollapsed
+                      ? MainAxisAlignment.center
+                      : MainAxisAlignment.start,
+                  children: [
+                    if (!isCollapsed) const SizedBox(width: 18.0),
+                    const FaIcon(
+                      FontAwesomeIcons.whatsapp,
+                      color: Color(0xFF25D366),
+                      size: 20.0,
+                    ),
+                    if (!isCollapsed)
+                      Padding(
+                        padding: const EdgeInsetsDirectional.fromSTEB(10.0, 0.0, 0.0, 0.0),
+                        child: Text(
+                          'Suporte WhatsApp',
+                          style: theme.bodyMedium.override(
+                            fontFamily: 'Open Sans',
+                            color: const Color(0xFF25D366),
+                            fontSize: 14.0,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsetsDirectional.fromSTEB(0.0, 4.0, 0.0, 15.0),
             child: InkWell(
               splashColor: Colors.transparent,
               focusColor: Colors.transparent,
