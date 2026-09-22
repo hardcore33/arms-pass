@@ -11,7 +11,9 @@ import 'package:easy_debounce/easy_debounce.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import '/flutter_flow/currency_formatter.dart';
 import '/components/header_pagina/header_pagina_widget.dart';
 import '/components/loading_table_shimmer/loading_table_shimmer_widget.dart';
 import 'validar_parceiro_model.dart';
@@ -473,24 +475,17 @@ class _ValidarParceiroWidgetState extends State<ValidarParceiroWidget> {
                                                   TextFormField(
                                                     controller: _model.textController2,
                                                     focusNode: _model.textFieldFocusNode2,
-                                                    onChanged: (_) => EasyDebounce.debounce(
-                                                      '_model.textController2',
-                                                      Duration(milliseconds: 500),
-                                                      () async {
-                                                        _model.formatacao =
-                                                            await actions.formatDecimalInput(
-                                                          _model.textController2.text,
-                                                        );
-                                                        safeSetState(() {
-                                                          _model.textController2?.text =
-                                                              _model.formatacao!;
-                                                        });
-                                                      },
-                                                    ),
+                                                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                                                    inputFormatters: [CurrencyInputFormatter()],
                                                     autofocus: false,
                                                     decoration: InputDecoration(
                                                       isDense: true,
                                                       hintText: '0,00',
+                                                      prefixText: 'R\$ ',
+                                                      prefixStyle: FlutterFlowTheme.of(context).bodyMedium.override(
+                                                        font: GoogleFonts.readexPro(),
+                                                        color: Colors.white70,
+                                                      ),
                                                       enabledBorder: OutlineInputBorder(
                                                         borderSide: BorderSide(
                                                           color: Color(0xFFC5C4C4),
@@ -536,10 +531,54 @@ class _ValidarParceiroWidgetState extends State<ValidarParceiroWidget> {
                                                 return;
                                               }
 
+                                              final rawValue = _model.textController2?.text.trim() ?? '';
+                                              final apiValue = CurrencyInputFormatter.toApiString(rawValue);
+                                              final numericValue = CurrencyInputFormatter.toDouble(rawValue);
+
+                                              if (numericValue <= 0.0) {
+                                                showWarningToast(
+                                                  context,
+                                                  'Por favor, informe o valor da compra.',
+                                                );
+                                                return;
+                                              }
+
+                                              // Trava de segurança para valores elevados (>= R$ 500,00)
+                                              if (numericValue >= 500.0) {
+                                                final formattedBr = NumberFormat.currency(
+                                                  locale: 'pt_BR',
+                                                  symbol: 'R\$ ',
+                                                ).format(numericValue);
+
+                                                final confirmed = await showDialog<bool>(
+                                                  context: context,
+                                                  builder: (dialogContext) => AlertDialog(
+                                                    title: const Text('Confirmar Valor da Compra'),
+                                                    content: Text(
+                                                      'O valor informado é de $formattedBr.\n\nConfirma que este é o valor correto da compra?',
+                                                    ),
+                                                    actions: [
+                                                      TextButton(
+                                                        onPressed: () => Navigator.pop(dialogContext, false),
+                                                        child: const Text('Revisar'),
+                                                      ),
+                                                      ElevatedButton(
+                                                        style: ElevatedButton.styleFrom(
+                                                          backgroundColor: FlutterFlowTheme.of(context).secondary,
+                                                        ),
+                                                        onPressed: () => Navigator.pop(dialogContext, true),
+                                                        child: const Text('Confirmar', style: TextStyle(color: Colors.white)),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                );
+                                                if (confirmed != true) return;
+                                              }
+
                                               _model.apiResultr69 = await ValidarCupomCall.call(
                                                 code: code,
-                                                value: _model.textController2?.text ?? '',
-                                                paidValue: _model.textController2?.text ?? '',
+                                                value: apiValue,
+                                                paidValue: apiValue,
                                                 partnerId: _effectivePartnerId,
                                                 discountId: _model.selectedDiscountId,
                                               );
@@ -754,24 +793,17 @@ class _ValidarParceiroWidgetState extends State<ValidarParceiroWidget> {
                                     TextFormField(
                                       controller: _model.valorMobileTextController,
                                       focusNode: _model.valorMobileFocusNode,
-                                      onChanged: (_) => EasyDebounce.debounce(
-                                        '_model.valorMobileTextController',
-                                        Duration(milliseconds: 500),
-                                        () async {
-                                          _model.formatacaoMobile =
-                                              await actions.formatDecimalInput(
-                                            _model.valorMobileTextController.text,
-                                          );
-                                          safeSetState(() {
-                                            _model.valorMobileTextController?.text =
-                                                _model.formatacaoMobile!;
-                                          });
-                                        },
-                                      ),
+                                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                                      inputFormatters: [CurrencyInputFormatter()],
                                       autofocus: false,
                                       decoration: InputDecoration(
                                         isDense: true,
                                         hintText: '0,00',
+                                        prefixText: 'R\$ ',
+                                        prefixStyle: FlutterFlowTheme.of(context).bodyMedium.override(
+                                          font: GoogleFonts.readexPro(),
+                                          color: Colors.white70,
+                                        ),
                                         enabledBorder: OutlineInputBorder(
                                           borderSide: BorderSide(
                                             color: Color(0xFFC5C4C4),
@@ -800,11 +832,65 @@ class _ValidarParceiroWidgetState extends State<ValidarParceiroWidget> {
                                     // Submit mobile button
                                     FFButtonWidget(
                                       onPressed: () async {
+                                        final code = _model.codigoMobileTextController?.text.trim() ?? '';
+                                        if (code.isEmpty) {
+                                          showWarningToast(
+                                            context,
+                                            'Por favor, informe o código do cupom ou CPF.',
+                                          );
+                                          return;
+                                        }
+
+                                        final rawValue = _model.valorMobileTextController?.text.trim() ?? '';
+                                        final apiValue = CurrencyInputFormatter.toApiString(rawValue);
+                                        final numericValue = CurrencyInputFormatter.toDouble(rawValue);
+
+                                        if (numericValue <= 0.0) {
+                                          showWarningToast(
+                                            context,
+                                            'Por favor, informe o valor da compra.',
+                                          );
+                                          return;
+                                        }
+
+                                        // Trava de segurança para valores elevados (>= R$ 500,00)
+                                        if (numericValue >= 500.0) {
+                                          final formattedBr = NumberFormat.currency(
+                                            locale: 'pt_BR',
+                                            symbol: 'R\$ ',
+                                          ).format(numericValue);
+
+                                          final confirmed = await showDialog<bool>(
+                                            context: context,
+                                            builder: (dialogContext) => AlertDialog(
+                                              title: const Text('Confirmar Valor da Compra'),
+                                              content: Text(
+                                                'O valor informado é de $formattedBr.\n\nConfirma que este é o valor correto da compra?',
+                                              ),
+                                              actions: [
+                                                TextButton(
+                                                  onPressed: () => Navigator.pop(dialogContext, false),
+                                                  child: const Text('Revisar'),
+                                                ),
+                                                ElevatedButton(
+                                                  style: ElevatedButton.styleFrom(
+                                                    backgroundColor: FlutterFlowTheme.of(context).secondary,
+                                                  ),
+                                                  onPressed: () => Navigator.pop(dialogContext, true),
+                                                  child: const Text('Confirmar', style: TextStyle(color: Colors.white)),
+                                                ),
+                                              ],
+                                            ),
+                                          );
+                                          if (confirmed != true) return;
+                                        }
+
                                         _model.apiResultr699 = await ValidarCupomCall.call(
-                                          code: _model.codigoMobileTextController?.text ?? '',
-                                          value: _model.valorMobileTextController?.text ?? '',
-                                          paidValue: _model.valorMobileTextController?.text ?? '',
+                                          code: code,
+                                          value: apiValue,
+                                          paidValue: apiValue,
                                           partnerId: _effectivePartnerId,
+                                          discountId: _model.selectedDiscountId,
                                         );
 
                                         if ((_model.apiResultr699?.succeeded ?? true)) {

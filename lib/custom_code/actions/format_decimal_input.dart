@@ -9,6 +9,21 @@ import 'package:flutter/material.dart';
 // DO NOT REMOVE OR MODIFY THE CODE ABOVE!
 
 Future<String> formatDecimalInput(String input) async {
-  double value = double.parse(input);
+  final clean = input.trim().replaceAll(RegExp(r'[^0-9,.]'), '');
+  if (clean.isEmpty) return '0.00';
+
+  String normalized = clean;
+  if (normalized.contains(',') && normalized.contains('.')) {
+    if (normalized.lastIndexOf(',') > normalized.lastIndexOf('.')) {
+      normalized = normalized.replaceAll('.', '').replaceAll(',', '.');
+    } else {
+      normalized = normalized.replaceAll(',', '');
+    }
+  } else if (normalized.contains(',')) {
+    normalized = normalized.replaceAll(',', '.');
+  }
+
+  double? value = double.tryParse(normalized);
+  if (value == null) return '0.00';
   return value.toStringAsFixed(2);
 }
