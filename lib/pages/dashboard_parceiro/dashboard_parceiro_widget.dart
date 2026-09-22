@@ -55,6 +55,17 @@ class _DashboardParceiroWidgetState extends State<DashboardParceiroWidget> {
     super.dispose();
   }
 
+  String get _effectivePartnerId {
+    final parceiroJson = FFAppState().parceiro;
+    final partnerIdDynamic = getJsonField(parceiroJson, r'$.partner.id') ??
+                             getJsonField(parceiroJson, r'$.user.partner.id') ??
+                             getJsonField(parceiroJson, r'$.id');
+    if (partnerIdDynamic != null && partnerIdDynamic.toString().isNotEmpty) {
+      return partnerIdDynamic.toString();
+    }
+    return currentUserUid;
+  }
+
   void _refreshDashboard() {
     ApiManager.clearCache('obterDashboardParceiro');
     ApiManager.clearCache('obterCuponsDoParceiro');
@@ -256,17 +267,9 @@ class _DashboardParceiroWidgetState extends State<DashboardParceiroWidget> {
     Color highlightColor, {
     required bool isMobile,
   }) {
-    final parceiroJson = FFAppState().parceiro;
-    final partnerIdDynamic = getJsonField(parceiroJson, r'$.partner.id') ??
-                             getJsonField(parceiroJson, r'$.user.partner.id') ??
-                             getJsonField(parceiroJson, r'$.id');
-    final effectivePartnerId = (partnerIdDynamic != null && partnerIdDynamic.toString().isNotEmpty)
-        ? partnerIdDynamic.toString()
-        : currentUserUid;
-
     return FutureBuilder<ApiCallResponse>(
       future: ObterDashboardParceiroCall.call(
-        partnerId: effectivePartnerId,
+        partnerId: _effectivePartnerId,
       ),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
@@ -277,12 +280,7 @@ class _DashboardParceiroWidgetState extends State<DashboardParceiroWidget> {
         }
 
         final response = snapshot.data!;
-        if (!response.succeeded) {
-          return _buildDashboardError(
-              context, cardBgColor, borderColor, highlightColor);
-        }
-
-        final jsonResponse = response.jsonBody;
+        final jsonResponse = response.succeeded ? response.jsonBody : {};
         return isMobile
             ? _buildMobileMetrics(
                 context, jsonResponse, cardBgColor, borderColor, highlightColor)
@@ -897,7 +895,7 @@ class _DashboardParceiroWidgetState extends State<DashboardParceiroWidget> {
       BuildContext context, Color cardBg, Color border, Color highlight) {
     return FutureBuilder<ApiCallResponse>(
       future: GetHistoricoRecenteCall.call(
-        partnerId: int.tryParse(currentUserUid),
+        partnerId: int.tryParse(_effectivePartnerId),
       ),
       builder: (context, snapshot) {
         final List<dynamic> validations = [];
@@ -1124,7 +1122,7 @@ class _DashboardParceiroWidgetState extends State<DashboardParceiroWidget> {
       BuildContext context, Color cardBg, Color border, Color highlight) {
     return FutureBuilder<ApiCallResponse>(
       future: ObterCuponsDoParceiroCall.call(
-        partnerId: currentUserUid,
+        partnerId: _effectivePartnerId,
       ),
       builder: (context, snapshot) {
         final List<dynamic> promos = [];
@@ -1187,7 +1185,7 @@ class _DashboardParceiroWidgetState extends State<DashboardParceiroWidget> {
                             context: context,
                             builder: (dialogContext) =>
                                 ModalAdicionarDescontoParceiroWidget(
-                              partnerId: currentUserUid,
+                              partnerId: _effectivePartnerId,
                             ),
                           );
                           if (res == true) {
@@ -1477,7 +1475,7 @@ class _DashboardParceiroWidgetState extends State<DashboardParceiroWidget> {
       BuildContext context, Color cardBg, Color border, Color highlight) {
     return FutureBuilder<ApiCallResponse>(
       future: GetHistoricoRecenteCall.call(
-        partnerId: int.tryParse(currentUserUid),
+        partnerId: int.tryParse(_effectivePartnerId),
       ),
       builder: (context, snapshot) {
         final List<dynamic> validations = [];

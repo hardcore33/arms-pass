@@ -264,12 +264,19 @@ class _TabelaDesempenhoParceirosWidgetState
       }
 
       final savings = _parseDouble(troca['total_saving']);
-      final paidValue = _parseDouble(troca['valorPagar'] ?? troca['valor']);
+      final paidValue = _parseDouble(troca['valorPagar'] ?? troca['valor'] ?? troca['qtd_point'] ?? troca['qtdPoint']);
+      final bool isValidated = troca['is_point'] == true ||
+                               troca['isPoint'] == true ||
+                               desc.contains('Cupom validado');
 
       if (target != null) {
-        target.cuponsValidados++;
-        target.economiaGerada += savings;
-        target.totalVendas += (paidValue > 0 ? paidValue : (savings > 0 ? savings * 2.5 : 40.0));
+        if (isValidated) {
+          target.cuponsValidados++;
+          target.economiaGerada += savings;
+          target.totalVendas += (paidValue > 0 ? paidValue : savings);
+        } else {
+          target.cuponsResgatados++;
+        }
 
         if (benefitDesc.isNotEmpty && benefitDesc != 'null') {
           target.produtosResgatados[benefitDesc] = (target.produtosResgatados[benefitDesc] ?? 0) + 1;
@@ -1085,9 +1092,9 @@ class _TabelaDesempenhoParceirosWidgetState
                               Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 3.0),
                                 decoration: BoxDecoration(
-                                  color: theme.primary.withOpacity(0.06),
-                                  borderRadius: BorderRadius.circular(6.0),
-                                  border: Border.all(color: theme.secondary.withOpacity(0.3)),
+                                   color: theme.primary.withOpacity(0.06),
+                                   borderRadius: BorderRadius.circular(6.0),
+                                   border: Border.all(color: theme.secondary.withOpacity(0.3)),
                                 ),
                                 child: Text(
                                   '${item.cuponsValidados} validados',
@@ -1100,7 +1107,10 @@ class _TabelaDesempenhoParceirosWidgetState
                               ),
                               const SizedBox(width: 6.0),
                               Text(
-                                '/ ${item.cuponsNaoValidados} ativos',
+                                '/ ${item.cuponsNaoValidados} ativos' +
+                                    (item.cuponsResgatados > 0
+                                        ? ' • ${item.cuponsResgatados} no app'
+                                        : ''),
                                 style: GoogleFonts.readexPro(
                                   fontSize: 11.5,
                                   color: theme.secondaryText,
@@ -1331,6 +1341,7 @@ class _PartnerPerformanceItem {
   final String city;
   double totalVendas;
   int cuponsValidados;
+  int cuponsResgatados;
   int cuponsNaoValidados;
   double economiaGerada;
   Map<String, int> produtosResgatados;
@@ -1344,6 +1355,7 @@ class _PartnerPerformanceItem {
     Map<String, int>? produtosResgatados,
   })  : totalVendas = 0.0,
         cuponsValidados = 0,
+        cuponsResgatados = 0,
         cuponsNaoValidados = 0,
         economiaGerada = 0.0,
         produtosResgatados = produtosResgatados ?? {};

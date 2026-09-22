@@ -29,17 +29,28 @@ class _CuponsParceiroWidgetState extends State<CuponsParceiroWidget> {
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
+  String get _effectivePartnerId {
+    final parceiroJson = FFAppState().parceiro;
+    final partnerIdDynamic = getJsonField(parceiroJson, r'$.partner.id') ??
+                             getJsonField(parceiroJson, r'$.user.partner.id') ??
+                             getJsonField(parceiroJson, r'$.id');
+    if (partnerIdDynamic != null && partnerIdDynamic.toString().isNotEmpty) {
+      return partnerIdDynamic.toString();
+    }
+    return currentUserUid;
+  }
+
   @override
   void initState() {
     super.initState();
     _model = createModel(context, () => CuponsParceiroModel());
-    _cuponsFuture = ObterCuponsDoParceiroCall.call(partnerId: currentUserUid);
+    _cuponsFuture = ObterCuponsDoParceiroCall.call(partnerId: _effectivePartnerId);
     WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));
   }
 
   void _recarregar() {
     setState(() {
-      _cuponsFuture = ObterCuponsDoParceiroCall.call(partnerId: currentUserUid);
+      _cuponsFuture = ObterCuponsDoParceiroCall.call(partnerId: _effectivePartnerId);
     });
   }
 

@@ -37,6 +37,17 @@ class _ListagemDeCuponsParceiroWidgetState
   int _paginaAtual = 1;
   static const int _itensPorPagina = 10;
 
+  String get _effectivePartnerId {
+    final parceiroJson = FFAppState().parceiro;
+    final partnerIdDynamic = getJsonField(parceiroJson, r'$.partner.id') ??
+                             getJsonField(parceiroJson, r'$.user.partner.id') ??
+                             getJsonField(parceiroJson, r'$.id');
+    if (partnerIdDynamic != null && partnerIdDynamic.toString().isNotEmpty) {
+      return partnerIdDynamic.toString();
+    }
+    return currentUserUid;
+  }
+
   @override
   void setState(VoidCallback callback) {
     super.setState(callback);
@@ -128,7 +139,7 @@ class _ListagemDeCuponsParceiroWidgetState
                           context: context,
                           builder: (dialogContext) =>
                               ModalSolicitarBannerWidget(
-                            partnerId: currentUserUid,
+                            partnerId: _effectivePartnerId,
                           ),
                         );
                       },
@@ -158,7 +169,7 @@ class _ListagemDeCuponsParceiroWidgetState
                           context: context,
                           builder: (dialogContext) =>
                               ModalAdicionarDescontoParceiroWidget(
-                            partnerId: currentUserUid,
+                            partnerId: _effectivePartnerId,
                           ),
                         );
                         if (res == true && widget.onChanged != null) {
