@@ -409,6 +409,7 @@ class _LoginWidgetState extends State<LoginWidget> {
                       ApiManager.setAccessToken(token);
                     }
                     if (LoginCall.role((_model.usuario?.jsonBody ?? '')) == 2) {
+                      FFAppState().parceiro = null;
                       FFAppState().indexPage = 1;
                       safeSetState(() {});
                       context.pushNamedAuth(DashboardWidget.routeName, context.mounted);

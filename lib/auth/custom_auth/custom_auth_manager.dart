@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'custom_auth_user_provider.dart';
+import '/app_state.dart';
 
 export 'custom_auth_manager.dart';
 
@@ -28,6 +29,7 @@ class CustomAuthManager {
     uid = null;
     try {
       _prefs.remove('ff_parceiro');
+      FFAppState().parceiro = null;
     } catch (_) {}
 
     // Update the current user.

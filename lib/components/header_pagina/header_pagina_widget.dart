@@ -30,6 +30,9 @@ class HeaderPaginaWidget extends StatelessWidget {
         ? partnerFantasy
         : (partnerRazao.isNotEmpty ? partnerRazao : customerName);
 
+    final bool isPartnerPage = breadcrumb.trim().toLowerCase() == 'parceiro';
+    final bool showPartner = isPartnerPage && partnerName.isNotEmpty;
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 20.0),
       child: Row(
@@ -57,7 +60,7 @@ class HeaderPaginaWidget extends StatelessWidget {
                         ),
                       ),
                     ),
-                    if (partnerName.isNotEmpty) ...[
+                    if (showPartner) ...[
                       const SizedBox(width: 10.0),
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 2.0),
@@ -115,7 +118,7 @@ class HeaderPaginaWidget extends StatelessWidget {
               ],
             ),
           ),
-          if (partnerName.isNotEmpty) ...[
+          if (showPartner) ...[
             Container(
               margin: const EdgeInsets.only(right: 12.0),
               padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 8.0),

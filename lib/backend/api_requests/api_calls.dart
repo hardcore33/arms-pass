@@ -474,14 +474,13 @@ class ValidarCupomCall {
     String? partnerId = '',
     String? discountId,
   }) async {
-    final partnerIdValue = (partnerId != null && partnerId.isNotEmpty) ? partnerId : 'null';
-    final discountIdField = (discountId != null && discountId.isNotEmpty) ? ',\n  "discountId": $discountId' : '';
+    final partnerIdField = (partnerId != null && partnerId.isNotEmpty && partnerId != 'null') ? ',\n  "partnerId": $partnerId' : '';
+    final discountIdField = (discountId != null && discountId.isNotEmpty && discountId != 'null') ? ',\n  "discountId": $discountId' : '';
     final ffApiRequestBody = '''
 {
   "validateCode": "${code}",
   "valorProduto": "${value}",
-  "valorPagar": "${paidValue}",
-  "partnerId": ${partnerIdValue}${discountIdField}
+  "valorPagar": "${paidValue}"$partnerIdField$discountIdField
 }''';
     return ApiManager.instance.makeApiCall(
       callName: 'validarCupom',
