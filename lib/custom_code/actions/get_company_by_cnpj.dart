@@ -17,26 +17,60 @@ Future<dynamic> getCompanyByCnpj(String cnpj) async {
     throw Exception('CNPJ inválido');
   }
 
-  final String url = 'https://brasilapi.com.br/api/cnpj/v1/$digits';
-  final response = await http.get(Uri.parse(url));
+  // 1. Tenta BrasilAPI com timeout
+  try {
+    final response = await http
+        .get(Uri.parse('https://brasilapi.com.br/api/cnpj/v1/$digits'))
+        .timeout(const Duration(seconds: 6));
 
-  if (response.statusCode == 200) {
-    final Map<String, dynamic> data = json.decode(response.body);
-
-    return {
-      'razaoSocial': data['razao_social'],
-      'nomeFantasia': data['nome_fantasia'],
-      'logradouro': data['logradouro'],
-      'numero': data['numero'],
-      'bairro': data['bairro'],
-      'cidade': data['municipio'],
-      'uf': data['uf'],
-      'cep': data['cep'],
-      'telefone': data['ddd_telefone_1'],
-      'email': data['email'],
-      'situacaoCadastral': data['descricao_situacao_cadastral'],
-    };
-  } else {
-    throw Exception('CNPJ não encontrado');
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> data = json.decode(response.body);
+      return {
+        'razaoSocial': data['razao_social'] ?? '',
+        'nomeFantasia': data['nome_fantasia'] ?? '',
+        'logradouro': data['logradouro'] ?? '',
+        'numero': data['numero'] ?? '',
+        'bairro': data['bairro'] ?? '',
+        'cidade': data['municipio'] ?? '',
+        'uf': data['uf'] ?? '',
+        'cep': data['cep'] ?? '',
+        'telefone': data['ddd_telefone_1'] ?? '',
+        'email': data['email'] ?? '',
+        'situacaoCadastral': data['descricao_situacao_cadastral'] ?? '',
+      };
+    }
+  } catch (_) {
+    // Caso falhe ou ocorra timeout, tenta o fallback
   }
+
+  // 2. Fallback: ReceitaWS
+  try {
+    final response = await http
+        .get(Uri.parse('https://receitaws.com.br/v1/cnpj/$digits'))
+        .timeout(const Duration(seconds: 8));
+
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> data = json.decode(response.body);
+      if (data['status'] == 'OK' || data['nome'] != null) {
+        return {
+          'razaoSocial': data['nome'] ?? '',
+          'nomeFantasia': data['fantasia'] ?? '',
+          'logradouro': data['logradouro'] ?? '',
+          'numero': data['numero'] ?? '',
+          'bairro': data['bairro'] ?? '',
+          'cidade': data['municipio'] ?? '',
+          'uf': data['uf'] ?? '',
+          'cep': data['cep'] ?? '',
+          'telefone': data['telefone'] ?? '',
+          'email': data['email'] ?? '',
+          'situacaoCadastral': data['situacao'] ?? '',
+        };
+      }
+    }
+  } catch (_) {
+    // Falha em ambas as fontes
+  }
+
+  throw Exception('CNPJ não encontrado');
 }
+
