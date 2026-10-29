@@ -92,10 +92,10 @@ class _ContratoParceiroWidgetState extends State<ContratoParceiroWidget> {
       child: Container(
         width: double.infinity,
         decoration: BoxDecoration(
-          color: theme.secondaryBackground,
+          color: const Color(0xFFFAF7F2),
           borderRadius: BorderRadius.circular(16.0),
           border: Border.all(
-            color: theme.alternate,
+            color: const Color(0xFFC5BCA8),
             width: 1.0,
           ),
         ),
@@ -112,16 +112,16 @@ class _ContratoParceiroWidgetState extends State<ContratoParceiroWidget> {
                   width: 52.0,
                   height: 52.0,
                   decoration: BoxDecoration(
-                    color: theme.secondary.withOpacity(0.12),
+                    color: const Color(0xFFEFECE4),
                     borderRadius: BorderRadius.circular(12.0),
                     border: Border.all(
-                      color: theme.secondary.withOpacity(0.3),
+                      color: const Color(0xFFC5BCA8),
                       width: 1.0,
                     ),
                   ),
-                  child: Icon(
+                  child: const Icon(
                     Icons.description_rounded,
-                    color: theme.secondary,
+                    color: Color(0xFF524B3E),
                     size: 28.0,
                   ),
                 ),
@@ -133,7 +133,7 @@ class _ContratoParceiroWidgetState extends State<ContratoParceiroWidget> {
                       Text(
                         'Termo de Adesão & Parceria Comercial',
                         style: GoogleFonts.readexPro(
-                          color: Colors.white,
+                          color: const Color(0xFF0F172A),
                           fontSize: isDesktop ? 18.0 : 16.0,
                           fontWeight: FontWeight.bold,
                         ),
@@ -142,7 +142,7 @@ class _ContratoParceiroWidgetState extends State<ContratoParceiroWidget> {
                       Text(
                         'Instrumento oficial de credenciamento junto ao Clube Procard',
                         style: GoogleFonts.readexPro(
-                          color: theme.secondaryText,
+                          color: const Color(0xFF64748B),
                           fontSize: 13.0,
                         ),
                       ),
@@ -153,10 +153,10 @@ class _ContratoParceiroWidgetState extends State<ContratoParceiroWidget> {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 6.0),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF1B382B),
+                    color: const Color(0xFFECFDF5),
                     borderRadius: BorderRadius.circular(20.0),
                     border: Border.all(
-                      color: const Color(0xFF2E7D32),
+                      color: const Color(0xFFA7F3D0),
                       width: 1.0,
                     ),
                   ),
@@ -167,7 +167,7 @@ class _ContratoParceiroWidgetState extends State<ContratoParceiroWidget> {
                         width: 8.0,
                         height: 8.0,
                         decoration: const BoxDecoration(
-                          color: Color(0xFF4CAF50),
+                          color: Color(0xFF059669),
                           shape: BoxShape.circle,
                         ),
                       ),
@@ -175,7 +175,7 @@ class _ContratoParceiroWidgetState extends State<ContratoParceiroWidget> {
                       Text(
                         'Vigente',
                         style: GoogleFonts.readexPro(
-                          color: const Color(0xFF81C784),
+                          color: const Color(0xFF059669),
                           fontSize: 12.0,
                           fontWeight: FontWeight.bold,
                         ),
@@ -187,16 +187,16 @@ class _ContratoParceiroWidgetState extends State<ContratoParceiroWidget> {
             ),
 
             const SizedBox(height: 24.0),
-            Divider(color: theme.alternate, thickness: 1.0),
+            const Divider(color: Color(0xFFC5BCA8), thickness: 1.0),
             const SizedBox(height: 20.0),
 
             // Informações Cadastrais da Unidade Parceira
             Text(
               'Dados Cadastrais do Estabelecimento',
               style: GoogleFonts.readexPro(
-                color: theme.secondary,
-                fontSize: 13.5,
-                fontWeight: FontWeight.w600,
+                color: const Color(0xFF0F172A),
+                fontSize: 14.0,
+                fontWeight: FontWeight.bold,
                 letterSpacing: 0.3,
               ),
             ),
@@ -206,10 +206,10 @@ class _ContratoParceiroWidgetState extends State<ContratoParceiroWidget> {
               width: double.infinity,
               padding: const EdgeInsets.all(18.0),
               decoration: BoxDecoration(
-                color: theme.primary,
+                color: const Color(0xFFEFECE4),
                 borderRadius: BorderRadius.circular(12.0),
                 border: Border.all(
-                  color: theme.alternate,
+                  color: const Color(0xFFC5BCA8),
                   width: 1.0,
                 ),
               ),
@@ -264,9 +264,9 @@ class _ContratoParceiroWidgetState extends State<ContratoParceiroWidget> {
             Text(
               'Diretrizes e Regras do Convênio',
               style: GoogleFonts.readexPro(
-                color: theme.secondary,
-                fontSize: 13.5,
-                fontWeight: FontWeight.w600,
+                color: const Color(0xFF0F172A),
+                fontSize: 14.0,
+                fontWeight: FontWeight.bold,
                 letterSpacing: 0.3,
               ),
             ),
@@ -364,9 +364,9 @@ class _ContratoParceiroWidgetState extends State<ContratoParceiroWidget> {
                   options: FFButtonOptions(
                     height: 48.0,
                     padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                    color: theme.secondary,
+                    color: const Color(0xFF8C8268),
                     textStyle: GoogleFonts.readexPro(
-                      color: theme.primary,
+                      color: const Color(0xFFFAF7F2),
                       fontSize: 14.0,
                       fontWeight: FontWeight.bold,
                     ),
@@ -451,10 +451,10 @@ class _ContratoParceiroWidgetState extends State<ContratoParceiroWidget> {
     return Container(
       padding: const EdgeInsets.all(16.0),
       decoration: BoxDecoration(
-        color: theme.primary,
+        color: const Color(0xFFEFECE4),
         borderRadius: BorderRadius.circular(10.0),
         border: Border.all(
-          color: theme.alternate,
+          color: const Color(0xFFC5BCA8),
           width: 1.0,
         ),
       ),
@@ -463,13 +463,13 @@ class _ContratoParceiroWidgetState extends State<ContratoParceiroWidget> {
         children: [
           Row(
             children: [
-              Icon(icon, size: 18.0, color: theme.secondary),
+              Icon(icon, size: 18.0, color: const Color(0xFF524B3E)),
               const SizedBox(width: 8.0),
               Expanded(
                 child: Text(
                   title,
                   style: GoogleFonts.readexPro(
-                    color: Colors.white,
+                    color: const Color(0xFF0F172A),
                     fontSize: 13.0,
                     fontWeight: FontWeight.bold,
                   ),
@@ -481,7 +481,7 @@ class _ContratoParceiroWidgetState extends State<ContratoParceiroWidget> {
           Text(
             description,
             style: GoogleFonts.readexPro(
-              color: theme.secondaryText,
+              color: const Color(0xFF64748B),
               fontSize: 12.0,
               height: 1.4,
             ),
@@ -505,10 +505,10 @@ class _ContratoParceiroWidgetState extends State<ContratoParceiroWidget> {
           width: 34.0,
           height: 34.0,
           decoration: BoxDecoration(
-            color: theme.secondary.withOpacity(0.08),
+            color: const Color(0xFFE2DDD1),
             borderRadius: BorderRadius.circular(8.0),
           ),
-          child: Icon(icon, size: 18.0, color: theme.secondary),
+          child: Icon(icon, size: 18.0, color: const Color(0xFF524B3E)),
         ),
         const SizedBox(width: 10.0),
         Column(
@@ -517,7 +517,7 @@ class _ContratoParceiroWidgetState extends State<ContratoParceiroWidget> {
             Text(
               label,
               style: GoogleFonts.readexPro(
-                color: theme.secondaryText,
+                color: const Color(0xFF64748B),
                 fontSize: 11.5,
                 fontWeight: FontWeight.w500,
               ),
@@ -526,7 +526,7 @@ class _ContratoParceiroWidgetState extends State<ContratoParceiroWidget> {
             Text(
               value,
               style: GoogleFonts.readexPro(
-                color: Colors.white,
+                color: const Color(0xFF0F172A),
                 fontSize: 13.5,
                 fontWeight: FontWeight.w600,
               ),
@@ -548,7 +548,7 @@ class _ContratoParceiroWidgetState extends State<ContratoParceiroWidget> {
       },
       child: Scaffold(
         key: scaffoldKey,
-        backgroundColor: FlutterFlowTheme.of(context).primary,
+        backgroundColor: const Color(0xFFACA48D),
         body: Column(
           mainAxisSize: MainAxisSize.max,
           children: [
@@ -569,7 +569,8 @@ class _ContratoParceiroWidgetState extends State<ContratoParceiroWidget> {
                         : (MediaQuery.sizeOf(context).width * 0.22).clamp(220.0, 320.0),
                     height: MediaQuery.sizeOf(context).height * 1.0,
                     decoration: BoxDecoration(
-                      color: FlutterFlowTheme.of(context).secondary,
+                      color: const Color(0xFFFAF7F2),
+                      border: const Border(right: BorderSide(color: Color(0xFFC5BCA8), width: 1.0)),
                     ),
                     child: wrapWithModel(
                       model: _model.menuParceiroModel,
@@ -581,8 +582,8 @@ class _ContratoParceiroWidgetState extends State<ContratoParceiroWidget> {
                   Expanded(
                     child: Container(
                       height: MediaQuery.sizeOf(context).height * 1.0,
-                      decoration: BoxDecoration(
-                        color: FlutterFlowTheme.of(context).primary,
+                      decoration: const BoxDecoration(
+                        color: const Color(0xFFACA48D),
                       ),
                       child: SingleChildScrollView(
                         child: Padding(

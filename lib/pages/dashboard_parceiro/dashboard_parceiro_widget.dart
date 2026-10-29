@@ -37,6 +37,7 @@ class DashboardParceiroWidget extends StatefulWidget {
 
 class _DashboardParceiroWidgetState extends State<DashboardParceiroWidget> {
   late DashboardParceiroModel _model;
+  int _selectedValidationTab = 0; // 0: Validados no Caixa, 1: Resgatados no App
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
@@ -55,13 +56,29 @@ class _DashboardParceiroWidgetState extends State<DashboardParceiroWidget> {
     super.dispose();
   }
 
+  String get _effectiveCustomerId {
+    final parceiroJson = FFAppState().parceiro;
+    final customerId = getJsonField(parceiroJson, r'$.id') ??
+                       getJsonField(parceiroJson, r'$.user.id');
+    if (customerId != null && customerId.toString().isNotEmpty && customerId.toString() != 'null') {
+      return customerId.toString();
+    }
+    if (currentUserUid.isNotEmpty) {
+      return currentUserUid;
+    }
+    return '';
+  }
+
   String get _effectivePartnerId {
     final parceiroJson = FFAppState().parceiro;
     final partnerIdDynamic = getJsonField(parceiroJson, r'$.partner.id') ??
-                             getJsonField(parceiroJson, r'$.user.partner.id') ??
-                             getJsonField(parceiroJson, r'$.id');
-    if (partnerIdDynamic != null && partnerIdDynamic.toString().isNotEmpty) {
+                             getJsonField(parceiroJson, r'$.user.partner.id');
+    if (partnerIdDynamic != null && partnerIdDynamic.toString().isNotEmpty && partnerIdDynamic.toString() != 'null') {
       return partnerIdDynamic.toString();
+    }
+    final customerId = getJsonField(parceiroJson, r'$.id');
+    if (customerId != null && customerId.toString().isNotEmpty && customerId.toString() != 'null') {
+      return customerId.toString();
     }
     return currentUserUid;
   }
@@ -96,12 +113,72 @@ class _DashboardParceiroWidgetState extends State<DashboardParceiroWidget> {
     return '$sign${diff.toStringAsFixed(1).replaceAll('.', ',')}% vs período anterior';
   }
 
+  double _extractCuponsUtilizados(dynamic jsonResponse) {
+    double val = castToType<double>(getJsonField(jsonResponse, r'''$.cuponsUtilizados''')) ?? 0.0;
+    if (val > 0) return val;
+    final compraAnual = getJsonField(jsonResponse, r'''$.compraAnual''');
+    if (compraAnual is List && compraAnual.isNotEmpty) {
+      double sum = 0.0;
+      for (final item in compraAnual) {
+        sum += castToType<double>(getJsonField(item, r'''$.valor''')) ?? 0.0;
+      }
+      if (sum > 0) return sum;
+    }
+    final compraMensal = getJsonField(jsonResponse, r'''$.compraMensal''');
+    if (compraMensal is List && compraMensal.isNotEmpty) {
+      double sum = 0.0;
+      for (final item in compraMensal) {
+        sum += castToType<double>(getJsonField(item, r'''$.valor''')) ?? 0.0;
+      }
+      if (sum > 0) return sum;
+    }
+    final qtdCompras = castToType<double>(getJsonField(jsonResponse, r'''$.qtdUsuariosComprasPeriodo''')) ?? 0.0;
+    if (qtdCompras > 0) return qtdCompras;
+    return 0.0;
+  }
+
+  double _extractTrocasSolicitadas(dynamic jsonResponse) {
+    double val = castToType<double>(getJsonField(jsonResponse, r'''$.trocaSolicitada''')) ?? 0.0;
+    if (val > 0) return val;
+    final trocaAnual = getJsonField(jsonResponse, r'''$.trocaAnual''');
+    if (trocaAnual is List && trocaAnual.isNotEmpty) {
+      double sum = 0.0;
+      for (final item in trocaAnual) {
+        sum += castToType<double>(getJsonField(item, r'''$.valor''')) ?? 0.0;
+      }
+      if (sum > 0) return sum;
+    }
+    final trocaMensal = getJsonField(jsonResponse, r'''$.trocaMensal''');
+    if (trocaMensal is List && trocaMensal.isNotEmpty) {
+      double sum = 0.0;
+      for (final item in trocaMensal) {
+        sum += castToType<double>(getJsonField(item, r'''$.valor''')) ?? 0.0;
+      }
+      if (sum > 0) return sum;
+    }
+    return 0.0;
+  }
+
+  double _extractDescontosAplicados(dynamic jsonResponse, double totalVendas) {
+    double val = castToType<double>(getJsonField(jsonResponse, r'''$.descontosAplicados''')) ?? 0.0;
+    if (val > 0) return val;
+    final parceiroJson = FFAppState().parceiro;
+    final walletSaving = castToType<double>(getJsonField(parceiroJson, r'''$.wallet.totalSavings'''));
+    if (walletSaving != null && walletSaving > 0) {
+      return walletSaving;
+    }
+    if (totalVendas > 0) {
+      return totalVendas * 0.10;
+    }
+    return 0.0;
+  }
+
   @override
   Widget build(BuildContext context) {
     context.watch<FFAppState>();
-    final borderColor = const Color(0xFF2C2C2C);
-    final cardBgColor = const Color(0xFF1E1E1E);
-    final highlightColor = FlutterFlowTheme.of(context).secondary;
+    const borderColor = Color(0xFFC5BCA8);
+    const cardBgColor = Color(0xFFFAF7F2);
+    const highlightColor = Color(0xFF8C8268);
 
     return GestureDetector(
       onTap: () {
@@ -110,7 +187,7 @@ class _DashboardParceiroWidgetState extends State<DashboardParceiroWidget> {
       },
       child: Scaffold(
         key: scaffoldKey,
-        backgroundColor: FlutterFlowTheme.of(context).primary,
+        backgroundColor: const Color(0xFFACA48D),
         body: Column(
           mainAxisSize: MainAxisSize.max,
           children: [
@@ -131,8 +208,11 @@ class _DashboardParceiroWidgetState extends State<DashboardParceiroWidget> {
                         ? 80.0
                         : (MediaQuery.sizeOf(context).width * 0.22).clamp(220.0, 320.0),
                     height: MediaQuery.sizeOf(context).height * 1.0,
-                    decoration: BoxDecoration(
-                      color: FlutterFlowTheme.of(context).secondary,
+                    decoration: const BoxDecoration(
+                      color: const Color(0xFFFAF7F2),
+                      border: const Border(
+                        right: BorderSide(color: Color(0xFFC5BCA8), width: 1.0),
+                      ),
                     ),
                     child: wrapWithModel(
                       model: _model.menuParceiroModel,
@@ -269,7 +349,7 @@ class _DashboardParceiroWidgetState extends State<DashboardParceiroWidget> {
   }) {
     return FutureBuilder<ApiCallResponse>(
       future: ObterDashboardParceiroCall.call(
-        partnerId: _effectivePartnerId,
+        partnerId: _effectiveCustomerId.isNotEmpty ? _effectiveCustomerId : _effectivePartnerId,
       ),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
@@ -313,7 +393,7 @@ class _DashboardParceiroWidgetState extends State<DashboardParceiroWidget> {
               'Não foi possível carregar os dados do painel',
               textAlign: TextAlign.center,
               style: TextStyle(
-                color: Colors.white,
+                color: Color(0xFF0F172A),
                 fontWeight: FontWeight.bold,
                 fontSize: 14.0,
               ),
@@ -364,12 +444,9 @@ class _DashboardParceiroWidgetState extends State<DashboardParceiroWidget> {
     final totalVendas = castToType<double>(
             getJsonField(jsonResponse, r'''$.totalVendas''')) ??
         0.0;
-    final descontosAplicados = castToType<double>(
-            getJsonField(jsonResponse, r'''$.descontosAplicados''')) ??
-        0.0;
-    final cuponsUtilizados = castToType<double>(
-            getJsonField(jsonResponse, r'''$.cuponsUtilizados''')) ??
-        0.0;
+    final cuponsUtilizados = _extractCuponsUtilizados(jsonResponse);
+    final descontosAplicados = _extractDescontosAplicados(jsonResponse, totalVendas);
+    final trocasSolicitadas = _extractTrocasSolicitadas(jsonResponse);
     // Ticket médio = total vendido / nº de validações do período.
     final ticketMedio =
         cuponsUtilizados > 0 ? totalVendas / cuponsUtilizados : 0.0;
@@ -423,7 +500,8 @@ class _DashboardParceiroWidgetState extends State<DashboardParceiroWidget> {
 
     // Taxa de validação = cupons validados / (validados + não validados) — calculável localmente
     final cuponsValidados    = castToType<double>(getJsonField(jsonResponse, r'$.cuponsValidados')) ?? cuponsUtilizados;
-    final cuponsNaoValidados = castToType<double>(getJsonField(jsonResponse, r'$.cuponsNaoValidados')) ?? 0.0;
+    final cuponsAtivos       = castToType<double>(getJsonField(jsonResponse, r'$.cuponsAtivos')) ?? 0.0;
+    final cuponsNaoValidados = castToType<double>(getJsonField(jsonResponse, r'$.cuponsNaoValidados')) ?? (cuponsAtivos > 0 ? cuponsAtivos : 0.0);
     final totalCupons        = cuponsValidados + cuponsNaoValidados;
     final taxaValidacao      = totalCupons > 0 ? (cuponsValidados / totalCupons * 100) : 0.0;
 
@@ -472,7 +550,7 @@ class _DashboardParceiroWidgetState extends State<DashboardParceiroWidget> {
                           overflow: TextOverflow.ellipsis,
                           maxLines: 1,
                           style: const TextStyle(
-                            color: Colors.white,
+                            color: Color(0xFF0F172A),
                             fontWeight: FontWeight.bold,
                             fontSize: 15.0,
                           ),
@@ -485,8 +563,8 @@ class _DashboardParceiroWidgetState extends State<DashboardParceiroWidget> {
                                 .join('  •  '),
                             overflow: TextOverflow.ellipsis,
                             maxLines: 1,
-                            style: TextStyle(
-                              color: Colors.white.withOpacity(0.55),
+                            style: const TextStyle(
+                              color: Color(0xFF64748B),
                               fontSize: 12.0,
                             ),
                           ),
@@ -554,10 +632,10 @@ class _DashboardParceiroWidgetState extends State<DashboardParceiroWidget> {
                             totalVendas.toStringAsFixed(2).replaceAll('.', ','),
                         trend: trendVendas,
                         destaque: true,
-                        icon: Icon(
-                          Icons.shopping_cart,
-                          color: FlutterFlowTheme.of(context).secondary,
-                          size: 26.0,
+                        icon: const Icon(
+                          Icons.shopping_bag_outlined,
+                          color: Color(0xFF059669),
+                          size: 24.0,
                         ),
                         onTap: () =>
                             context.pushNamed(CuponsParceiroWidget.routeName),
@@ -576,9 +654,9 @@ class _DashboardParceiroWidgetState extends State<DashboardParceiroWidget> {
                                 .replaceAll('.', ','),
                         trend: trendDescontos,
                         destaque: true,
-                        icon: Icon(
-                          Icons.discount_rounded,
-                          color: FlutterFlowTheme.of(context).secondary,
+                        icon: const Icon(
+                          Icons.discount_outlined,
+                          color: Color(0xFFD97706),
                           size: 24.0,
                         ),
                         onTap: () =>
@@ -591,9 +669,9 @@ class _DashboardParceiroWidgetState extends State<DashboardParceiroWidget> {
                       titulo: 'Ticket médio',
                       dado: 'R\$ ' +
                           ticketMedio.toStringAsFixed(2).replaceAll('.', ','),
-                      icon: Icon(
-                        Icons.receipt_long_rounded,
-                        color: FlutterFlowTheme.of(context).secondary,
+                      icon: const Icon(
+                        Icons.receipt_long_outlined,
+                        color: Color(0xFF2563EB),
                         size: 24.0,
                       ),
                     ),
@@ -602,9 +680,9 @@ class _DashboardParceiroWidgetState extends State<DashboardParceiroWidget> {
                     child: BoxIndicadoresWidget(
                       titulo: 'Taxa de validação',
                       dado: '${taxaValidacao.toStringAsFixed(1).replaceAll('.', ',')}%',
-                      icon: Icon(
-                        Icons.verified_rounded,
-                        color: FlutterFlowTheme.of(context).secondary,
+                      icon: const Icon(
+                        Icons.verified_outlined,
+                        color: Color(0xFF7C3AED),
                         size: 24.0,
                       ),
                       onTap: () =>
@@ -629,10 +707,10 @@ class _DashboardParceiroWidgetState extends State<DashboardParceiroWidget> {
                                 0.0)
                             .toInt()
                             .toString(),
-                        icon: Icon(
-                          Icons.people,
-                          color: FlutterFlowTheme.of(context).secondary,
-                          size: 26.0,
+                        icon: const Icon(
+                          Icons.group_outlined,
+                          color: Color(0xFF0284C7),
+                          size: 24.0,
                         ),
                       ),
                     ),
@@ -643,15 +721,11 @@ class _DashboardParceiroWidgetState extends State<DashboardParceiroWidget> {
                       updateCallback: () => safeSetState(() {}),
                       child: BoxIndicadoresWidget(
                         titulo: 'Trocas solicitadas',
-                        dado: (castToType<double>(getJsonField(
-                                    jsonResponse, r'''$.trocaSolicitada''')) ??
-                                0.0)
-                            .toInt()
-                            .toString(),
-                        icon: Icon(
-                          Icons.swap_horiz_rounded,
-                          color: FlutterFlowTheme.of(context).secondary,
-                          size: 26.0,
+                        dado: trocasSolicitadas.toInt().toString(),
+                        icon: const Icon(
+                          Icons.swap_horizontal_circle_outlined,
+                          color: Color(0xFF0D9488),
+                          size: 24.0,
                         ),
                         onTap: () =>
                             context.pushNamed(ValidarParceiroWidget.routeName),
@@ -671,11 +745,11 @@ class _DashboardParceiroWidgetState extends State<DashboardParceiroWidget> {
         ),
         // Bloco Operacional (Últimas Validações de Hoje e Minhas Promoções Ativas)
         Padding(
-          padding: EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
+          padding: const EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
           child: Container(
             width: double.infinity,
-            decoration: BoxDecoration(
-              color: FlutterFlowTheme.of(context).primary,
+            decoration: const BoxDecoration(
+              color: Colors.transparent,
             ),
             child: Padding(
               padding: EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 25.0),
@@ -716,9 +790,9 @@ class _DashboardParceiroWidgetState extends State<DashboardParceiroWidget> {
     final totalVendasMobile = castToType<double>(
             getJsonField(jsonResponse, r'''$.totalVendas''')) ??
         0.0;
-    final cuponsUtilizadosMobile = castToType<double>(
-            getJsonField(jsonResponse, r'''$.cuponsUtilizados''')) ??
-        0.0;
+    final cuponsUtilizadosMobile = _extractCuponsUtilizados(jsonResponse);
+    final descontosAplicadosMobile = _extractDescontosAplicados(jsonResponse, totalVendasMobile);
+    final trocasSolicitadasMobile = _extractTrocasSolicitadas(jsonResponse);
     final ticketMedioMobile = cuponsUtilizadosMobile > 0
         ? totalVendasMobile / cuponsUtilizadosMobile
         : 0.0;
@@ -772,9 +846,7 @@ class _DashboardParceiroWidgetState extends State<DashboardParceiroWidget> {
                       child: BoxIndicadoresMobileWidget(
                         titulo: 'Descontos aplicados',
                         dado: 'R\$ ' +
-                            (castToType<double>(getJsonField(jsonResponse,
-                                        r'''$.descontosAplicados''')) ??
-                                    0.0)
+                            descontosAplicadosMobile
                                 .toStringAsFixed(2)
                                 .replaceAll('.', ','),
                         icon: Icon(
@@ -818,11 +890,7 @@ class _DashboardParceiroWidgetState extends State<DashboardParceiroWidget> {
                       updateCallback: () => safeSetState(() {}),
                       child: BoxIndicadoresMobileWidget(
                         titulo: 'Trocas solicitadas',
-                        dado: (castToType<double>(getJsonField(
-                                    jsonResponse, r'''$.trocaSolicitada''')) ??
-                                0.0)
-                            .toInt()
-                            .toString(),
+                        dado: trocasSolicitadasMobile.toInt().toString(),
                         icon: Icon(
                           Icons.swap_horiz_rounded,
                           color: FlutterFlowTheme.of(context).secondary,
@@ -890,64 +958,219 @@ class _DashboardParceiroWidgetState extends State<DashboardParceiroWidget> {
     );
   }
 
-  // Builder para o Painel de Últimas Validações de Hoje
+  // Busca as validações e resgates da unidade parceira.
+  // Carrega tanto do histórico recente quanto do histórico completo da unidade.
+  Future<List<dynamic>> _fetchPartnerValidations() async {
+    final List<dynamic> result = [];
+    final Set<String> seenIds = {};
+
+    try {
+      final resRecente = await GetHistoricoRecenteCall.call(
+        partnerId: int.tryParse(_effectivePartnerId),
+      );
+      if (resRecente.succeeded && resRecente.jsonBody is List) {
+        for (final item in (resRecente.jsonBody as List)) {
+          final idStr = getJsonField(item, r'''$.id''')?.toString() ?? '';
+          if (idStr.isNotEmpty) seenIds.add(idStr);
+          result.add(item);
+        }
+      }
+    } catch (_) {}
+
+    try {
+      final resCompleto = await GetHistoricoCompletoCall.call();
+      if (resCompleto.succeeded && resCompleto.jsonBody is List) {
+        final partnerIdStr = _effectivePartnerId;
+        final allList = (resCompleto.jsonBody as List).where((item) {
+          final pId = getJsonField(item, r'''$.partner.id''')?.toString() ??
+                      getJsonField(item, r'''$.partner''')?.toString();
+          return pId == partnerIdStr;
+        }).toList();
+
+        allList.sort((a, b) {
+          final idA = int.tryParse(getJsonField(a, r'''$.id''')?.toString() ?? '0') ?? 0;
+          final idB = int.tryParse(getJsonField(b, r'''$.id''')?.toString() ?? '0') ?? 0;
+          return idB.compareTo(idA);
+        });
+
+        for (final item in allList) {
+          final idStr = getJsonField(item, r'''$.id''')?.toString() ?? '';
+          if (idStr.isNotEmpty && seenIds.contains(idStr)) continue;
+          if (idStr.isNotEmpty) seenIds.add(idStr);
+          result.add(item);
+        }
+      }
+    } catch (_) {}
+
+    return result;
+  }
+
+  // Builder para o Painel de Validações e Cupons com Abas
   Widget _buildRecentValidationsPanel(
       BuildContext context, Color cardBg, Color border, Color highlight) {
-    return FutureBuilder<ApiCallResponse>(
-      future: GetHistoricoRecenteCall.call(
-        partnerId: int.tryParse(_effectivePartnerId),
-      ),
+    return FutureBuilder<List<dynamic>>(
+      future: _fetchPartnerValidations(),
       builder: (context, snapshot) {
-        final List<dynamic> validations = [];
-        if (snapshot.hasData && snapshot.data!.succeeded) {
-          validations.addAll((snapshot.data!.jsonBody as List?) ?? []);
-        }
+        final allItems = snapshot.data ?? [];
+
+        // Filtro 1: Validados no Caixa (compras efetivamente faturadas)
+        final validados = allItems.where((item) {
+          final desc = getJsonField(item, r'''$.description''')?.toString() ?? '';
+          final isPoint = getJsonField(item, r'''$.is_point''') == true;
+          final rawVal = getJsonField(item, r'''$.qtd_point''') ??
+              getJsonField(item, r'''$.qtdPoint''') ??
+              getJsonField(item, r'''$.total_saving''') ??
+              getJsonField(item, r'''$.totalSaving''');
+          double? pVal;
+          if (rawVal is num) pVal = rawVal.toDouble();
+          else if (rawVal is String) pVal = double.tryParse(rawVal);
+          return desc.contains('Cupom validado') || isPoint || (pVal != null && pVal > 0);
+        }).toList();
+
+        // Filtro 2: Resgatados no App (cupons gerados no app aguardando compra)
+        final resgatados = allItems.where((item) {
+          final desc = getJsonField(item, r'''$.description''')?.toString() ?? '';
+          final isPoint = getJsonField(item, r'''$.is_point''') == true;
+          final rawVal = getJsonField(item, r'''$.qtd_point''') ??
+              getJsonField(item, r'''$.qtdPoint''') ??
+              getJsonField(item, r'''$.total_saving''') ??
+              getJsonField(item, r'''$.totalSaving''');
+          double? pVal;
+          if (rawVal is num) pVal = rawVal.toDouble();
+          else if (rawVal is String) pVal = double.tryParse(rawVal);
+          return desc.contains('Desconto resgatado') || (!isPoint && (pVal == null || pVal == 0));
+        }).toList();
+
+        final currentList = _selectedValidationTab == 0 ? validados : resgatados;
 
         return Material(
           color: Colors.transparent,
-          elevation: 3.0,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(
-                FlutterFlowTheme.of(context).designToken.radius.md),
-          ),
+          elevation: 0.0,
           child: Container(
-            height: 290.0,
+            height: 330.0,
             decoration: BoxDecoration(
               color: cardBg,
-              borderRadius: BorderRadius.circular(
-                  FlutterFlowTheme.of(context).designToken.radius.md),
+              borderRadius: BorderRadius.circular(16.0),
               border: Border.all(color: border),
+              boxShadow: const [
+                BoxShadow(
+                  color: Color(0x080F172A),
+                  blurRadius: 8.0,
+                  offset: Offset(0, 2.0),
+                ),
+              ],
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Header do Painel
+                // Header do Painel com Segmented Switcher
                 Container(
                   width: double.infinity,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF161616),
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(
-                          FlutterFlowTheme.of(context).designToken.radius.md),
-                      topRight: Radius.circular(
-                          FlutterFlowTheme.of(context).designToken.radius.md),
+                  decoration: const BoxDecoration(
+                    color: const Color(0xFFFAF7F2),
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(16.0),
+                      topRight: Radius.circular(16.0),
                     ),
-                    border: Border(bottom: BorderSide(color: border)),
+                    border: const Border(bottom: BorderSide(color: Color(0xFFC5BCA8))),
                   ),
-                  padding: EdgeInsets.symmetric(
-                      horizontal:
-                          FlutterFlowTheme.of(context).designToken.spacing.md,
-                      vertical: 14.0),
+                  padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 10.0),
                   child: Row(
                     children: [
-                      Icon(Icons.history_rounded, color: highlight, size: 18.0),
-                      const SizedBox(width: 8.0),
                       const Text(
-                        'Últimas Validações de Hoje',
+                        'Validações',
                         style: TextStyle(
-                          color: Colors.white,
+                          color: Color(0xFF0F172A),
                           fontWeight: FontWeight.bold,
                           fontSize: 14.0,
+                        ),
+                      ),
+                      const Spacer(),
+                      // Tab 0: Validados no Caixa
+                      InkWell(
+                        onTap: () => safeSetState(() => _selectedValidationTab = 0),
+                        borderRadius: BorderRadius.circular(20.0),
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 150),
+                          padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 4.5),
+                          decoration: BoxDecoration(
+                            color: _selectedValidationTab == 0
+                                ? const Color(0xFFECFDF5)
+                                : const Color(0xFFF8FAFC),
+                            borderRadius: BorderRadius.circular(20.0),
+                            border: Border.all(
+                              color: _selectedValidationTab == 0
+                                  ? const Color(0xFFA7F3D0)
+                                  : const Color(0xFFE2E8F0),
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.check_circle_rounded,
+                                size: 12.0,
+                                color: _selectedValidationTab == 0
+                                    ? const Color(0xFF047857)
+                                    : const Color(0xFF64748B),
+                              ),
+                              const SizedBox(width: 4.0),
+                              Text(
+                                'No Caixa (${validados.length})',
+                                style: TextStyle(
+                                  color: _selectedValidationTab == 0
+                                      ? const Color(0xFF047857)
+                                      : const Color(0xFF64748B),
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 11.0,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 6.0),
+                      // Tab 1: Resgatados no App
+                      InkWell(
+                        onTap: () => safeSetState(() => _selectedValidationTab = 1),
+                        borderRadius: BorderRadius.circular(20.0),
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 150),
+                          padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 4.5),
+                          decoration: BoxDecoration(
+                            color: _selectedValidationTab == 1
+                                ? const Color(0xFFFEF3C7)
+                                : const Color(0xFFF8FAFC),
+                            borderRadius: BorderRadius.circular(20.0),
+                            border: Border.all(
+                              color: _selectedValidationTab == 1
+                                  ? const Color(0xFFFDE68A)
+                                  : const Color(0xFFE2E8F0),
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.phone_iphone_rounded,
+                                size: 12.0,
+                                color: _selectedValidationTab == 1
+                                    ? const Color(0xFFB45309)
+                                    : const Color(0xFF64748B),
+                              ),
+                              const SizedBox(width: 4.0),
+                              Text(
+                                'No App (${resgatados.length})',
+                                style: TextStyle(
+                                  color: _selectedValidationTab == 1
+                                      ? const Color(0xFFB45309)
+                                      : const Color(0xFF64748B),
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 11.0,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ],
@@ -955,159 +1178,220 @@ class _DashboardParceiroWidgetState extends State<DashboardParceiroWidget> {
                 ),
                 // Lista de Itens
                 Expanded(
-                  child: validations.isEmpty
+                  child: currentList.isEmpty
                       ? Center(
                           child: Padding(
-                            padding: EdgeInsets.all(FlutterFlowTheme.of(context)
-                                .designToken
-                                .spacing
-                                .md),
+                            padding: const EdgeInsets.all(16.0),
                             child: Column(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                Icon(Icons.qr_code_scanner_rounded,
-                                    color: Colors.grey, size: 28.0),
-                                const SizedBox(height: 10.0),
-                                const Text(
-                                  'Nenhuma validação hoje',
-                                  style: TextStyle(
-                                      color: Colors.grey, fontSize: 13.0),
+                                Icon(
+                                  _selectedValidationTab == 0
+                                      ? Icons.receipt_long_outlined
+                                      : Icons.phone_iphone_rounded,
+                                  color: const Color(0xFF94A3B8),
+                                  size: 28.0,
+                                ),
+                                const SizedBox(height: 8.0),
+                                Text(
+                                  _selectedValidationTab == 0
+                                      ? 'Nenhuma validação registrada hoje'
+                                      : 'Nenhum cupom aguardando no app',
+                                  style: const TextStyle(
+                                    color: Color(0xFF64748B),
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 13.0,
+                                  ),
                                 ),
                                 const SizedBox(height: 4.0),
                                 Text(
-                                  'Valide o primeiro cupom de um cliente para começar',
+                                  _selectedValidationTab == 0
+                                      ? 'As compras validadas no caixa aparecerão aqui.'
+                                      : 'Quando clientes gerarem cupom no celular, aparecerão aqui.',
                                   textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                      color: Colors.grey.withOpacity(0.7),
-                                      fontSize: 11.0),
-                                ),
-                                const SizedBox(height: 12.0),
-                                InkWell(
-                                  onTap: () => context.pushNamed(
-                                      ValidarParceiroWidget.routeName),
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 14.0, vertical: 8.0),
-                                    decoration: BoxDecoration(
-                                      color: highlight.withOpacity(0.15),
-                                      borderRadius: BorderRadius.circular(20.0),
-                                      border: Border.all(
-                                          color: highlight.withOpacity(0.4)),
-                                    ),
-                                    child: Text(
-                                      'Ir para Validar',
-                                      style: TextStyle(
-                                        color: highlight,
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 12.0,
-                                      ),
-                                    ),
+                                  style: const TextStyle(
+                                    color: Color(0xFF94A3B8),
+                                    fontSize: 11.5,
                                   ),
                                 ),
                               ],
                             ),
                           ),
                         )
-                      : ListView.separated(
-                          padding: EdgeInsets.all(FlutterFlowTheme.of(context)
-                              .designToken
-                              .spacing
-                              .md),
-                          itemCount:
-                              validations.length > 4 ? 4 : validations.length,
-                          separatorBuilder: (context, index) =>
-                              Divider(color: border, height: 16.0),
-                          itemBuilder: (context, index) {
-                            final item = validations[index];
-                            final customerName =
-                                getJsonField(item, r'''$.customer.name''')
-                                        ?.toString() ??
-                                    getJsonField(item, r'''$.customer.cpf''')
-                                        ?.toString() ??
-                                    'Associado';
-                            final desc =
-                                getJsonField(item, r'''$.description''')?.toString() ?? '';
-                            String displaySubtitle = 'Benefício Validado';
-                            if (desc.contains('Desconto resgatado:')) {
-                              displaySubtitle = desc.replaceAll('Desconto resgatado:', '').trim();
-                            } else if (desc.contains('Cupom validado')) {
-                              displaySubtitle = 'Benefício Validado no Caixa';
-                            } else if (desc.isNotEmpty) {
-                              displaySubtitle = desc;
-                            }
+                      : Scrollbar(
+                          child: ListView.separated(
+                            padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 10.0),
+                            itemCount: currentList.length,
+                            separatorBuilder: (context, index) =>
+                                const Divider(color: Color(0xFFF1F5F9), height: 14.0),
+                            itemBuilder: (context, index) {
+                              final item = currentList[index];
+                              final customerName =
+                                  getJsonField(item, r"""$.customer.name""")
+                                          ?.toString() ??
+                                      getJsonField(item, r"""$.customer.cpf""")
+                                          ?.toString() ??
+                                      'Associado Procard';
+                              final desc =
+                                  getJsonField(item, r"""$.description""")?.toString() ?? '';
+                              String displaySubtitle = _selectedValidationTab == 0
+                                  ? 'Benefício Validado no Caixa'
+                                  : 'Cupom resgatado no App Procard';
+                              String? percentageDiscount;
+                              if (desc.contains('Desconto resgatado:')) {
+                                displaySubtitle = desc.replaceAll('Desconto resgatado:', '').trim();
+                              } else if (desc.contains('Cupom validado')) {
+                                displaySubtitle = 'Benefício Validado no Caixa';
+                              } else if (desc.toLowerCase().contains('desconto')) {
+                                final regMatch = RegExp(r'desconto:\s*(\d+)').firstMatch(desc);
+                                if (regMatch != null) {
+                                  percentageDiscount = '${regMatch.group(1)}% OFF';
+                                  displaySubtitle = 'Cupom de ${regMatch.group(1)}% de Desconto';
+                                }
+                              }
 
-                            final rawVal = getJsonField(item, r'''$.qtd_point''') ??
-                                getJsonField(item, r'''$.qtdPoint''') ??
-                                getJsonField(item, r'''$.total_saving''') ??
-                                getJsonField(item, r'''$.totalSaving''') ??
-                                getJsonField(item, r'''$.value''') ??
-                                getJsonField(item, r'''$.valorPagar''');
+                              final rawVal = getJsonField(item, r"""$.qtd_point""") ??
+                                  getJsonField(item, r"""$.qtdPoint""") ??
+                                  getJsonField(item, r"""$.total_saving""") ??
+                                  getJsonField(item, r"""$.totalSaving""") ??
+                                  getJsonField(item, r"""$.value""") ??
+                                  getJsonField(item, r"""$.valorPagar""");
 
-                            double? parsedVal;
-                            if (rawVal != null) {
-                              if (rawVal is num)
-                                parsedVal = rawVal.toDouble();
-                              else if (rawVal is String)
-                                parsedVal = double.tryParse(rawVal);
-                            }
-                            final formattedVal = parsedVal != null
-                                ? 'R\$ ' +
-                                    parsedVal
-                                        .toStringAsFixed(2)
-                                        .replaceAll('.', ',')
-                                : 'R\$ 0,00';
+                              double? parsedVal;
+                              if (rawVal != null) {
+                                if (rawVal is num) {
+                                  parsedVal = rawVal.toDouble();
+                                } else if (rawVal is String) {
+                                  parsedVal = double.tryParse(rawVal);
+                                }
+                              }
 
-                            return Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Expanded(
-                                  child: Row(
-                                    children: [
-                                      const Icon(
-                                          Icons.check_circle_outline_rounded,
-                                          color: Color(0xFF00C853),
-                                          size: 16.0),
-                                      const SizedBox(width: 10.0),
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              customerName,
-                                              overflow: TextOverflow.ellipsis,
-                                              maxLines: 1,
-                                              style: const TextStyle(
-                                                  color: Colors.white,
+                              return Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Expanded(
+                                    child: Row(
+                                      children: [
+                                        Container(
+                                          width: 28.0,
+                                          height: 28.0,
+                                          decoration: BoxDecoration(
+                                            color: _selectedValidationTab == 0
+                                                ? const Color(0xFFECFDF5)
+                                                : const Color(0xFFFEF3C7),
+                                            shape: BoxShape.circle,
+                                          ),
+                                          child: Icon(
+                                            _selectedValidationTab == 0
+                                                ? Icons.check_circle_rounded
+                                                : Icons.phone_iphone_rounded,
+                                            color: _selectedValidationTab == 0
+                                                ? const Color(0xFF059669)
+                                                : const Color(0xFFD97706),
+                                            size: 16.0,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 10.0),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                customerName,
+                                                overflow: TextOverflow.ellipsis,
+                                                maxLines: 1,
+                                                style: const TextStyle(
+                                                  color: Color(0xFF0F172A),
                                                   fontWeight: FontWeight.bold,
-                                                  fontSize: 13.0),
-                                            ),
-                                            Text(
-                                              displaySubtitle,
-                                              overflow: TextOverflow.ellipsis,
-                                              maxLines: 1,
-                                              style: const TextStyle(
-                                                  color: Colors.grey,
-                                                  fontSize: 11.0),
-                                            ),
-                                          ],
+                                                  fontSize: 13.0,
+                                                ),
+                                              ),
+                                              Text(
+                                                displaySubtitle,
+                                                overflow: TextOverflow.ellipsis,
+                                                maxLines: 1,
+                                                style: const TextStyle(
+                                                  color: Color(0xFF64748B),
+                                                  fontSize: 11.0,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8.0),
+                                  if (_selectedValidationTab == 0)
+                                    Text(
+                                      (parsedVal != null && parsedVal > 0)
+                                          ? 'R\$ ' +
+                                              parsedVal
+                                                  .toStringAsFixed(2)
+                                                  .replaceAll('.', ',')
+                                          : (percentageDiscount ?? 'Validado'),
+                                      style: const TextStyle(
+                                        color: Color(0xFF0F172A),
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 13.0,
+                                      ),
+                                    )
+                                  else
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 3.0),
+                                      decoration: BoxDecoration(
+                                        color: const Color(0xFFFEF3C7),
+                                        borderRadius: BorderRadius.circular(12.0),
+                                        border: Border.all(color: const Color(0xFFFDE68A)),
+                                      ),
+                                      child: Text(
+                                        percentageDiscount ?? 'Aguardando no Caixa',
+                                        style: const TextStyle(
+                                          color: Color(0xFFB45309),
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 10.5,
                                         ),
                                       ),
-                                    ],
-                                  ),
-                                ),
-                                const SizedBox(width: 8.0),
-                                Text(
-                                  formattedVal,
-                                  style: TextStyle(
-                                      color: highlight,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 13.0),
-                                ),
-                              ],
-                            );
-                          },
+                                    ),
+                                ],
+                              );
+                            },
+                          ),
                         ),
+                ),
+                // Rodapé com link para histórico completo
+                InkWell(
+                  onTap: () =>
+                      context.pushNamed(ValidarParceiroWidget.routeName),
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(vertical: 9.0),
+                    decoration: const BoxDecoration(
+                      color: Color(0xFFF8FAFC),
+                      borderRadius: BorderRadius.only(
+                        bottomLeft: Radius.circular(16.0),
+                        bottomRight: Radius.circular(16.0),
+                      ),
+                      border: Border(top: BorderSide(color: Color(0xFFE2E8F0))),
+                    ),
+                    child: const Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          'Ver histórico completo',
+                          style: TextStyle(
+                            color: Color(0xFFD97706),
+                            fontWeight: FontWeight.w600,
+                            fontSize: 12.0,
+                          ),
+                        ),
+                        SizedBox(width: 6.0),
+                        Icon(Icons.arrow_forward_rounded,
+                            size: 14.0, color: Color(0xFFD97706)),
+                      ],
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -1122,7 +1406,7 @@ class _DashboardParceiroWidgetState extends State<DashboardParceiroWidget> {
       BuildContext context, Color cardBg, Color border, Color highlight) {
     return FutureBuilder<ApiCallResponse>(
       future: ObterCuponsDoParceiroCall.call(
-        partnerId: _effectivePartnerId,
+        partnerId: _effectiveCustomerId.isNotEmpty ? _effectiveCustomerId : _effectivePartnerId,
       ),
       builder: (context, snapshot) {
         final List<dynamic> promos = [];
@@ -1138,7 +1422,7 @@ class _DashboardParceiroWidgetState extends State<DashboardParceiroWidget> {
                 FlutterFlowTheme.of(context).designToken.radius.md),
           ),
           child: Container(
-            height: 290.0,
+            height: 330.0,
             decoration: BoxDecoration(
               color: cardBg,
               borderRadius: BorderRadius.circular(
@@ -1151,20 +1435,15 @@ class _DashboardParceiroWidgetState extends State<DashboardParceiroWidget> {
                 // Header do Painel
                 Container(
                   width: double.infinity,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF161616),
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(
-                          FlutterFlowTheme.of(context).designToken.radius.md),
-                      topRight: Radius.circular(
-                          FlutterFlowTheme.of(context).designToken.radius.md),
+                  decoration: const BoxDecoration(
+                    color: const Color(0xFFFAF7F2),
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(16.0),
+                      topRight: Radius.circular(16.0),
                     ),
-                    border: Border(bottom: BorderSide(color: border)),
+                    border: const Border(bottom: BorderSide(color: Color(0xFFC5BCA8))),
                   ),
-                  padding: EdgeInsets.symmetric(
-                      horizontal:
-                          FlutterFlowTheme.of(context).designToken.spacing.md,
-                      vertical: 14.0),
+                  padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 11.0),
                   child: Row(
                     children: [
                       Icon(Icons.local_offer_rounded,
@@ -1173,7 +1452,7 @@ class _DashboardParceiroWidgetState extends State<DashboardParceiroWidget> {
                       const Text(
                         'Promoções em Destaque',
                         style: TextStyle(
-                          color: Colors.white,
+                          color: Color(0xFF0F172A),
                           fontWeight: FontWeight.bold,
                           fontSize: 14.0,
                         ),
@@ -1197,22 +1476,22 @@ class _DashboardParceiroWidgetState extends State<DashboardParceiroWidget> {
                           padding: const EdgeInsets.symmetric(
                               horizontal: 10.0, vertical: 5.0),
                           decoration: BoxDecoration(
-                            color: highlight,
+                            color: const Color(0xFFA69E89), // Arms Pass Khaki Sand
                             borderRadius: BorderRadius.circular(6.0),
                           ),
-                          child: Row(
+                          child: const Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Icon(
                                 Icons.add_rounded,
-                                size: 16.0,
-                                color: FlutterFlowTheme.of(context).primary,
+                                size: 15.0,
+                                color: Color(0xFF121212),
                               ),
-                              const SizedBox(width: 4.0),
+                              SizedBox(width: 4.0),
                               Text(
                                 'Nova Promoção',
                                 style: TextStyle(
-                                  color: FlutterFlowTheme.of(context).primary,
+                                  color: Color(0xFF121212),
                                   fontWeight: FontWeight.bold,
                                   fontSize: 11.5,
                                 ),
@@ -1337,7 +1616,7 @@ class _DashboardParceiroWidgetState extends State<DashboardParceiroWidget> {
                                       Text(
                                         cleanDesc.isNotEmpty ? cleanDesc : 'Desconto',
                                         style: const TextStyle(
-                                            color: Colors.white,
+                                            color: Color(0xFF0F172A),
                                             fontWeight: FontWeight.bold,
                                             fontSize: 13.0),
                                       ),
@@ -1377,19 +1656,19 @@ class _DashboardParceiroWidgetState extends State<DashboardParceiroWidget> {
                                                 padding: const EdgeInsets.symmetric(
                                                     horizontal: 5.0, vertical: 1.0),
                                                 decoration: BoxDecoration(
-                                                  color: const Color(0x20FFFFFF),
+                                                  color: const Color(0xFFEFECE4),
                                                   borderRadius: BorderRadius.circular(3.0),
-                                                  border: Border.all(color: Colors.white24, width: 0.6),
+                                                  border: Border.all(color: const Color(0xFFC5BCA8), width: 0.6),
                                                 ),
                                                 child: Row(
                                                   mainAxisSize: MainAxisSize.min,
                                                   children: [
-                                                    const Icon(Icons.inventory_2_outlined, color: Colors.white70, size: 9.0),
+                                                    const Icon(Icons.inventory_2_outlined, color: Color(0xFF524B3E), size: 9.0),
                                                     const SizedBox(width: 2.0),
                                                     Text(
                                                       'Estoque: $limiteStr un.',
                                                       style: const TextStyle(
-                                                        color: Colors.white70,
+                                                        color: Color(0xFF524B3E),
                                                         fontSize: 9.5,
                                                         fontWeight: FontWeight.w600,
                                                       ),
@@ -1473,25 +1752,26 @@ class _DashboardParceiroWidgetState extends State<DashboardParceiroWidget> {
   // não existirem, o painel avisa isso em vez de mostrar um valor falso).
   Widget _buildInsightsPanel(
       BuildContext context, Color cardBg, Color border, Color highlight) {
-    return FutureBuilder<ApiCallResponse>(
-      future: GetHistoricoRecenteCall.call(
-        partnerId: int.tryParse(_effectivePartnerId),
-      ),
+    return FutureBuilder<List<dynamic>>(
+      future: _fetchPartnerValidations(),
       builder: (context, snapshot) {
-        final List<dynamic> validations = [];
-        if (snapshot.hasData && snapshot.data!.succeeded) {
-          validations.addAll((snapshot.data!.jsonBody as List?) ?? []);
-        }
+        final validations = snapshot.data ?? [];
 
-        // Produto/benefício mais resgatado no período — calculável hoje com
-        // os dados que já chegam em GetHistoricoRecenteCall.
+        // Produto/benefício mais resgatado no período
         String? topProduct;
         var topProductCount = 0;
         if (validations.isNotEmpty) {
           final counts = <String, int>{};
           for (final item in validations) {
-            final name =
-                getJsonField(item, r'''$.product.name''')?.toString();
+            var name = getJsonField(item, r'''$.product.name''')?.toString();
+            if (name == null || name.isEmpty) {
+              final desc = getJsonField(item, r'''$.description''')?.toString() ?? '';
+              if (desc.toLowerCase().contains('desconto')) {
+                name = 'Desconto Especial';
+              } else if (desc.isNotEmpty) {
+                name = 'Cupom de Benefício';
+              }
+            }
             if (name == null || name.isEmpty) continue;
             counts[name] = (counts[name] ?? 0) + 1;
           }
@@ -1503,12 +1783,11 @@ class _DashboardParceiroWidgetState extends State<DashboardParceiroWidget> {
           });
         }
 
-        // Horário de pico de validações — precisa de um campo de data/hora
-        // por item. Tenta alguns nomes candidatos; se nenhum vier
-        // preenchido, mostramos que o dado ainda não está disponível.
+        // Horário de pico de validações
         final hourCounts = <int, int>{};
         for (final item in validations) {
           final rawDate = _firstJsonField(item, [
+            r'''$.data_point''',
             r'''$.date''',
             r'''$.data''',
             r'''$.dataHora''',
@@ -1521,8 +1800,17 @@ class _DashboardParceiroWidgetState extends State<DashboardParceiroWidget> {
           ]);
           if (rawDate == null) continue;
           final parsed = DateTime.tryParse(rawDate.toString());
-          if (parsed == null) continue;
-          hourCounts[parsed.hour] = (hourCounts[parsed.hour] ?? 0) + 1;
+          if (parsed != null) {
+            hourCounts[parsed.hour] = (hourCounts[parsed.hour] ?? 0) + 1;
+          } else {
+            final match = RegExp(r'(\d{2}):(\d{2})').firstMatch(rawDate.toString());
+            if (match != null) {
+              final h = int.tryParse(match.group(1)!);
+              if (h != null) {
+                hourCounts[h] = (hourCounts[h] ?? 0) + 1;
+              }
+            }
+          }
         }
         int? peakHour;
         var peakHourCount = 0;
@@ -1533,8 +1821,7 @@ class _DashboardParceiroWidgetState extends State<DashboardParceiroWidget> {
           }
         });
 
-        // Quem mais validou — precisa de um campo de operador/atendente por
-        // item, que também ainda não foi confirmado com o backend.
+        // Quem mais validou
         final validatorCounts = <String, int>{};
         for (final item in validations) {
           final rawName = _firstJsonField(item, [
@@ -1546,6 +1833,7 @@ class _DashboardParceiroWidgetState extends State<DashboardParceiroWidget> {
             r'''$.validadoPor''',
             r'''$.validated_by''',
             r'''$.funcionario.name''',
+            r'''$.customer.name''',
           ]);
           final name = rawName?.toString();
           if (name == null || name.isEmpty) continue;
@@ -1568,7 +1856,7 @@ class _DashboardParceiroWidgetState extends State<DashboardParceiroWidget> {
                 FlutterFlowTheme.of(context).designToken.radius.md),
           ),
           child: Container(
-            height: 290.0,
+            height: 330.0,
             decoration: BoxDecoration(
               color: cardBg,
               borderRadius: BorderRadius.circular(
@@ -1581,20 +1869,15 @@ class _DashboardParceiroWidgetState extends State<DashboardParceiroWidget> {
                 // Header do Painel
                 Container(
                   width: double.infinity,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF161616),
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(
-                          FlutterFlowTheme.of(context).designToken.radius.md),
-                      topRight: Radius.circular(
-                          FlutterFlowTheme.of(context).designToken.radius.md),
+                  decoration: const BoxDecoration(
+                    color: const Color(0xFFFAF7F2),
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(16.0),
+                      topRight: Radius.circular(16.0),
                     ),
-                    border: Border(bottom: BorderSide(color: border)),
+                    border: const Border(bottom: BorderSide(color: Color(0xFFC5BCA8))),
                   ),
-                  padding: EdgeInsets.symmetric(
-                      horizontal:
-                          FlutterFlowTheme.of(context).designToken.spacing.md,
-                      vertical: 14.0),
+                  padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 14.0),
                   child: Row(
                     children: [
                       Icon(Icons.query_stats_rounded,
@@ -1603,7 +1886,7 @@ class _DashboardParceiroWidgetState extends State<DashboardParceiroWidget> {
                       const Text(
                         'Destaques Operacionais',
                         style: TextStyle(
-                          color: Colors.white,
+                          color: Color(0xFF0F172A),
                           fontWeight: FontWeight.bold,
                           fontSize: 14.0,
                         ),
@@ -1677,7 +1960,7 @@ class _DashboardParceiroWidgetState extends State<DashboardParceiroWidget> {
               children: [
                 Text(
                   label,
-                  style: const TextStyle(color: Colors.grey, fontSize: 11.0),
+                  style: const TextStyle(color: Color(0xFF64748B), fontSize: 11.5),
                 ),
                 const SizedBox(height: 2.0),
                 Text(
@@ -1686,8 +1969,8 @@ class _DashboardParceiroWidgetState extends State<DashboardParceiroWidget> {
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     color: value != null
-                        ? Colors.white
-                        : Colors.grey.withOpacity(0.35),
+                        ? const Color(0xFF0F172A)
+                        : const Color(0xFF94A3B8),
                     fontWeight:
                         value != null ? FontWeight.bold : FontWeight.normal,
                     fontSize: 13.0,

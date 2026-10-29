@@ -3,6 +3,8 @@
   "version": "1.0.0",
   "description": "Arms Pass Web Application",
   "scripts": {
+    "dev": "flutter run -d chrome",
+    "start": "flutter run -d chrome",
     "build": "./build.sh"
   }
 }

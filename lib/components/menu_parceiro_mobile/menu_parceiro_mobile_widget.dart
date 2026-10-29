@@ -3,6 +3,7 @@ import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
 import 'dart:ui';
+import '/components/modal_alterar_senha_parceiro/modal_alterar_senha_parceiro_widget.dart';
 import '/index.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
@@ -354,6 +355,60 @@ class _MenuParceiroMobileWidgetState extends State<MenuParceiroMobileWidget> {
                                           .bodyMedium
                                           .fontStyle,
                                     ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                InkWell(
+                  splashColor: Colors.transparent,
+                  focusColor: Colors.transparent,
+                  hoverColor: Colors.transparent,
+                  highlightColor: Colors.transparent,
+                  onTap: () async {
+                    Navigator.pop(context);
+                    await showDialog(
+                      context: context,
+                      builder: (dialogContext) => const ModalAlterarSenhaParceiroWidget(),
+                    );
+                  },
+                  child: Container(
+                    width: MediaQuery.sizeOf(context).width * 0.65,
+                    height: 50.0,
+                    decoration: BoxDecoration(
+                      color: FlutterFlowTheme.of(context).primary,
+                      borderRadius: BorderRadius.circular(6.0),
+                      border: Border.all(
+                        color: const Color(0xFFA49C88).withValues(alpha: 0.4),
+                        width: 1.0,
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.max,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(
+                          Icons.lock_outline_rounded,
+                          color: Color(0xFFA49C88),
+                          size: 24.0,
+                        ),
+                        Align(
+                          alignment: const AlignmentDirectional(0.0, 0.0),
+                          child: Container(
+                            width: 100.0,
+                            decoration: const BoxDecoration(),
+                            child: Padding(
+                              padding: const EdgeInsetsDirectional.fromSTEB(10.0, 0.0, 0.0, 0.0),
+                              child: Text(
+                                'Alterar Senha',
+                                style: FlutterFlowTheme.of(context).bodyMedium.override(
+                                  font: GoogleFonts.readexPro(),
+                                  color: const Color(0xFFA49C88),
+                                  fontWeight: FontWeight.w600,
+                                ),
                               ),
                             ),
                           ),

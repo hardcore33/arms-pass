@@ -101,11 +101,11 @@ class _ModalSolicitarBannerWidgetState
 
   @override
   Widget build(BuildContext context) {
-    // Cores explícitas Dark Premium para evitar conflito com tema Light do FlutterFlow
-    final cardBgColor = const Color(0xFF1E1E1E);
-    final inputBgColor = const Color(0xFF121212);
-    final borderColor = const Color(0xFF2C2C2C);
-    final highlightColor = FlutterFlowTheme.of(context).secondary;
+    // Cores alinhadas à identidade Arms Pass
+    final cardBgColor = const Color(0xFFFAF7F2);
+    final inputBgColor = const Color(0xFFEFECE4);
+    final borderColor = const Color(0xFFC5BCA8);
+    final highlightColor = const Color(0xFF8C8268);
 
     return Dialog(
       backgroundColor: Colors.transparent,
@@ -143,7 +143,7 @@ class _ModalSolicitarBannerWidgetState
                             font: GoogleFonts.openSans(
                               fontWeight: FontWeight.bold,
                             ),
-                            color: Colors.white,
+                            color: const Color(0xFF0F172A),
                             fontSize: 22.0,
                           ),
                         ),
@@ -156,14 +156,14 @@ class _ModalSolicitarBannerWidgetState
                           ),
                         ),
                         const SizedBox(height: 20.0),
-                        // Box Informativo de Recomendações (Tema Escuro Integrado)
+                        // Box Informativo de Recomendações
                         Container(
                           width: double.infinity,
                           decoration: BoxDecoration(
                             color: inputBgColor,
                             borderRadius: BorderRadius.circular(10.0),
                             border: Border.all(
-                              color: highlightColor.withOpacity(0.3),
+                              color: const Color(0xFFC5BCA8),
                               width: 1.0,
                             ),
                           ),
@@ -192,7 +192,7 @@ class _ModalSolicitarBannerWidgetState
                                 '• Formato de arquivo: PNG ou JPG em alta definição\n'
                                 '• Layout: Evite excesso de textos e garanta boa legibilidade',
                                 style: TextStyle(
-                                  color: Colors.white70,
+                                  color: Color(0xFF524B3E),
                                   fontSize: 12.0,
                                   height: 1.6,
                                 ),
@@ -236,7 +236,7 @@ class _ModalSolicitarBannerWidgetState
                             fillColor: inputBgColor,
                             contentPadding: const EdgeInsets.all(16.0),
                           ),
-                          style: const TextStyle(color: Colors.white),
+                          style: const TextStyle(color: Color(0xFF0F172A)),
                           validator: _model.urlTextControllerValidator.asValidator(context),
                         ),
                         const Spacer(),
@@ -252,8 +252,8 @@ class _ModalSolicitarBannerWidgetState
                                 height: 45.0,
                                 padding: EdgeInsets.zero,
                                 color: Colors.transparent,
-                                textStyle: TextStyle(
-                                  color: FlutterFlowTheme.of(context).secondaryText,
+                                textStyle: const TextStyle(
+                                  color: Color(0xFF64748B),
                                   fontWeight: FontWeight.w600,
                                 ),
                                 elevation: 0.0,
@@ -273,8 +273,8 @@ class _ModalSolicitarBannerWidgetState
                                 height: 45.0,
                                 padding: EdgeInsets.zero,
                                 color: highlightColor,
-                                textStyle: TextStyle(
-                                  color: FlutterFlowTheme.of(context).primary,
+                                textStyle: GoogleFonts.readexPro(
+                                  color: const Color(0xFFFAF7F2),
                                   fontWeight: FontWeight.bold,
                                 ),
                                 elevation: 2.0,

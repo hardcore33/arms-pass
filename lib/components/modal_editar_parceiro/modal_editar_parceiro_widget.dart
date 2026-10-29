@@ -187,9 +187,15 @@ class _ModalEditarParceiroWidgetState extends State<ModalEditarParceiroWidget> {
     _model.cidadeTextController ??= TextEditingController(text: _cleanNull(getJsonField(partner, r'''$.city''')));
     _model.cidadeFocusNode ??= FocusNode();
 
-    _model.phoneTextController ??= TextEditingController(text: _cleanNull(getJsonField(partner, r'''$.number''')));
-    _model.phoneFocusNode ??= FocusNode();
     _model.phoneMask = MaskTextInputFormatter(mask: '(##) # ####-####');
+    final rawNumber = _cleanNull(getJsonField(partner, r'''$.number''')).isNotEmpty
+        ? _cleanNull(getJsonField(partner, r'''$.number'''))
+        : _cleanNull(getJsonField(widget.dados, r'''$.phone'''));
+    final initialNumber = rawNumber.isNotEmpty && !rawNumber.contains('(') && rawNumber.length >= 10
+        ? _model.phoneMask.maskText(rawNumber)
+        : rawNumber;
+    _model.phoneTextController ??= TextEditingController(text: initialNumber);
+    _model.phoneFocusNode ??= FocusNode();
 
     _model.emailTextController ??= TextEditingController(text: _cleanNull(getJsonField(partner, r'''$.email''')));
     _model.emailFocusNode ??= FocusNode();
@@ -200,17 +206,31 @@ class _ModalEditarParceiroWidgetState extends State<ModalEditarParceiroWidget> {
     _model.nomeRepTextController ??= TextEditingController(text: _cleanNull(getJsonField(partner, r'''$.representative_name''')));
     _model.nomeRepFocusNode ??= FocusNode();
 
-    _model.rgTextController ??= TextEditingController(text: _cleanNull(getJsonField(partner, r'''$.rg''')));
-    _model.rgFocusNode ??= FocusNode();
     _model.rgMask = MaskTextInputFormatter(mask: '##.###.###-#');
+    final rawRg = _cleanNull(getJsonField(partner, r'''$.representative_rg''')).isNotEmpty
+        ? _cleanNull(getJsonField(partner, r'''$.representative_rg'''))
+        : _cleanNull(getJsonField(partner, r'''$.rg'''));
+    _model.rgTextController ??= TextEditingController(text: rawRg);
+    _model.rgFocusNode ??= FocusNode();
 
-    _model.cpfTextController ??= TextEditingController(text: _cleanNull(getJsonField(partner, r'''$.cpf''')));
-    _model.cpfFocusNode ??= FocusNode();
     _model.cpfMask = MaskTextInputFormatter(mask: '###.###.###-##');
+    final rawCpf = _cleanNull(getJsonField(partner, r'''$.representative_cpf''')).isNotEmpty
+        ? _cleanNull(getJsonField(partner, r'''$.representative_cpf'''))
+        : (_cleanNull(getJsonField(partner, r'''$.cpf''')).isNotEmpty
+            ? _cleanNull(getJsonField(partner, r'''$.cpf'''))
+            : _cleanNull(getJsonField(widget.dados, r'''$.cpf''')));
+    _model.cpfTextController ??= TextEditingController(text: rawCpf);
+    _model.cpfFocusNode ??= FocusNode();
 
-    _model.phoneRepTextController ??= TextEditingController(text: _cleanNull(getJsonField(partner, r'''$.representative_phone''')));
-    _model.phoneRepFocusNode ??= FocusNode();
     _model.phoneRepMask = MaskTextInputFormatter(mask: '(##) # ####-####');
+    final rawRepPhone = _cleanNull(getJsonField(partner, r'''$.representative_number''')).isNotEmpty
+        ? _cleanNull(getJsonField(partner, r'''$.representative_number'''))
+        : _cleanNull(getJsonField(partner, r'''$.representative_phone'''));
+    final initialRepPhone = rawRepPhone.isNotEmpty && !rawRepPhone.contains('(') && rawRepPhone.length >= 10
+        ? _model.phoneRepMask.maskText(rawRepPhone)
+        : rawRepPhone;
+    _model.phoneRepTextController ??= TextEditingController(text: initialRepPhone);
+    _model.phoneRepFocusNode ??= FocusNode();
 
     _model.mailRepTextController ??= TextEditingController(
       text: _cleanNull(getJsonField(widget.dados, r'''$.user.login''')).isNotEmpty
@@ -219,7 +239,8 @@ class _ModalEditarParceiroWidgetState extends State<ModalEditarParceiroWidget> {
     );
     _model.mailRepFocusNode ??= FocusNode();
 
-    // Não carregar 'null' literal na senha
+    // Em edição de parceiro, o campo de senha NUNCA deve ser preenchido com o hash Bcrypt.
+    // Deixa em branco: se o admin digitar nova senha, ela é atualizada; se deixar em branco, a senha atual é preservada.
     _model.passRepTextController ??= TextEditingController(text: '');
     _model.passRepFocusNode ??= FocusNode();
 
@@ -347,10 +368,19 @@ class _ModalEditarParceiroWidgetState extends State<ModalEditarParceiroWidget> {
           ? _model.fileUrl
           : _cleanNull(getJsonField(widget.dados, r'''$.partner.contract'''));
 
+      final typedPass = _model.passRepTextController.text.trim();
+      // Envia nova senha apenas se o admin digitou uma nova (ignora se vazio ou se for hash Bcrypt)
+      final String? passToSend = (typedPass.isNotEmpty && !typedPass.startsWith(r'$2a$') && !typedPass.startsWith(r'$2b$'))
+          ? typedPass
+          : null;
+      final loginEmail = _model.mailRepTextController.text.trim().isNotEmpty
+          ? _model.mailRepTextController.text.trim()
+          : _model.emailTextController.text.trim();
+
       _model.apiResultjex = await AtualizarParceiroCall.call(
         idTenant: functions.convertToInt(FFAppConstants.tenantId),
-        email: _model.emailTextController.text,
-        senha: _model.passRepTextController.text.isNotEmpty ? _model.passRepTextController.text : null,
+        email: loginEmail,
+        senha: passToSend,
         razao: _model.razaoTextController.text,
         cnpj: _model.cnpjTextController.text,
         cep: _model.cepTextController.text,
@@ -366,7 +396,7 @@ class _ModalEditarParceiroWidgetState extends State<ModalEditarParceiroWidget> {
         state: _model.estadoValue,
         cpf: _model.cpfTextController.text,
         rg: _model.rgTextController.text,
-        emailRepresentante: _model.mailRepTextController.text,
+        emailRepresentante: _model.mailRepTextController.text.trim(),
         fantasia: _model.nomeTextController.text,
         idSegmento: _model.segmentoId?.toString(),
         proposal: _model.proposalTextController?.text.trim().isNotEmpty ?? false
@@ -1061,9 +1091,9 @@ class _ModalEditarParceiroWidgetState extends State<ModalEditarParceiroWidget> {
                                     focusNode: _model.passRepFocusNode,
                                     obscureText: _senhaOculta,
                                     decoration: _buildInputDecoration(
-                                      'Nova Senha (Opcional)',
+                                      'Nova Senha (opcional)',
                                       theme,
-                                      hint: 'Deixe em branco para manter',
+                                      hint: 'Deixe em branco p/ manter',
                                       suffixIcon: IconButton(
                                         icon: Icon(
                                           _senhaOculta ? Icons.visibility_off_outlined : Icons.visibility_outlined,

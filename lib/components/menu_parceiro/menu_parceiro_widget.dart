@@ -3,6 +3,7 @@ import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
 import 'dart:ui';
+import '/components/modal_alterar_senha_parceiro/modal_alterar_senha_parceiro_widget.dart';
 import '/index.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
@@ -50,30 +51,22 @@ class _MenuParceiroWidgetState extends State<MenuParceiroWidget> {
     required bool isActive,
     required VoidCallback onTap,
   }) {
-    final theme = FlutterFlowTheme.of(context);
     final isCollapsed = FFAppState().sidebarCollapsed;
 
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(8.0),
-      hoverColor:
-          isActive ? Colors.transparent : theme.primary.withValues(alpha: 0.12),
-      splashColor: theme.primary.withValues(alpha: 0.2),
+      hoverColor: isActive ? Colors.transparent : const Color(0xFFF8FAFC),
+      splashColor: const Color(0x15D97706),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 150),
         width: double.infinity,
         height: 48.0,
         decoration: BoxDecoration(
-          color: isActive ? theme.secondaryBackground : Colors.transparent,
+          color: isActive ? const Color(0xFFFEF3C7) : Colors.transparent,
           borderRadius: BorderRadius.circular(8.0),
-          boxShadow: isActive
-              ? [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.08),
-                    blurRadius: 4,
-                    offset: const Offset(0, 2),
-                  )
-                ]
+          border: isActive
+              ? Border.all(color: const Color(0xFFFDE68A), width: 1.0)
               : null,
         ),
         child: Row(
@@ -83,10 +76,10 @@ class _MenuParceiroWidgetState extends State<MenuParceiroWidget> {
           children: [
             if (!isCollapsed) ...[
               Container(
-                width: 4.0,
-                height: 24.0,
+                width: 3.5,
+                height: 22.0,
                 decoration: BoxDecoration(
-                  color: isActive ? theme.secondary : Colors.transparent,
+                  color: isActive ? const Color(0xFFD97706) : Colors.transparent,
                   borderRadius: BorderRadius.circular(2.0),
                 ),
               ),
@@ -96,8 +89,8 @@ class _MenuParceiroWidgetState extends State<MenuParceiroWidget> {
               icon,
               size: 20.0,
               color: isActive
-                  ? theme.primary
-                  : theme.primaryText.withValues(alpha: 0.85),
+                  ? const Color(0xFFD97706)
+                  : const Color(0xFF64748B),
             ),
             if (!isCollapsed) ...[
               const SizedBox(width: 10.0),
@@ -106,13 +99,12 @@ class _MenuParceiroWidgetState extends State<MenuParceiroWidget> {
                   title,
                   overflow: TextOverflow.ellipsis,
                   maxLines: 1,
-                  style: theme.bodyMedium.override(
-                    fontFamily: 'Open Sans',
+                  style: GoogleFonts.openSans(
                     fontSize: 14.0,
                     fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
                     color: isActive
-                        ? theme.primary
-                        : theme.primaryText.withValues(alpha: 0.85),
+                        ? const Color(0xFF0F172A)
+                        : const Color(0xFF475569),
                   ),
                 ),
               ),
@@ -167,7 +159,7 @@ class _MenuParceiroWidgetState extends State<MenuParceiroWidget> {
                       isCollapsed
                           ? Icons.chevron_right_rounded
                           : Icons.chevron_left_rounded,
-                      color: theme.primary,
+                      color: const Color(0xFF64748B),
                       size: 24.0,
                     ),
                   ),
@@ -175,9 +167,9 @@ class _MenuParceiroWidgetState extends State<MenuParceiroWidget> {
               ],
             ),
           ),
-          Divider(
-            thickness: 2.0,
-            color: theme.primary,
+          const Divider(
+            thickness: 1.0,
+            color: Color(0xFFC5BCA8),
           ),
           const SizedBox(height: 15.0),
           Expanded(
@@ -296,61 +288,114 @@ class _MenuParceiroWidgetState extends State<MenuParceiroWidget> {
             ),
           ),
           Padding(
-            padding: const EdgeInsetsDirectional.fromSTEB(0.0, 4.0, 0.0, 15.0),
-            child: InkWell(
-              splashColor: Colors.transparent,
-              focusColor: Colors.transparent,
-              hoverColor: Colors.transparent,
-              highlightColor: Colors.transparent,
-              onTap: () async {
-                GoRouter.of(context).prepareAuthEvent();
-                await authManager.signOut();
-                GoRouter.of(context).clearRedirectLocation();
-
-                context.goNamedAuth(LoginWidget.routeName, context.mounted);
-              },
-              child: Container(
-                width: double.infinity,
-                height: 55.0,
-                decoration: BoxDecoration(
-                  color: valueOrDefault<Color>(
-                    FFAppState().indexPage != 10
-                        ? theme.primary
-                        : theme.secondaryBackground,
-                    theme.primary,
-                  ),
-                  borderRadius: BorderRadius.circular(8.0),
-                ),
-                child: Row(
-                  mainAxisAlignment: isCollapsed
-                      ? MainAxisAlignment.center
-                      : MainAxisAlignment.start,
-                  children: [
-                    if (!isCollapsed)
-                      const SizedBox(width: 24.0),
-                    const Icon(
-                      Icons.logout,
-                      color: Color(0xFFE57373),
+            padding: const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 6.0),
+            child: Tooltip(
+              message: isCollapsed ? 'Alterar Senha' : '',
+              child: InkWell(
+                splashColor: Colors.transparent,
+                focusColor: Colors.transparent,
+                hoverColor: const Color(0xFFF1F5F9),
+                highlightColor: Colors.transparent,
+                borderRadius: BorderRadius.circular(8.0),
+                onTap: () async {
+                  await showDialog(
+                    context: context,
+                    builder: (dialogContext) => const ModalAlterarSenhaParceiroWidget(),
+                  );
+                },
+                child: Container(
+                  width: double.infinity,
+                  height: 44.0,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFEFECE4),
+                    borderRadius: BorderRadius.circular(8.0),
+                    border: Border.all(
+                      color: const Color(0xFFE2E8F0),
+                      width: 1.0,
                     ),
-                    if (!isCollapsed)
-                      Padding(
-                        padding: const EdgeInsetsDirectional.fromSTEB(8.0, 0.0, 0.0, 0.0),
-                        child: Text(
-                          'Sair',
-                          style: theme.bodyMedium.override(
-                            font: GoogleFonts.openSans(
-                              fontWeight: FontWeight.w500,
-                              fontStyle: theme.bodyMedium.fontStyle,
+                  ),
+                  child: Row(
+                    mainAxisAlignment: isCollapsed
+                        ? MainAxisAlignment.center
+                        : MainAxisAlignment.start,
+                    children: [
+                      if (!isCollapsed) const SizedBox(width: 18.0),
+                      const Icon(
+                        Icons.lock_outline_rounded,
+                        color: Color(0xFF0F172A),
+                        size: 20.0,
+                      ),
+                      if (!isCollapsed)
+                        Padding(
+                          padding: const EdgeInsetsDirectional.fromSTEB(10.0, 0.0, 0.0, 0.0),
+                          child: Text(
+                            'Alterar Senha',
+                            style: GoogleFonts.openSans(
+                              color: const Color(0xFF0F172A),
+                              fontSize: 13.5,
+                              fontWeight: FontWeight.w600,
                             ),
-                            color: const Color(0xFFE57373),
-                            fontSize: 15.0,
-                            letterSpacing: 0.0,
-                            fontWeight: FontWeight.w500,
-                            fontStyle: theme.bodyMedium.fontStyle,
                           ),
                         ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsetsDirectional.fromSTEB(0.0, 4.0, 0.0, 15.0),
+            child: Tooltip(
+              message: isCollapsed ? 'Sair' : '',
+              child: InkWell(
+                splashColor: Colors.transparent,
+                focusColor: Colors.transparent,
+                hoverColor: const Color(0xFFFEF2F2),
+                highlightColor: Colors.transparent,
+                borderRadius: BorderRadius.circular(8.0),
+                onTap: () async {
+                  GoRouter.of(context).prepareAuthEvent();
+                  await authManager.signOut();
+                  GoRouter.of(context).clearRedirectLocation();
+
+                  context.goNamedAuth(LoginWidget.routeName, context.mounted);
+                },
+                child: Container(
+                  width: double.infinity,
+                  height: 44.0,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFEF2F2),
+                    borderRadius: BorderRadius.circular(8.0),
+                    border: Border.all(
+                      color: const Color(0xFFFECACA),
+                      width: 1.0,
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: isCollapsed
+                        ? MainAxisAlignment.center
+                        : MainAxisAlignment.start,
+                    children: [
+                      if (!isCollapsed) const SizedBox(width: 18.0),
+                      const Icon(
+                        Icons.logout_rounded,
+                        color: Color(0xFFDC2626),
+                        size: 20.0,
                       ),
-                  ],
+                      if (!isCollapsed)
+                        Padding(
+                          padding: const EdgeInsetsDirectional.fromSTEB(10.0, 0.0, 0.0, 0.0),
+                          child: Text(
+                            'Sair',
+                            style: GoogleFonts.openSans(
+                              color: const Color(0xFFDC2626),
+                              fontSize: 13.5,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
                 ),
               ),
             ),

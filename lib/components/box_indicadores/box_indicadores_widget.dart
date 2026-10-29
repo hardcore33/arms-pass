@@ -61,18 +61,15 @@ class _BoxIndicadoresWidgetState extends State<BoxIndicadoresWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = true;
-    final cardBgColor = FlutterFlowTheme.of(context).primary;
+    const cardBgColor = Color(0xFFFAF7F2);
     final borderColor = widget.destaque
-        ? FlutterFlowTheme.of(context).secondary
-        : FlutterFlowTheme.of(context).alternate;
-    final titleColor = widget.destaque
-        ? FlutterFlowTheme.of(context).secondary
-        : FlutterFlowTheme.of(context).secondaryText;
-    final valueColor = Colors.white;
+        ? const Color(0xFF8C8268)
+        : const Color(0xFFC5BCA8);
+    final titleColor = const Color(0xFF64748B);
+    const valueColor = Color(0xFF0F172A);
     final circleBgColor = widget.destaque
-        ? FlutterFlowTheme.of(context).secondary.withOpacity(0.25)
-        : FlutterFlowTheme.of(context).secondary.withOpacity(0.15);
+        ? const Color(0xFFACA48D)
+        : const Color(0xFFE8E3D7);
 
     return MouseRegion(
       cursor: widget.onTap != null
@@ -83,99 +80,91 @@ class _BoxIndicadoresWidgetState extends State<BoxIndicadoresWidget> {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         transform: _isHovered
-            ? (Matrix4.identity()..translate(0.0, -4.0, 0.0))
+            ? (Matrix4.identity()..translate(0.0, -3.0, 0.0))
             : Matrix4.identity(),
-        child: Material(
-          color: Colors.transparent,
-          elevation: _isHovered ? 8.0 : 3.0,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16.0),
+        decoration: BoxDecoration(
+          color: cardBgColor,
+          borderRadius: BorderRadius.circular(16.0),
+          border: Border.all(
+            color: borderColor,
+            width: widget.destaque ? 1.5 : 1.0,
           ),
-          child: InkWell(
-            onTap: widget.onTap,
-            borderRadius: BorderRadius.circular(16.0),
-            child: Container(
-              height: 120.0,
-              decoration: BoxDecoration(
-                color: cardBgColor,
-                borderRadius: BorderRadius.circular(16.0),
-                border: Border.all(
-                  color: borderColor,
-                  width: 1.0,
-                ),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Row(
-                  mainAxisSize: MainAxisSize.max,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Expanded(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            valueOrDefault<String>(widget!.titulo, 'Título'),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: FlutterFlowTheme.of(context)
-                                .bodyMedium
-                                .override(
-                                  font: GoogleFonts.openSans(
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                  color: titleColor,
-                                  fontSize: 13.0,
-                                  letterSpacing: 0.0,
-                                ),
-                          ),
-                          const SizedBox(height: 8.0),
-                          AutoSizeText(
-                            valueOrDefault<String>(widget!.dado, '0'),
-                            maxLines: 1,
-                            minFontSize: 16.0,
-                            style: FlutterFlowTheme.of(context)
-                                .bodyMedium
-                                .override(
-                                  font: GoogleFonts.readexPro(
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                  color: valueColor,
-                                  fontSize: 24.0,
-                                  letterSpacing: 0.0,
-                                ),
-                          ),
-                          if (widget.trend != null) ...[
-                            const SizedBox(height: 4.0),
-                            _buildTrendBadge(widget.trend!),
-                          ],
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: 8.0),
-                    Container(
-                      width: 48.0,
-                      height: 48.0,
-                      decoration: BoxDecoration(
-                        color: circleBgColor,
-                        shape: BoxShape.circle,
-                      ),
-                      child: Center(
-                        child: FittedBox(
-                          fit: BoxFit.scaleDown,
-                          child: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: widget!.icon!,
-                          ),
+          boxShadow: [
+            BoxShadow(
+              color: _isHovered
+                  ? const Color(0x140F172A)
+                  : const Color(0x080F172A),
+              blurRadius: _isHovered ? 16.0 : 8.0,
+              offset: Offset(0, _isHovered ? 6.0 : 2.0),
+            ),
+          ],
+        ),
+        child: InkWell(
+          onTap: widget.onTap,
+          borderRadius: BorderRadius.circular(16.0),
+          child: Container(
+            height: 120.0,
+            padding: const EdgeInsets.all(16.0),
+            child: Row(
+              mainAxisSize: MainAxisSize.max,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Expanded(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        valueOrDefault<String>(widget!.titulo, 'Título'),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: GoogleFonts.openSans(
+                          fontWeight: FontWeight.w600,
+                          color: titleColor,
+                          fontSize: 12.5,
+                          letterSpacing: 0.1,
                         ),
                       ),
-                    ),
-                  ],
+                      const SizedBox(height: 6.0),
+                      AutoSizeText(
+                        valueOrDefault<String>(widget!.dado, '0'),
+                        maxLines: 1,
+                        minFontSize: 16.0,
+                        style: GoogleFonts.readexPro(
+                          fontWeight: FontWeight.bold,
+                          color: valueColor,
+                          fontSize: 24.0,
+                          letterSpacing: -0.5,
+                        ),
+                      ),
+                      if (widget.trend != null) ...[
+                        const SizedBox(height: 4.0),
+                        _buildTrendBadge(widget.trend!),
+                      ],
+                    ],
+                  ),
                 ),
-              ),
+                const SizedBox(width: 8.0),
+                Container(
+                  width: 48.0,
+                  height: 48.0,
+                  decoration: BoxDecoration(
+                    color: circleBgColor,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Center(
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: widget!.icon!,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         ),
@@ -186,35 +175,47 @@ class _BoxIndicadoresWidgetState extends State<BoxIndicadoresWidget> {
   Widget _buildTrendBadge(String trend) {
     final isPositive = trend.trimLeft().startsWith('+');
     final isNegative = trend.trimLeft().startsWith('-');
-    final color = isPositive
-        ? const Color(0xFF00C853)
+    final textColor = isPositive
+        ? const Color(0xFF047857)
         : isNegative
-            ? const Color(0xFFFF5963)
-            : Colors.grey;
+            ? const Color(0xFFDC2626)
+            : const Color(0xFF64748B);
+    final bgColor = isPositive
+        ? const Color(0xFFECFDF5)
+        : isNegative
+            ? const Color(0xFFFEF2F2)
+            : const Color(0xFFE8E3D7);
     final arrow = isPositive
         ? Icons.arrow_upward_rounded
         : isNegative
             ? Icons.arrow_downward_rounded
             : Icons.remove_rounded;
 
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(arrow, color: color, size: 12.0),
-        const SizedBox(width: 2.0),
-        Flexible(
-          child: Text(
-            trend,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              color: color,
-              fontSize: 10.5,
-              fontWeight: FontWeight.w600,
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6.0, vertical: 2.0),
+      decoration: BoxDecoration(
+        color: bgColor,
+        borderRadius: BorderRadius.circular(10.0),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(arrow, color: textColor, size: 11.0),
+          const SizedBox(width: 2.0),
+          Flexible(
+            child: Text(
+              trend,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                color: textColor,
+                fontSize: 10.5,
+                fontWeight: FontWeight.w700,
+              ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

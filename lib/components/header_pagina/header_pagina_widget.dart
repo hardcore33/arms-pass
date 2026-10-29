@@ -21,18 +21,6 @@ class HeaderPaginaWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = FlutterFlowTheme.of(context);
 
-    // Identifica o nome da empresa parceira logada
-    final parceiroJson = FFAppState().parceiro;
-    final String partnerFantasy = getJsonField(parceiroJson, r'$.partner.fantasy')?.toString() ?? '';
-    final String partnerRazao = getJsonField(parceiroJson, r'$.partner.razaoSocial')?.toString() ?? '';
-    final String customerName = getJsonField(parceiroJson, r'$.name')?.toString() ?? '';
-    final String partnerName = partnerFantasy.isNotEmpty
-        ? partnerFantasy
-        : (partnerRazao.isNotEmpty ? partnerRazao : customerName);
-
-    final bool isPartnerPage = breadcrumb.trim().toLowerCase() == 'parceiro';
-    final bool showPartner = isPartnerPage && partnerName.isNotEmpty;
-
     return Padding(
       padding: const EdgeInsets.only(bottom: 20.0),
       child: Row(
@@ -44,53 +32,16 @@ class HeaderPaginaWidget extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Flexible(
-                      child: Text(
-                        '$breadcrumb  /  $titulo',
-                        overflow: TextOverflow.ellipsis,
-                        maxLines: 1,
-                        style: theme.labelMedium.override(
-                          font: GoogleFonts.readexPro(),
-                          color: theme.secondary,
-                          fontSize: 13.0,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ),
-                    if (showPartner) ...[
-                      const SizedBox(width: 10.0),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 2.0),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFA49C88).withValues(alpha: 0.18),
-                          borderRadius: BorderRadius.circular(6.0),
-                          border: Border.all(
-                            color: const Color(0xFFA49C88).withValues(alpha: 0.4),
-                            width: 1.0,
-                          ),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(Icons.storefront_rounded, size: 12.0, color: Color(0xFFA49C88)),
-                            const SizedBox(width: 4.0),
-                            Text(
-                              partnerName.toUpperCase(),
-                              style: GoogleFonts.openSans(
-                                fontSize: 11.0,
-                                fontWeight: FontWeight.bold,
-                                color: const Color(0xFFA49C88),
-                                letterSpacing: 0.5,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ],
+                Text(
+                  '$breadcrumb  /  $titulo',
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
+                  style: theme.labelMedium.override(
+                    font: GoogleFonts.readexPro(),
+                    color: const Color(0xFF4A4437),
+                    fontSize: 13.0,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
                 const SizedBox(height: 4.0),
                 Text(
@@ -99,7 +50,7 @@ class HeaderPaginaWidget extends StatelessWidget {
                   maxLines: 1,
                   style: theme.headlineMedium.override(
                     font: GoogleFonts.readexPro(),
-                    color: theme.secondaryBackground,
+                    color: const Color(0xFF141414),
                     fontSize: 24.0,
                     fontWeight: FontWeight.bold,
                   ),
@@ -110,7 +61,7 @@ class HeaderPaginaWidget extends StatelessWidget {
                     descricao!,
                     style: theme.bodyMedium.override(
                       font: GoogleFonts.readexPro(),
-                      color: theme.secondaryText,
+                      color: const Color(0xFF383329),
                       fontSize: 14.0,
                     ),
                   ),
@@ -118,56 +69,6 @@ class HeaderPaginaWidget extends StatelessWidget {
               ],
             ),
           ),
-          if (showPartner) ...[
-            Container(
-              margin: const EdgeInsets.only(right: 12.0),
-              padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 8.0),
-              decoration: BoxDecoration(
-                color: const Color(0xFF1E1E1E),
-                borderRadius: BorderRadius.circular(10.0),
-                border: Border.all(
-                  color: const Color(0xFFA49C88).withValues(alpha: 0.3),
-                  width: 1.0,
-                ),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    width: 8.0,
-                    height: 8.0,
-                    decoration: const BoxDecoration(
-                      color: Color(0xFF2E7D32),
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                  const SizedBox(width: 8.0),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        partnerName,
-                        style: GoogleFonts.openSans(
-                          fontSize: 13.0,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                      ),
-                      Text(
-                        'Unidade Parceira Conectada',
-                        style: GoogleFonts.openSans(
-                          fontSize: 10.5,
-                          color: const Color(0xFFA49C88),
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ],
           if (action != null) ...[
             const SizedBox(width: 16.0),
             action!,

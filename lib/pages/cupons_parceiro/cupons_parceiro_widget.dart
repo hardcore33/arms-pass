@@ -29,28 +29,32 @@ class _CuponsParceiroWidgetState extends State<CuponsParceiroWidget> {
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
-  String get _effectivePartnerId {
+  String get _effectiveCustomerId {
     final parceiroJson = FFAppState().parceiro;
-    final partnerIdDynamic = getJsonField(parceiroJson, r'$.partner.id') ??
-                             getJsonField(parceiroJson, r'$.user.partner.id') ??
-                             getJsonField(parceiroJson, r'$.id');
-    if (partnerIdDynamic != null && partnerIdDynamic.toString().isNotEmpty) {
-      return partnerIdDynamic.toString();
+    final customerId = getJsonField(parceiroJson, r'$.id') ??
+                       getJsonField(parceiroJson, r'$.user.id');
+    if (customerId != null && customerId.toString().isNotEmpty && customerId.toString() != 'null') {
+      return customerId.toString();
     }
-    return currentUserUid;
+    if (currentUserUid.isNotEmpty) {
+      return currentUserUid;
+    }
+    final partnerIdDynamic = getJsonField(parceiroJson, r'$.partner.id') ??
+                             getJsonField(parceiroJson, r'$.user.partner.id');
+    return partnerIdDynamic?.toString() ?? '';
   }
 
   @override
   void initState() {
     super.initState();
     _model = createModel(context, () => CuponsParceiroModel());
-    _cuponsFuture = ObterCuponsDoParceiroCall.call(partnerId: _effectivePartnerId);
+    _cuponsFuture = ObterCuponsDoParceiroCall.call(partnerId: _effectiveCustomerId);
     WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));
   }
 
   void _recarregar() {
     setState(() {
-      _cuponsFuture = ObterCuponsDoParceiroCall.call(partnerId: _effectivePartnerId);
+      _cuponsFuture = ObterCuponsDoParceiroCall.call(partnerId: _effectiveCustomerId);
     });
   }
 
@@ -72,7 +76,7 @@ class _CuponsParceiroWidgetState extends State<CuponsParceiroWidget> {
       },
       child: Scaffold(
         key: scaffoldKey,
-        backgroundColor: FlutterFlowTheme.of(context).primary,
+        backgroundColor: const Color(0xFFACA48D),
         body: Column(
           mainAxisSize: MainAxisSize.max,
           children: [
@@ -92,7 +96,8 @@ class _CuponsParceiroWidgetState extends State<CuponsParceiroWidget> {
                         : (MediaQuery.sizeOf(context).width * 0.22).clamp(220.0, 320.0),
                     height: MediaQuery.sizeOf(context).height * 1.0,
                     decoration: BoxDecoration(
-                      color: FlutterFlowTheme.of(context).secondary,
+                      color: const Color(0xFFFAF7F2),
+                      border: const Border(right: BorderSide(color: Color(0xFFC5BCA8), width: 1.0)),
                     ),
                     child: wrapWithModel(
                       model: _model.menuParceiroModel,
@@ -103,8 +108,8 @@ class _CuponsParceiroWidgetState extends State<CuponsParceiroWidget> {
                   Expanded(
                     child: Container(
                       height: MediaQuery.sizeOf(context).height * 1.0,
-                      decoration: BoxDecoration(
-                        color: FlutterFlowTheme.of(context).primary,
+                      decoration: const BoxDecoration(
+                        color: const Color(0xFFACA48D),
                       ),
                       child: Padding(
                         padding: const EdgeInsetsDirectional.fromSTEB(
@@ -130,14 +135,18 @@ class _CuponsParceiroWidgetState extends State<CuponsParceiroWidget> {
                                   }
                                   final cuponsParceiroObterCuponsDoParceiroResponse =
                                       snapshot.data!;
+                                  final rawBody = cuponsParceiroObterCuponsDoParceiroResponse.jsonBody;
+                                  final List<dynamic> cuponsList = rawBody is List
+                                      ? rawBody
+                                      : (rawBody is Map && rawBody['content'] is List
+                                          ? (rawBody['content'] as List<dynamic>)
+                                          : <dynamic>[]);
 
                                   return wrapWithModel(
                                     model: _model.listagemDeCuponsParceiroModel,
                                     updateCallback: () => safeSetState(() {}),
                                     child: ListagemDeCuponsParceiroWidget(
-                                      cupons:
-                                          cuponsParceiroObterCuponsDoParceiroResponse
-                                              .jsonBody,
+                                      cupons: cuponsList,
                                       onChanged: () async {
                                         setState(() {});
                                       },
@@ -181,7 +190,7 @@ class _CuponsParceiroWidgetState extends State<CuponsParceiroWidget> {
                             .bodyMedium
                             .override(
                               font: GoogleFonts.readexPro(),
-                              color: FlutterFlowTheme.of(context).secondary,
+                              color: const Color(0xFF64748B),
                               letterSpacing: 0.0,
                             ),
                       ),

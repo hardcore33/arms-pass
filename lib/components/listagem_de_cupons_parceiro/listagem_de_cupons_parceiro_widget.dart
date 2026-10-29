@@ -89,9 +89,9 @@ class _ListagemDeCuponsParceiroWidgetState
   @override
   Widget build(BuildContext context) {
     // Definimos paleta de cores Dark Premium explícita para consistência visual
-    final cardBgColor = const Color(0xFF1E1E1E);
-    final inputBgColor = const Color(0xFF121212);
-    final borderColor = const Color(0xFF2C2C2C);
+    final cardBgColor = const Color(0xFFFAF7F2);
+    final inputBgColor = const Color(0xFFEFECE4);
+    final borderColor = const Color(0xFFC5BCA8);
     final highlightColor = FlutterFlowTheme.of(context).secondary;
 
     return Material(
@@ -125,7 +125,7 @@ class _ListagemDeCuponsParceiroWidgetState
                     font: GoogleFonts.openSans(
                       fontWeight: FontWeight.bold,
                     ),
-                    color: Colors.white,
+                    color: const Color(0xFF0F172A),
                     fontSize: 20.0,
                   ),
                 ),
@@ -243,7 +243,7 @@ class _ListagemDeCuponsParceiroWidgetState
                             size: 20.0,
                           ),
                         ),
-                        style: const TextStyle(color: Colors.white),
+                        style: const TextStyle(color: Color(0xFF0F172A)),
                       ),
                     ),
                   ],
@@ -400,7 +400,7 @@ class _ListagemDeCuponsParceiroWidgetState
                                       Text(
                                         cleanDesc.isNotEmpty ? cleanDesc : 'Sem descrição',
                                         style: const TextStyle(
-                                          color: Colors.white,
+                                          color: const Color(0xFF0F172A),
                                           fontWeight: FontWeight.bold,
                                           fontSize: 14.0,
                                         ),
@@ -439,19 +439,19 @@ class _ListagemDeCuponsParceiroWidgetState
                                               Container(
                                                 padding: const EdgeInsets.symmetric(horizontal: 7.0, vertical: 2.0),
                                                 decoration: BoxDecoration(
-                                                  color: const Color(0x20FFFFFF),
+                                                  color: const Color(0xFFEFECE4),
                                                   borderRadius: BorderRadius.circular(4.0),
-                                                  border: Border.all(color: Colors.white30, width: 0.8),
+                                                  border: Border.all(color: const Color(0xFFC5BCA8), width: 0.8),
                                                 ),
                                                 child: Row(
                                                   mainAxisSize: MainAxisSize.min,
                                                   children: [
-                                                    const Icon(Icons.inventory_2_outlined, color: Colors.white70, size: 11.0),
+                                                    const Icon(Icons.inventory_2_outlined, color: Color(0xFF524B3E), size: 11.0),
                                                     const SizedBox(width: 3.0),
                                                     Text(
                                                       'Estoque: $limiteStr un.',
                                                       style: const TextStyle(
-                                                        color: Colors.white70,
+                                                        color: Color(0xFF524B3E),
                                                         fontSize: 10.5,
                                                         fontWeight: FontWeight.w600,
                                                       ),
@@ -497,7 +497,7 @@ class _ListagemDeCuponsParceiroWidgetState
                                   child: Text(
                                     functions.formataDataDeExibicao(validity) ?? '',
                                     style: const TextStyle(
-                                      color: Colors.white70,
+                                      color: Color(0xFF0F172A),
                                       fontSize: 13.0,
                                     ),
                                   ),
@@ -637,7 +637,7 @@ class _ListagemDeCuponsParceiroWidgetState
                         children: [
                           IconButton(
                             icon: const Icon(Icons.chevron_left_rounded, size: 20.0),
-                            color: paginaSegura > 1 ? highlightColor : Colors.white24,
+                            color: paginaSegura > 1 ? const Color(0xFF8C8268) : const Color(0xFFC5BCA8),
                             onPressed: paginaSegura > 1
                                 ? () => setState(() => _paginaAtual = paginaSegura - 1)
                                 : null,
@@ -647,12 +647,12 @@ class _ListagemDeCuponsParceiroWidgetState
                             style: const TextStyle(
                               fontSize: 12.0,
                               fontWeight: FontWeight.w600,
-                              color: Colors.white,
+                              color: Color(0xFF0F172A),
                             ),
                           ),
                           IconButton(
                             icon: const Icon(Icons.chevron_right_rounded, size: 20.0),
-                            color: paginaSegura < totalPaginas ? highlightColor : Colors.white24,
+                            color: paginaSegura < totalPaginas ? const Color(0xFF8C8268) : const Color(0xFFC5BCA8),
                             onPressed: paginaSegura < totalPaginas
                                 ? () => setState(() => _paginaAtual = paginaSegura + 1)
                                 : null,

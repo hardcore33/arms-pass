@@ -150,16 +150,16 @@ class _ModalAdicionarDescontoParceiroWidgetState
           width: (MediaQuery.sizeOf(context).width * 0.48).clamp(460.0, 640.0),
           constraints: const BoxConstraints(maxHeight: 680.0),
           decoration: BoxDecoration(
-            color: FlutterFlowTheme.of(context).secondaryBackground,
+            color: const Color(0xFFFAF7F2),
             borderRadius: BorderRadius.circular(16.0),
             border: Border.all(
-              color: FlutterFlowTheme.of(context).alternate,
+              color: const Color(0xFFC5BCA8),
             ),
           ),
           child: _loading
               ? Center(
                   child: CircularProgressIndicator(
-                    color: FlutterFlowTheme.of(context).secondary,
+                    color: const Color(0xFF8C8268),
                   ),
                 )
               : Form(
@@ -177,7 +177,7 @@ class _ModalAdicionarDescontoParceiroWidgetState
                               font: GoogleFonts.openSans(
                                 fontWeight: FontWeight.bold,
                               ),
-                              color: Colors.white,
+                              color: const Color(0xFF0F172A),
                               fontSize: 22.0,
                             ),
                           ),
@@ -194,7 +194,7 @@ class _ModalAdicionarDescontoParceiroWidgetState
                           Text(
                             'Nome/Descrição da Promoção*',
                             style: TextStyle(
-                              color: FlutterFlowTheme.of(context).secondaryText,
+                              color: const Color(0xFF524B3E),
                               fontWeight: FontWeight.bold,
                               fontSize: 14.0,
                             ),
@@ -208,23 +208,23 @@ class _ModalAdicionarDescontoParceiroWidgetState
                               hintText: 'Ex: Compre 1 e ganhe 50% no 2º, ou 15% OFF Whey Protein',
                               enabledBorder: OutlineInputBorder(
                                 borderSide: const BorderSide(
-                                  color: Color(0xFFC5C4C4),
-                                  width: 0.5,
+                                  color: Color(0xFFC5BCA8),
+                                  width: 1.0,
                                 ),
                                 borderRadius: BorderRadius.circular(8.0),
                               ),
                               focusedBorder: OutlineInputBorder(
-                                borderSide: BorderSide(
-                                  color: FlutterFlowTheme.of(context).secondary,
+                                borderSide: const BorderSide(
+                                  color: Color(0xFF8C8268),
                                   width: 1.0,
                                 ),
                                 borderRadius: BorderRadius.circular(8.0),
                               ),
                               filled: true,
-                              fillColor: FlutterFlowTheme.of(context).primary,
+                              fillColor: const Color(0xFFEFECE4),
                               contentPadding: const EdgeInsets.all(16.0),
                             ),
-                            style: const TextStyle(color: Colors.white),
+                            style: const TextStyle(color: Color(0xFF0F172A)),
                             validator: _model.descricaoTextControllerValidator.asValidator(context),
                           ),
                           const SizedBox(height: 4.0),
@@ -247,7 +247,7 @@ class _ModalAdicionarDescontoParceiroWidgetState
                                     Text(
                                       'Desconto (%)*',
                                       style: TextStyle(
-                                        color: FlutterFlowTheme.of(context).secondaryText,
+                                        color: const Color(0xFF524B3E),
                                         fontWeight: FontWeight.bold,
                                         fontSize: 14.0,
                                       ),
@@ -261,24 +261,24 @@ class _ModalAdicionarDescontoParceiroWidgetState
                                         isDense: true,
                                         hintText: 'Ex: 15',
                                         enabledBorder: OutlineInputBorder(
-                                          borderSide: BorderSide(
-                                            color: Color(0xFFC5C4C4),
-                                            width: 0.5,
+                                          borderSide: const BorderSide(
+                                            color: Color(0xFFC5BCA8),
+                                            width: 1.0,
                                           ),
                                           borderRadius: BorderRadius.circular(8.0),
                                         ),
                                         focusedBorder: OutlineInputBorder(
-                                          borderSide: BorderSide(
-                                            color: FlutterFlowTheme.of(context).secondary,
+                                          borderSide: const BorderSide(
+                                            color: Color(0xFF8C8268),
                                             width: 1.0,
                                           ),
                                           borderRadius: BorderRadius.circular(8.0),
                                         ),
                                         filled: true,
-                                        fillColor: FlutterFlowTheme.of(context).primary,
+                                        fillColor: const Color(0xFFEFECE4),
                                         contentPadding: const EdgeInsets.all(16.0),
                                       ),
-                                      style: const TextStyle(color: Colors.white),
+                                      style: const TextStyle(color: Color(0xFF0F172A)),
                                       validator: _model.porcentagemTextControllerValidator.asValidator(context),
                                     ),
                                   ],
@@ -293,7 +293,7 @@ class _ModalAdicionarDescontoParceiroWidgetState
                                     Text(
                                       'Validade*',
                                       style: TextStyle(
-                                        color: FlutterFlowTheme.of(context).secondaryText,
+                                        color: const Color(0xFF524B3E),
                                         fontWeight: FontWeight.bold,
                                         fontSize: 14.0,
                                       ),
@@ -317,11 +317,11 @@ class _ModalAdicionarDescontoParceiroWidgetState
                                         width: double.infinity,
                                         height: 48.0,
                                         decoration: BoxDecoration(
-                                          color: FlutterFlowTheme.of(context).primary,
+                                          color: const Color(0xFFEFECE4),
                                           borderRadius: BorderRadius.circular(8.0),
                                           border: Border.all(
-                                            color: const Color(0xFFC5C4C4),
-                                            width: 0.5,
+                                            color: const Color(0xFFC5BCA8),
+                                            width: 1.0,
                                           ),
                                         ),
                                         padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -335,13 +335,14 @@ class _ModalAdicionarDescontoParceiroWidgetState
                                               style: TextStyle(
                                                 color: _model.dataSelecionada == null
                                                     ? Colors.grey
-                                                    : Colors.white,
+                                                    : const Color(0xFF0F172A),
                                                 fontSize: 14.0,
+                                                fontWeight: FontWeight.w600,
                                               ),
                                             ),
-                                            Icon(
+                                            const Icon(
                                               Icons.calendar_today_rounded,
-                                              color: FlutterFlowTheme.of(context).secondary,
+                                              color: Color(0xFF524B3E),
                                               size: 20.0,
                                             ),
                                           ],
@@ -358,15 +359,11 @@ class _ModalAdicionarDescontoParceiroWidgetState
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
                             decoration: BoxDecoration(
-                              color: _model.isArmsPro
-                                  ? FlutterFlowTheme.of(context).secondary.withValues(alpha: 0.12)
-                                  : FlutterFlowTheme.of(context).primary,
+                              color: const Color(0xFFEFECE4),
                               borderRadius: BorderRadius.circular(10.0),
                               border: Border.all(
-                                color: _model.isArmsPro
-                                    ? FlutterFlowTheme.of(context).secondary
-                                    : const Color(0xFFC5C4C4).withValues(alpha: 0.5),
-                                width: _model.isArmsPro ? 1.2 : 0.5,
+                                color: const Color(0xFFC5BCA8),
+                                width: 1.0,
                               ),
                             ),
                             child: Row(
@@ -374,12 +371,12 @@ class _ModalAdicionarDescontoParceiroWidgetState
                                 Container(
                                   padding: const EdgeInsets.all(8.0),
                                   decoration: BoxDecoration(
-                                    color: FlutterFlowTheme.of(context).secondary.withValues(alpha: 0.2),
+                                    color: const Color(0xFF8C8268).withOpacity(0.15),
                                     shape: BoxShape.circle,
                                   ),
-                                  child: Icon(
+                                  child: const Icon(
                                     Icons.star_rounded,
-                                    color: FlutterFlowTheme.of(context).secondary,
+                                    color: Color(0xFF8C8268),
                                     size: 22.0,
                                   ),
                                 ),
@@ -395,14 +392,14 @@ class _ModalAdicionarDescontoParceiroWidgetState
                                             style: GoogleFonts.readexPro(
                                               fontSize: 13.5,
                                               fontWeight: FontWeight.bold,
-                                              color: Colors.white,
+                                              color: const Color(0xFF0F172A),
                                             ),
                                           ),
                                           const SizedBox(width: 6.0),
                                           Container(
                                             padding: const EdgeInsets.symmetric(horizontal: 6.0, vertical: 2.0),
                                             decoration: BoxDecoration(
-                                              color: FlutterFlowTheme.of(context).secondary,
+                                              color: const Color(0xFF8C8268),
                                               borderRadius: BorderRadius.circular(4.0),
                                             ),
                                             child: Text(
@@ -410,7 +407,7 @@ class _ModalAdicionarDescontoParceiroWidgetState
                                               style: GoogleFonts.readexPro(
                                                 fontSize: 10.0,
                                                 fontWeight: FontWeight.bold,
-                                                color: FlutterFlowTheme.of(context).primary,
+                                                color: const Color(0xFFFAF7F2),
                                               ),
                                             ),
                                           ),
@@ -429,7 +426,7 @@ class _ModalAdicionarDescontoParceiroWidgetState
                                 ),
                                 Switch.adaptive(
                                   value: _model.isArmsPro,
-                                  activeThumbColor: FlutterFlowTheme.of(context).secondary,
+                                  activeThumbColor: const Color(0xFF8C8268),
                                   onChanged: (val) {
                                     setState(() {
                                       _model.isArmsPro = val;
@@ -453,7 +450,7 @@ class _ModalAdicionarDescontoParceiroWidgetState
                                     Text(
                                       'Limite de Cupons',
                                       style: TextStyle(
-                                        color: FlutterFlowTheme.of(context).secondaryText,
+                                        color: const Color(0xFF524B3E),
                                         fontWeight: FontWeight.bold,
                                         fontSize: 14.0,
                                       ),
@@ -468,23 +465,23 @@ class _ModalAdicionarDescontoParceiroWidgetState
                                         hintText: 'Ex: 20 (vazio = livre)',
                                         enabledBorder: OutlineInputBorder(
                                           borderSide: const BorderSide(
-                                            color: Color(0xFFC5C4C4),
-                                            width: 0.5,
+                                            color: Color(0xFFC5BCA8),
+                                            width: 1.0,
                                           ),
                                           borderRadius: BorderRadius.circular(8.0),
                                         ),
                                         focusedBorder: OutlineInputBorder(
-                                          borderSide: BorderSide(
-                                            color: FlutterFlowTheme.of(context).secondary,
+                                          borderSide: const BorderSide(
+                                            color: Color(0xFF8C8268),
                                             width: 1.0,
                                           ),
                                           borderRadius: BorderRadius.circular(8.0),
                                         ),
                                         filled: true,
-                                        fillColor: FlutterFlowTheme.of(context).primary,
+                                        fillColor: const Color(0xFFEFECE4),
                                         contentPadding: const EdgeInsets.all(16.0),
                                       ),
-                                      style: const TextStyle(color: Colors.white),
+                                      style: const TextStyle(color: Color(0xFF0F172A)),
                                     ),
                                   ],
                                 ),
@@ -499,7 +496,7 @@ class _ModalAdicionarDescontoParceiroWidgetState
                                     Text(
                                       'Regras / Condições da Oferta',
                                       style: TextStyle(
-                                        color: FlutterFlowTheme.of(context).secondaryText,
+                                        color: const Color(0xFF524B3E),
                                         fontWeight: FontWeight.bold,
                                         fontSize: 14.0,
                                       ),
@@ -513,23 +510,23 @@ class _ModalAdicionarDescontoParceiroWidgetState
                                         hintText: 'Ex: Compre 1 e ganhe 50% no 2º item',
                                         enabledBorder: OutlineInputBorder(
                                           borderSide: const BorderSide(
-                                            color: Color(0xFFC5C4C4),
-                                            width: 0.5,
+                                            color: Color(0xFFC5BCA8),
+                                            width: 1.0,
                                           ),
                                           borderRadius: BorderRadius.circular(8.0),
                                         ),
                                         focusedBorder: OutlineInputBorder(
-                                          borderSide: BorderSide(
-                                            color: FlutterFlowTheme.of(context).secondary,
+                                          borderSide: const BorderSide(
+                                            color: Color(0xFF8C8268),
                                             width: 1.0,
                                           ),
                                           borderRadius: BorderRadius.circular(8.0),
                                         ),
                                         filled: true,
-                                        fillColor: FlutterFlowTheme.of(context).primary,
+                                        fillColor: const Color(0xFFEFECE4),
                                         contentPadding: const EdgeInsets.all(16.0),
                                       ),
-                                      style: const TextStyle(color: Colors.white),
+                                      style: const TextStyle(color: Color(0xFF0F172A)),
                                     ),
                                   ],
                                 ),
@@ -549,13 +546,13 @@ class _ModalAdicionarDescontoParceiroWidgetState
                                   height: 45.0,
                                   padding: EdgeInsets.zero,
                                   color: Colors.transparent,
-                                  textStyle: TextStyle(
-                                    color: FlutterFlowTheme.of(context).secondaryText,
+                                  textStyle: const TextStyle(
+                                    color: Color(0xFF64748B),
                                     fontWeight: FontWeight.w600,
                                   ),
                                   elevation: 0.0,
-                                  borderSide: BorderSide(
-                                    color: FlutterFlowTheme.of(context).alternate,
+                                  borderSide: const BorderSide(
+                                    color: Color(0xFFC5BCA8),
                                     width: 1.0,
                                   ),
                                   borderRadius: BorderRadius.circular(8.0),
@@ -569,9 +566,9 @@ class _ModalAdicionarDescontoParceiroWidgetState
                                   width: 160.0,
                                   height: 45.0,
                                   padding: EdgeInsets.zero,
-                                  color: FlutterFlowTheme.of(context).secondary,
-                                  textStyle: TextStyle(
-                                    color: FlutterFlowTheme.of(context).primary,
+                                  color: const Color(0xFF8C8268),
+                                  textStyle: GoogleFonts.readexPro(
+                                    color: const Color(0xFFFAF7F2),
                                     fontWeight: FontWeight.bold,
                                   ),
                                   elevation: 2.0,

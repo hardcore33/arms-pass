@@ -35,6 +35,52 @@ class _ValidarParceiroWidgetState extends State<ValidarParceiroWidget> {
   
   // Controle local para forçar a atualização do histórico de validações
   Key _historyKey = UniqueKey();
+  int _selectedHistoryTab = 0;
+
+  Future<List<dynamic>> _fetchPartnerValidations() async {
+    final List<dynamic> result = [];
+    final Set<String> seenIds = {};
+
+    try {
+      final resRecente = await GetHistoricoRecenteCall.call(
+        partnerId: int.tryParse(_effectivePartnerId),
+      );
+      if (resRecente.succeeded && resRecente.jsonBody is List) {
+        for (final item in (resRecente.jsonBody as List)) {
+          final idStr = getJsonField(item, r'''$.id''')?.toString() ?? '';
+          if (idStr.isNotEmpty) seenIds.add(idStr);
+          result.add(item);
+        }
+      }
+    } catch (_) {}
+
+    try {
+      final resCompleto = await GetHistoricoCompletoCall.call();
+      if (resCompleto.succeeded && resCompleto.jsonBody is List) {
+        final partnerIdStr = _effectivePartnerId;
+        final allList = (resCompleto.jsonBody as List).where((item) {
+          final pId = getJsonField(item, r'''$.partner.id''')?.toString() ??
+                      getJsonField(item, r'''$.partner''')?.toString();
+          return pId == partnerIdStr;
+        }).toList();
+
+        allList.sort((a, b) {
+          final idA = int.tryParse(getJsonField(a, r'''$.id''')?.toString() ?? '0') ?? 0;
+          final idB = int.tryParse(getJsonField(b, r'''$.id''')?.toString() ?? '0') ?? 0;
+          return idB.compareTo(idA);
+        });
+
+        for (final item in allList) {
+          final idStr = getJsonField(item, r'''$.id''')?.toString() ?? '';
+          if (idStr.isNotEmpty && seenIds.contains(idStr)) continue;
+          if (idStr.isNotEmpty) seenIds.add(idStr);
+          result.add(item);
+        }
+      }
+    } catch (_) {}
+
+    return result;
+  }
 
   @override
   void initState() {
@@ -157,22 +203,22 @@ class _ValidarParceiroWidgetState extends State<ValidarParceiroWidget> {
         margin: const EdgeInsets.only(top: 18.0, bottom: 6.0),
         padding: const EdgeInsets.all(12.0),
         decoration: BoxDecoration(
-          color: theme.primary.withValues(alpha: 0.5),
+          color: const Color(0xFFF8FAFC),
           borderRadius: BorderRadius.circular(10.0),
-          border: Border.all(color: theme.secondary.withValues(alpha: 0.35)),
+          border: Border.all(color: const Color(0xFFE2E8F0)),
         ),
         child: Row(
           children: [
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 9.0, vertical: 5.0),
               decoration: BoxDecoration(
-                color: theme.secondary,
+                color: const Color(0xFFA69E89), // Arms Khaki Sand
                 borderRadius: BorderRadius.circular(6.0),
               ),
               child: Text(
                 '$discVal% OFF',
                 style: GoogleFonts.readexPro(
-                  color: theme.primary,
+                  color: const Color(0xFF121212),
                   fontWeight: FontWeight.bold,
                   fontSize: 12.0,
                 ),
@@ -186,7 +232,7 @@ class _ValidarParceiroWidgetState extends State<ValidarParceiroWidget> {
                   Text(
                     desc,
                     style: GoogleFonts.readexPro(
-                      color: Colors.white,
+                      color: const Color(0xFF0F172A),
                       fontWeight: FontWeight.w600,
                       fontSize: 13.0,
                     ),
@@ -194,7 +240,7 @@ class _ValidarParceiroWidgetState extends State<ValidarParceiroWidget> {
                   if (formattedDate.isNotEmpty)
                     Text(
                       'Válido até $formattedDate',
-                      style: TextStyle(color: theme.secondaryText, fontSize: 11.5),
+                      style: const TextStyle(color: Color(0xFF64748B), fontSize: 11.5),
                     ),
                 ],
               ),
@@ -330,7 +376,7 @@ class _ValidarParceiroWidgetState extends State<ValidarParceiroWidget> {
       },
       child: Scaffold(
         key: scaffoldKey,
-        backgroundColor: FlutterFlowTheme.of(context).primary,
+        backgroundColor: const Color(0xFFACA48D),
         body: Column(
           mainAxisSize: MainAxisSize.max,
           children: [
@@ -352,8 +398,11 @@ class _ValidarParceiroWidgetState extends State<ValidarParceiroWidget> {
                         ? 80.0
                         : (MediaQuery.sizeOf(context).width * 0.22).clamp(220.0, 320.0),
                     height: MediaQuery.sizeOf(context).height * 1.0,
-                    decoration: BoxDecoration(
-                      color: FlutterFlowTheme.of(context).secondary,
+                    decoration: const BoxDecoration(
+                      color: const Color(0xFFFAF7F2),
+                      border: const Border(
+                        right: BorderSide(color: Color(0xFFC5BCA8), width: 1.0),
+                      ),
                     ),
                     child: wrapWithModel(
                       model: _model.menuParceiroModel,
@@ -389,7 +438,7 @@ class _ValidarParceiroWidgetState extends State<ValidarParceiroWidget> {
                                   child: Container(
                                   width: double.infinity,
                                   decoration: BoxDecoration(
-                                    color: FlutterFlowTheme.of(context).secondaryBackground,
+                                    color: const Color(0xFFFAF7F2),
                                     borderRadius: BorderRadius.circular(16.0),
                                     border: Border.all(
                                       color: FlutterFlowTheme.of(context).alternate,
@@ -443,12 +492,13 @@ class _ValidarParceiroWidgetState extends State<ValidarParceiroWidget> {
                                                         borderRadius: BorderRadius.circular(8.0),
                                                       ),
                                                       filled: true,
-                                                      fillColor: FlutterFlowTheme.of(context).primary,
+                                                      fillColor: const Color(0xFFEFECE4),
                                                       contentPadding: EdgeInsets.all(18.0),
                                                     ),
-                                                    style: FlutterFlowTheme.of(context).bodyMedium.override(
-                                                      font: GoogleFonts.readexPro(),
-                                                      color: Colors.white,
+                                                    style: GoogleFonts.readexPro(
+                                                      color: const Color(0xFF0F172A),
+                                                      fontWeight: FontWeight.w600,
+                                                      fontSize: 14.0,
                                                     ),
                                                     validator: _model.textController1Validator.asValidator(context),
                                                   ),
@@ -501,12 +551,13 @@ class _ValidarParceiroWidgetState extends State<ValidarParceiroWidget> {
                                                         borderRadius: BorderRadius.circular(8.0),
                                                       ),
                                                       filled: true,
-                                                      fillColor: FlutterFlowTheme.of(context).primary,
+                                                      fillColor: const Color(0xFFEFECE4),
                                                       contentPadding: EdgeInsets.all(18.0),
                                                     ),
-                                                    style: FlutterFlowTheme.of(context).bodyMedium.override(
-                                                      font: GoogleFonts.readexPro(),
-                                                      color: Colors.white,
+                                                    style: GoogleFonts.readexPro(
+                                                      color: const Color(0xFF0F172A),
+                                                      fontWeight: FontWeight.w600,
+                                                      fontSize: 14.0,
                                                     ),
                                                     validator: _model.textController2Validator.asValidator(context),
                                                   ),
@@ -663,12 +714,12 @@ class _ValidarParceiroWidgetState extends State<ValidarParceiroWidget> {
                               const SizedBox(height: 35.0),
                               // Recent Validations (History List)
                               Text(
-                                'Últimas Validações de Hoje',
+                                'Histórico de Validações',
                                 style: FlutterFlowTheme.of(context).headlineMedium.override(
                                   font: GoogleFonts.openSans(
                                     fontWeight: FontWeight.bold,
                                   ),
-                                  color: Colors.white,
+                                  color: const Color(0xFF0F172A),
                                   fontSize: 20.0,
                                 ),
                               ),
@@ -722,7 +773,7 @@ class _ValidarParceiroWidgetState extends State<ValidarParceiroWidget> {
                             Container(
                               width: double.infinity,
                               decoration: BoxDecoration(
-                                color: FlutterFlowTheme.of(context).secondaryBackground,
+                                color: const Color(0xFFFAF7F2),
                                 borderRadius: BorderRadius.circular(16.0),
                                 border: Border.all(
                                   color: FlutterFlowTheme.of(context).alternate,
@@ -768,12 +819,12 @@ class _ValidarParceiroWidgetState extends State<ValidarParceiroWidget> {
                                           borderRadius: BorderRadius.circular(8.0),
                                         ),
                                         filled: true,
-                                        fillColor: FlutterFlowTheme.of(context).primary,
+                                        fillColor: const Color(0xFFEFECE4),
                                         contentPadding: EdgeInsets.all(18.0),
                                       ),
                                       style: FlutterFlowTheme.of(context).bodyMedium.override(
                                         font: GoogleFonts.readexPro(),
-                                        color: Colors.white,
+                                        color: const Color(0xFFFAF7F2),
                                       ),
                                       validator: _model.codigoMobileTextControllerValidator.asValidator(context),
                                     ),
@@ -819,12 +870,12 @@ class _ValidarParceiroWidgetState extends State<ValidarParceiroWidget> {
                                           borderRadius: BorderRadius.circular(8.0),
                                         ),
                                         filled: true,
-                                        fillColor: FlutterFlowTheme.of(context).primary,
+                                        fillColor: const Color(0xFFEFECE4),
                                         contentPadding: EdgeInsets.all(18.0),
                                       ),
                                       style: FlutterFlowTheme.of(context).bodyMedium.override(
                                         font: GoogleFonts.readexPro(),
-                                        color: Colors.white,
+                                        color: const Color(0xFFFAF7F2),
                                       ),
                                       validator: _model.valorMobileTextControllerValidator.asValidator(context),
                                     ),
@@ -962,12 +1013,12 @@ class _ValidarParceiroWidgetState extends State<ValidarParceiroWidget> {
                             Align(
                               alignment: Alignment.centerLeft,
                               child: Text(
-                                'Últimas Validações',
+                                'Histórico de Validações',
                                 style: FlutterFlowTheme.of(context).headlineMedium.override(
                                   font: GoogleFonts.openSans(
                                     fontWeight: FontWeight.bold,
                                   ),
-                                  color: Colors.white,
+                                  color: const Color(0xFF0F172A),
                                   fontSize: 18.0,
                                 ),
                               ),
@@ -987,170 +1038,334 @@ class _ValidarParceiroWidgetState extends State<ValidarParceiroWidget> {
     );
   }
 
-  // Componente dinâmico de Histórico usando a chamada GetHistoricoRecenteCall
+  // Componente dinâmico de Histórico usando a busca unificada de validações e resgates
   Widget _buildHistorySection({required bool desktop}) {
     // Usando o UniqueKey local para forçar a re-execução do FutureBuilder ao validar
-    return FutureBuilder<ApiCallResponse>(
+    return FutureBuilder<List<dynamic>>(
       key: _historyKey,
-      future: GetHistoricoRecenteCall.call(
-        partnerId: int.tryParse(_effectivePartnerId),
-      ),
+      future: _fetchPartnerValidations(),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
           return const LoadingTableShimmerWidget(
-            titulo: 'Histórico Recente',
-            rowCount: 3,
+            titulo: 'Histórico de Validações',
+            rowCount: 4,
           );
         }
 
-        final response = snapshot.data!;
-        final historyList = ((response.jsonBody as List?) ?? [])
-            .where((item) => getJsonField(item, r'''$.is_point''') == true || getJsonField(item, r'''$.qtd_point''') != null || getJsonField(item, r'''$.total_saving''') != null)
-            .toList();
+        final allItems = snapshot.data ?? [];
 
-        if (historyList.isEmpty) {
-          return Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(30.0),
-            decoration: BoxDecoration(
-              color: const Color(0xFF161616),
-              borderRadius: BorderRadius.circular(16.0),
-              border: Border.all(
-                color: const Color(0xFF26221A),
-              ),
-            ),
-            child: Column(
-              children: [
-                Icon(
-                  Icons.history_toggle_off_rounded,
-                  color: FlutterFlowTheme.of(context).secondaryText,
-                  size: 40.0,
-                ),
-                const SizedBox(height: 10.0),
-                Text(
-                  'Nenhuma validação registrada hoje',
-                  style: TextStyle(
-                    color: FlutterFlowTheme.of(context).secondaryText,
-                    fontSize: 14.0,
-                  ),
-                ),
-              ],
-            ),
-          );
-        }
+        // Filtro 1: Validados no Caixa (compras efetivamente faturadas no balcão)
+        final validados = allItems.where((item) {
+          final desc = getJsonField(item, r'''$.description''')?.toString() ?? '';
+          final isPoint = getJsonField(item, r'''$.is_point''') == true;
+          final rawVal = getJsonField(item, r'''$.qtd_point''') ??
+              getJsonField(item, r'''$.qtdPoint''') ??
+              getJsonField(item, r'''$.total_saving''') ??
+              getJsonField(item, r'''$.totalSaving''');
+          double? pVal;
+          if (rawVal is num) pVal = rawVal.toDouble();
+          else if (rawVal is String) pVal = double.tryParse(rawVal);
+          return desc.contains('Cupom validado') || isPoint || (pVal != null && pVal > 0);
+        }).toList();
+
+        // Filtro 2: Resgatados no App (cupons gerados no app aguardando compra)
+        final resgatados = allItems.where((item) {
+          final desc = getJsonField(item, r'''$.description''')?.toString() ?? '';
+          final isPoint = getJsonField(item, r'''$.is_point''') == true;
+          final rawVal = getJsonField(item, r'''$.qtd_point''') ??
+              getJsonField(item, r'''$.qtdPoint''') ??
+              getJsonField(item, r'''$.total_saving''') ??
+              getJsonField(item, r'''$.totalSaving''');
+          double? pVal;
+          if (rawVal is num) pVal = rawVal.toDouble();
+          else if (rawVal is String) pVal = double.tryParse(rawVal);
+          return desc.contains('Desconto resgatado') || (!isPoint && (pVal == null || pVal == 0));
+        }).toList();
+
+        final currentList = _selectedHistoryTab == 0 ? validados : resgatados;
 
         return Container(
           decoration: BoxDecoration(
-            color: const Color(0xFF161616),
+            color: const Color(0xFFFAF7F2),
             borderRadius: BorderRadius.circular(16.0),
             border: Border.all(
-              color: const Color(0xFF26221A),
+              color: const Color(0xFFC5BCA8),
             ),
           ),
-          child: ListView.separated(
-            padding: const EdgeInsets.all(16.0),
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: historyList.length > 6 ? 6 : historyList.length,
-            separatorBuilder: (context, index) => Divider(
-              color: const Color(0xFF26221A),
-              height: 20.0,
-            ),
-            itemBuilder: (context, index) {
-              final item = historyList[index];
-              final customerName = getJsonField(item, r'''$.customer.name''')?.toString() ?? 
-                                   getJsonField(item, r'''$.customer.cpf''')?.toString() ?? 'Associado';
-              final desc = getJsonField(item, r'''$.description''')?.toString() ?? '';
-              String displaySubtitle = 'Benefício Validado';
-              if (desc.contains('Desconto resgatado:')) {
-                displaySubtitle = desc.replaceAll('Desconto resgatado:', '').trim();
-              } else if (desc.contains('Cupom validado')) {
-                displaySubtitle = 'Benefício Validado no Caixa';
-              } else if (desc.isNotEmpty) {
-                displaySubtitle = desc;
-              }
-
-              final rawValue = getJsonField(item, r'''$.qtd_point''') ?? 
-                               getJsonField(item, r'''$.qtdPoint''') ?? 
-                               getJsonField(item, r'''$.total_saving''') ?? 
-                               getJsonField(item, r'''$.totalSaving''') ?? 
-                               getJsonField(item, r'''$.value''') ?? 
-                               getJsonField(item, r'''$.valorPagar''');
-              
-              double? parsedVal;
-              if (rawValue != null) {
-                if (rawValue is num) {
-                  parsedVal = rawValue.toDouble();
-                } else if (rawValue is String) {
-                  parsedVal = double.tryParse(rawValue);
-                }
-              }
-              final formattedValue = parsedVal != null 
-                  ? 'R\$ ' + parsedVal.toStringAsFixed(2).replaceAll('.', ',')
-                  : 'R\$ 0,00';
-
-              return Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    child: Row(
-                      children: [
-                        Container(
-                          width: 38.0,
-                          height: 38.0,
-                          decoration: const BoxDecoration(
-                            color: Color(0x2000C853),
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(
-                            Icons.check_circle_rounded,
-                            color: Color(0xFF00C853),
-                            size: 20.0,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Barra de topo com Abas Segmentadas
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+                decoration: const BoxDecoration(
+                  border: Border(
+                    bottom: BorderSide(color: Color(0xFFC5BCA8), width: 1.0),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Text(
+                      _selectedHistoryTab == 0
+                          ? 'Validações no Caixa (${validados.length})'
+                          : 'Resgates no App (${resgatados.length})',
+                      style: GoogleFonts.readexPro(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 15.0,
+                        color: const Color(0xFF0F172A),
+                      ),
+                    ),
+                    const Spacer(),
+                    // Tab 0: No Caixa
+                    InkWell(
+                      onTap: () => setState(() => _selectedHistoryTab = 0),
+                      borderRadius: BorderRadius.circular(20.0),
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 150),
+                        padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 6.0),
+                        decoration: BoxDecoration(
+                          color: _selectedHistoryTab == 0
+                              ? const Color(0xFFECFDF5)
+                              : const Color(0xFFEFECE4),
+                          borderRadius: BorderRadius.circular(20.0),
+                          border: Border.all(
+                            color: _selectedHistoryTab == 0
+                                ? const Color(0xFFA7F3D0)
+                                : const Color(0xFFC5BCA8),
                           ),
                         ),
-                        const SizedBox(width: 12.0),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.check_circle_rounded,
+                              size: 14.0,
+                              color: _selectedHistoryTab == 0
+                                  ? const Color(0xFF059669)
+                                  : const Color(0xFF64748B),
+                            ),
+                            const SizedBox(width: 5.0),
+                            Text(
+                              'No Caixa (${validados.length})',
+                              style: TextStyle(
+                                color: _selectedHistoryTab == 0
+                                    ? const Color(0xFF059669)
+                                    : const Color(0xFF64748B),
+                                fontWeight: FontWeight.bold,
+                                fontSize: 12.0,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8.0),
+                    // Tab 1: No App
+                    InkWell(
+                      onTap: () => setState(() => _selectedHistoryTab = 1),
+                      borderRadius: BorderRadius.circular(20.0),
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 150),
+                        padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 6.0),
+                        decoration: BoxDecoration(
+                          color: _selectedHistoryTab == 1
+                              ? const Color(0xFFFEF3C7)
+                              : const Color(0xFFEFECE4),
+                          borderRadius: BorderRadius.circular(20.0),
+                          border: Border.all(
+                            color: _selectedHistoryTab == 1
+                                ? const Color(0xFFFDE68A)
+                                : const Color(0xFFC5BCA8),
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.phone_iphone_rounded,
+                              size: 14.0,
+                              color: _selectedHistoryTab == 1
+                                  ? const Color(0xFFB45309)
+                                  : const Color(0xFF64748B),
+                            ),
+                            const SizedBox(width: 5.0),
+                            Text(
+                              'No App (${resgatados.length})',
+                              style: TextStyle(
+                                color: _selectedHistoryTab == 1
+                                    ? const Color(0xFFB45309)
+                                    : const Color(0xFF64748B),
+                                fontWeight: FontWeight.bold,
+                                fontSize: 12.0,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              if (currentList.isEmpty)
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(30.0),
+                  child: Column(
+                    children: [
+                      Icon(
+                        _selectedHistoryTab == 0
+                            ? Icons.history_toggle_off_rounded
+                            : Icons.phone_iphone_rounded,
+                        color: FlutterFlowTheme.of(context).secondaryText,
+                        size: 40.0,
+                      ),
+                      const SizedBox(height: 10.0),
+                      Text(
+                        _selectedHistoryTab == 0
+                            ? 'Nenhuma validação registrada no caixa'
+                            : 'Nenhum cupom aguardando no aplicativo',
+                        style: TextStyle(
+                          color: FlutterFlowTheme.of(context).secondaryText,
+                          fontSize: 14.0,
+                        ),
+                      ),
+                    ],
+                  ),
+                )
+              else
+                ListView.separated(
+                  padding: const EdgeInsets.all(16.0),
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: currentList.length,
+                  separatorBuilder: (context, index) => Divider(
+                    color: const Color(0xFFE8E3D7),
+                    height: 20.0,
+                  ),
+                  itemBuilder: (context, index) {
+                    final item = currentList[index];
+                    final customerName = getJsonField(item, r'''$.customer.name''')?.toString() ?? 
+                                         getJsonField(item, r'''$.customer.cpf''')?.toString() ?? 'Associado';
+                    final desc = getJsonField(item, r'''$.description''')?.toString() ?? '';
+                    final isCaixa = _selectedHistoryTab == 0;
+                    String displaySubtitle = isCaixa
+                        ? 'Benefício Validado no Caixa'
+                        : 'Cupom resgatado no App Procard';
+                    if (desc.contains('Desconto resgatado:')) {
+                      displaySubtitle = desc.replaceAll('Desconto resgatado:', '').trim();
+                    } else if (desc.contains('Cupom validado')) {
+                      displaySubtitle = 'Benefício Validado no Caixa';
+                    } else if (desc.isNotEmpty) {
+                      displaySubtitle = desc;
+                    }
+
+                    final rawValue = getJsonField(item, r'''$.qtd_point''') ?? 
+                                     getJsonField(item, r'''$.qtdPoint''') ?? 
+                                     getJsonField(item, r'''$.total_saving''') ?? 
+                                     getJsonField(item, r'''$.totalSaving''') ?? 
+                                     getJsonField(item, r'''$.value''') ?? 
+                                     getJsonField(item, r'''$.valorPagar''');
+                    
+                    double? parsedVal;
+                    if (rawValue != null) {
+                      if (rawValue is num) {
+                        parsedVal = rawValue.toDouble();
+                      } else if (rawValue is String) {
+                        parsedVal = double.tryParse(rawValue);
+                      }
+                    }
+                    final formattedValue = parsedVal != null && parsedVal > 0
+                        ? 'R\$ ' + parsedVal.toStringAsFixed(2).replaceAll('.', ',')
+                        : (isCaixa ? 'R\$ 0,00' : 'Aguardando no Caixa');
+
+                    return Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
                         Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                          child: Row(
                             children: [
-                              Text(
-                                customerName,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: GoogleFonts.readexPro(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 14.0,
-                                  color: Colors.white,
+                              Container(
+                                width: 38.0,
+                                height: 38.0,
+                                decoration: BoxDecoration(
+                                  color: isCaixa
+                                      ? const Color(0x2000C853)
+                                      : const Color(0x20F59E0B),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Icon(
+                                  isCaixa
+                                      ? Icons.check_circle_rounded
+                                      : Icons.phone_iphone_rounded,
+                                  color: isCaixa
+                                      ? const Color(0xFF00C853)
+                                      : const Color(0xFFD97706),
+                                  size: 20.0,
                                 ),
                               ),
-                              const SizedBox(height: 2.0),
-                              Text(
-                                displaySubtitle,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                  color: FlutterFlowTheme.of(context).secondaryText,
-                                  fontSize: 12.0,
+                              const SizedBox(width: 12.0),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      customerName,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: GoogleFonts.readexPro(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 14.0,
+                                        color: const Color(0xFF0F172A),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 2.0),
+                                    Text(
+                                      displaySubtitle,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                        color: FlutterFlowTheme.of(context).secondaryText,
+                                        fontSize: 12.0,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
                             ],
                           ),
                         ),
+                        const SizedBox(width: 8.0),
+                        if (isCaixa || (parsedVal != null && parsedVal > 0))
+                          Text(
+                            formattedValue,
+                            style: GoogleFonts.readexPro(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14.0,
+                              color: const Color(0xFF0F172A),
+                            ),
+                          )
+                        else
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 4.0),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFFEF3C7),
+                              borderRadius: BorderRadius.circular(12.0),
+                              border: Border.all(color: const Color(0xFFFDE68A)),
+                            ),
+                            child: const Text(
+                              'Aguardando Caixa',
+                              style: TextStyle(
+                                color: Color(0xFFB45309),
+                                fontWeight: FontWeight.bold,
+                                fontSize: 11.0,
+                              ),
+                            ),
+                          ),
                       ],
-                    ),
-                  ),
-                  const SizedBox(width: 8.0),
-                  Text(
-                    formattedValue,
-                    style: GoogleFonts.readexPro(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14.0,
-                      color: FlutterFlowTheme.of(context).secondary,
-                    ),
-                  ),
-                ],
-              );
-            },
+                    );
+                  },
+                ),
+            ],
           ),
         );
       },

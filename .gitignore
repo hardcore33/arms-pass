@@ -51,3 +51,6 @@ app.*.map.json
 # Data exports
 *.csv
 *.xlsx
+
+# MCP tools
+arms-pass-mcp/
