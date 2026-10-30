@@ -308,8 +308,13 @@ class _ModalEditarParceiroWidgetState extends State<ModalEditarParceiroWidget> {
     if (_model.estadoValue!.isEmpty) _model.estadoValue = null;
 
     final segObj = getJsonField(partner, r'''$.segment''');
-    if (segObj is Map && segObj['name'] != null) {
-      _model.segmentoValue = segObj['name'].toString();
+    if (segObj is Map) {
+      if (segObj['id'] != null) {
+        _model.segmentoId = int.tryParse(segObj['id'].toString());
+      }
+      if (segObj['name'] != null) {
+        _model.segmentoValue = segObj['name'].toString();
+      }
     }
 
     _model.imagemUrll = _cleanNull(getJsonField(partner, r'''$.photo'''));
@@ -458,7 +463,7 @@ class _ModalEditarParceiroWidgetState extends State<ModalEditarParceiroWidget> {
         rg: _model.rgTextController.text,
         emailRepresentante: _model.mailRepTextController.text.trim(),
         fantasia: _model.nomeTextController.text,
-        idSegmento: _model.segmentoId?.toString(),
+        idSegmento: (_model.segmentoId ?? getJsonField(widget.dados, r'''$.partner.segment.id'''))?.toString(),
         proposal: _model.proposalTextController?.text.trim().isNotEmpty ?? false
             ? _model.proposalTextController!.text.trim()
             : 'off',

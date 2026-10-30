@@ -1024,9 +1024,8 @@ class AtualizarParceiroCall {
     final segmentBlock = (segmentIdInt != null && segmentIdInt > 0)
         ? '"segment": { "id": $segmentIdInt },'
         : '';
-    final tenantBlock = (idTenant != null && idTenant > 0)
-        ? '"tenant": { "id": $idTenant },'
-        : '"tenant": null,';
+    // No backend Spring, a entidade Partner não aceita objeto Tenant no update (retorna 500 se enviado)
+    const tenantBlock = '"tenant": null,';
     final contractVal = (contract != null && contract.isNotEmpty && contract != 'null')
         ? '"$contract"'
         : 'null';
