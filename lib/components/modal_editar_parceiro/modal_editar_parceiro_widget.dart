@@ -1,3 +1,4 @@
+import 'package:flutter/services.dart';
 import '/backend/api_requests/api_calls.dart';
 import '/components/modal_adicionar_segmento/modal_adicionar_segmento_widget.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
@@ -12,6 +13,73 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 import 'modal_editar_parceiro_model.dart';
 export 'modal_editar_parceiro_model.dart';
+
+class BrazilianPhoneFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    final digits = newValue.text.replaceAll(RegExp(r'\D'), '');
+    if (digits.isEmpty) {
+      return const TextEditingValue(text: '');
+    }
+
+    final trimmed = digits.length > 11 ? digits.substring(0, 11) : digits;
+    final buffer = StringBuffer();
+
+    if (trimmed.isNotEmpty) {
+      buffer.write('(');
+      if (trimmed.length <= 2) {
+        buffer.write(trimmed);
+        return TextEditingValue(
+          text: buffer.toString(),
+          selection: TextSelection.collapsed(offset: buffer.length),
+        );
+      }
+      buffer.write(trimmed.substring(0, 2));
+      buffer.write(') ');
+    }
+
+    if (trimmed.length <= 10) {
+      final rest = trimmed.substring(2);
+      if (rest.length <= 4) {
+        buffer.write(rest);
+      } else {
+        buffer.write(rest.substring(0, 4));
+        buffer.write('-');
+        buffer.write(rest.substring(4));
+      }
+    } else {
+      final rest = trimmed.substring(2);
+      buffer.write(rest.substring(0, 1));
+      buffer.write(' ');
+      if (rest.length <= 5) {
+        buffer.write(rest.substring(1));
+      } else {
+        buffer.write(rest.substring(1, 5));
+        buffer.write('-');
+        buffer.write(rest.substring(5));
+      }
+    }
+
+    final formatted = buffer.toString();
+    return TextEditingValue(
+      text: formatted,
+      selection: TextSelection.collapsed(offset: formatted.length),
+    );
+  }
+}
+
+String formatBrazilianPhone(String raw) {
+  final digits = raw.replaceAll(RegExp(r'\D'), '');
+  if (digits.length == 11) {
+    return '(${digits.substring(0, 2)}) ${digits.substring(2, 3)} ${digits.substring(3, 7)}-${digits.substring(7)}';
+  } else if (digits.length == 10) {
+    return '(${digits.substring(0, 2)}) ${digits.substring(2, 6)}-${digits.substring(6)}';
+  }
+  return raw;
+}
 
 class ModalEditarParceiroWidget extends StatefulWidget {
   const ModalEditarParceiroWidget({
@@ -190,13 +258,7 @@ class _ModalEditarParceiroWidgetState extends State<ModalEditarParceiroWidget> {
     final rawNumber = _cleanNull(getJsonField(partner, r'''$.number''')).isNotEmpty
         ? _cleanNull(getJsonField(partner, r'''$.number'''))
         : _cleanNull(getJsonField(widget.dados, r'''$.phone'''));
-    final rawDigits = rawNumber.replaceAll(RegExp(r'\D'), '');
-    final maskPattern = rawDigits.length <= 10 ? '(##) ####-####' : '(##) # ####-####';
-    _model.phoneMask = MaskTextInputFormatter(mask: maskPattern, filter: {"#": RegExp(r'[0-9]')});
-    final initialNumber = rawDigits.length >= 10
-        ? _model.phoneMask.maskText(rawDigits)
-        : rawNumber;
-    _model.phoneTextController ??= TextEditingController(text: initialNumber);
+    _model.phoneTextController ??= TextEditingController(text: formatBrazilianPhone(rawNumber));
     _model.phoneFocusNode ??= FocusNode();
 
     _model.emailTextController ??= TextEditingController(text: _cleanNull(getJsonField(partner, r'''$.email''')));
@@ -227,13 +289,7 @@ class _ModalEditarParceiroWidgetState extends State<ModalEditarParceiroWidget> {
     final rawRepPhone = _cleanNull(getJsonField(partner, r'''$.representative_number''')).isNotEmpty
         ? _cleanNull(getJsonField(partner, r'''$.representative_number'''))
         : _cleanNull(getJsonField(partner, r'''$.representative_phone'''));
-    final rawRepDigits = rawRepPhone.replaceAll(RegExp(r'\D'), '');
-    final maskRepPattern = rawRepDigits.length <= 10 ? '(##) ####-####' : '(##) # ####-####';
-    _model.phoneRepMask = MaskTextInputFormatter(mask: maskRepPattern, filter: {"#": RegExp(r'[0-9]')});
-    final initialRepPhone = rawRepDigits.length >= 10
-        ? _model.phoneRepMask.maskText(rawRepDigits)
-        : rawRepPhone;
-    _model.phoneRepTextController ??= TextEditingController(text: initialRepPhone);
+    _model.phoneRepTextController ??= TextEditingController(text: formatBrazilianPhone(rawRepPhone));
     _model.phoneRepFocusNode ??= FocusNode();
 
     _model.mailRepTextController ??= TextEditingController(
@@ -683,15 +739,7 @@ class _ModalEditarParceiroWidgetState extends State<ModalEditarParceiroWidget> {
                                   child: TextFormField(
                                     controller: _model.phoneTextController,
                                     focusNode: _model.phoneFocusNode,
-                                    inputFormatters: [_model.phoneMask],
-                                    onChanged: (val) {
-                                      final clean = val.replaceAll(RegExp(r'\D'), '');
-                                      if (clean.length <= 10 && _model.phoneMask.getMask() != '(##) ####-####') {
-                                        _model.phoneMask.updateMask(mask: '(##) ####-####');
-                                      } else if (clean.length > 10 && _model.phoneMask.getMask() != '(##) # ####-####') {
-                                        _model.phoneMask.updateMask(mask: '(##) # ####-####');
-                                      }
-                                    },
+                                    inputFormatters: [BrazilianPhoneFormatter()],
                                     decoration: _buildInputDecoration('Telefone Comercial', theme, hint: '(00) 0 0000-0000'),
                                     style: GoogleFonts.readexPro(fontSize: 13.0, color: theme.primaryText),
                                   ),
@@ -1078,15 +1126,7 @@ class _ModalEditarParceiroWidgetState extends State<ModalEditarParceiroWidget> {
                                   child: TextFormField(
                                     controller: _model.phoneRepTextController,
                                     focusNode: _model.phoneRepFocusNode,
-                                    inputFormatters: [_model.phoneRepMask],
-                                    onChanged: (val) {
-                                      final clean = val.replaceAll(RegExp(r'\D'), '');
-                                      if (clean.length <= 10 && _model.phoneRepMask.getMask() != '(##) ####-####') {
-                                        _model.phoneRepMask.updateMask(mask: '(##) ####-####');
-                                      } else if (clean.length > 10 && _model.phoneRepMask.getMask() != '(##) # ####-####') {
-                                        _model.phoneRepMask.updateMask(mask: '(##) # ####-####');
-                                      }
-                                    },
+                                    inputFormatters: [BrazilianPhoneFormatter()],
                                     decoration: _buildInputDecoration('Telefone Celular *', theme, hint: '(00) 0 0000-0000'),
                                     style: GoogleFonts.readexPro(fontSize: 13.0, color: theme.primaryText),
                                   ),

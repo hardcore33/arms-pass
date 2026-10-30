@@ -1,3 +1,4 @@
+import 'package:flutter/services.dart';
 import '/backend/api_requests/api_calls.dart';
 import '/components/modal_adicionar_segmento/modal_adicionar_segmento_widget.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
@@ -12,6 +13,63 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 import 'modal_adicionar_parceiro_model.dart';
 export 'modal_adicionar_parceiro_model.dart';
+
+class BrazilianPhoneFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    final digits = newValue.text.replaceAll(RegExp(r'\D'), '');
+    if (digits.isEmpty) {
+      return const TextEditingValue(text: '');
+    }
+
+    final trimmed = digits.length > 11 ? digits.substring(0, 11) : digits;
+    final buffer = StringBuffer();
+
+    if (trimmed.isNotEmpty) {
+      buffer.write('(');
+      if (trimmed.length <= 2) {
+        buffer.write(trimmed);
+        return TextEditingValue(
+          text: buffer.toString(),
+          selection: TextSelection.collapsed(offset: buffer.length),
+        );
+      }
+      buffer.write(trimmed.substring(0, 2));
+      buffer.write(') ');
+    }
+
+    if (trimmed.length <= 10) {
+      final rest = trimmed.substring(2);
+      if (rest.length <= 4) {
+        buffer.write(rest);
+      } else {
+        buffer.write(rest.substring(0, 4));
+        buffer.write('-');
+        buffer.write(rest.substring(4));
+      }
+    } else {
+      final rest = trimmed.substring(2);
+      buffer.write(rest.substring(0, 1));
+      buffer.write(' ');
+      if (rest.length <= 5) {
+        buffer.write(rest.substring(1));
+      } else {
+        buffer.write(rest.substring(1, 5));
+        buffer.write('-');
+        buffer.write(rest.substring(5));
+      }
+    }
+
+    final formatted = buffer.toString();
+    return TextEditingValue(
+      text: formatted,
+      selection: TextSelection.collapsed(offset: formatted.length),
+    );
+  }
+}
 
 class ModalAdicionarParceiroWidget extends StatefulWidget {
   const ModalAdicionarParceiroWidget({
@@ -600,7 +658,7 @@ class _ModalAdicionarParceiroWidgetState
                                   child: TextFormField(
                                     controller: _model.foneTextController,
                                     focusNode: _model.foneFocusNode,
-                                    inputFormatters: [_model.foneMask],
+                                    inputFormatters: [BrazilianPhoneFormatter()],
                                     decoration: _buildInputDecoration('Telefone Comercial', theme, hint: '(00) 0 0000-0000'),
                                     style: GoogleFonts.readexPro(fontSize: 13.0, color: theme.primaryText),
                                   ),
@@ -945,7 +1003,7 @@ class _ModalAdicionarParceiroWidgetState
                                   child: TextFormField(
                                     controller: _model.foneRepTextController,
                                     focusNode: _model.foneRepFocusNode,
-                                    inputFormatters: [_model.foneRepMask],
+                                    inputFormatters: [BrazilianPhoneFormatter()],
                                     decoration: _buildInputDecoration('Telefone Celular *', theme, hint: '(00) 0 0000-0000'),
                                     style: GoogleFonts.readexPro(fontSize: 13.0, color: theme.primaryText),
                                   ),
