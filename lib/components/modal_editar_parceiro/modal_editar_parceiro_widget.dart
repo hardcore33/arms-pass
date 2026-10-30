@@ -187,12 +187,14 @@ class _ModalEditarParceiroWidgetState extends State<ModalEditarParceiroWidget> {
     _model.cidadeTextController ??= TextEditingController(text: _cleanNull(getJsonField(partner, r'''$.city''')));
     _model.cidadeFocusNode ??= FocusNode();
 
-    _model.phoneMask = MaskTextInputFormatter(mask: '(##) # ####-####');
     final rawNumber = _cleanNull(getJsonField(partner, r'''$.number''')).isNotEmpty
         ? _cleanNull(getJsonField(partner, r'''$.number'''))
         : _cleanNull(getJsonField(widget.dados, r'''$.phone'''));
-    final initialNumber = rawNumber.isNotEmpty && !rawNumber.contains('(') && rawNumber.length >= 10
-        ? _model.phoneMask.maskText(rawNumber)
+    final rawDigits = rawNumber.replaceAll(RegExp(r'\D'), '');
+    final maskPattern = rawDigits.length <= 10 ? '(##) ####-####' : '(##) # ####-####';
+    _model.phoneMask = MaskTextInputFormatter(mask: maskPattern, filter: {"#": RegExp(r'[0-9]')});
+    final initialNumber = rawDigits.length >= 10
+        ? _model.phoneMask.maskText(rawDigits)
         : rawNumber;
     _model.phoneTextController ??= TextEditingController(text: initialNumber);
     _model.phoneFocusNode ??= FocusNode();
@@ -222,12 +224,14 @@ class _ModalEditarParceiroWidgetState extends State<ModalEditarParceiroWidget> {
     _model.cpfTextController ??= TextEditingController(text: rawCpf);
     _model.cpfFocusNode ??= FocusNode();
 
-    _model.phoneRepMask = MaskTextInputFormatter(mask: '(##) # ####-####');
     final rawRepPhone = _cleanNull(getJsonField(partner, r'''$.representative_number''')).isNotEmpty
         ? _cleanNull(getJsonField(partner, r'''$.representative_number'''))
         : _cleanNull(getJsonField(partner, r'''$.representative_phone'''));
-    final initialRepPhone = rawRepPhone.isNotEmpty && !rawRepPhone.contains('(') && rawRepPhone.length >= 10
-        ? _model.phoneRepMask.maskText(rawRepPhone)
+    final rawRepDigits = rawRepPhone.replaceAll(RegExp(r'\D'), '');
+    final maskRepPattern = rawRepDigits.length <= 10 ? '(##) ####-####' : '(##) # ####-####';
+    _model.phoneRepMask = MaskTextInputFormatter(mask: maskRepPattern, filter: {"#": RegExp(r'[0-9]')});
+    final initialRepPhone = rawRepDigits.length >= 10
+        ? _model.phoneRepMask.maskText(rawRepDigits)
         : rawRepPhone;
     _model.phoneRepTextController ??= TextEditingController(text: initialRepPhone);
     _model.phoneRepFocusNode ??= FocusNode();
@@ -680,6 +684,14 @@ class _ModalEditarParceiroWidgetState extends State<ModalEditarParceiroWidget> {
                                     controller: _model.phoneTextController,
                                     focusNode: _model.phoneFocusNode,
                                     inputFormatters: [_model.phoneMask],
+                                    onChanged: (val) {
+                                      final clean = val.replaceAll(RegExp(r'\D'), '');
+                                      if (clean.length <= 10 && _model.phoneMask.getMask() != '(##) ####-####') {
+                                        _model.phoneMask.updateMask(mask: '(##) ####-####');
+                                      } else if (clean.length > 10 && _model.phoneMask.getMask() != '(##) # ####-####') {
+                                        _model.phoneMask.updateMask(mask: '(##) # ####-####');
+                                      }
+                                    },
                                     decoration: _buildInputDecoration('Telefone Comercial', theme, hint: '(00) 0 0000-0000'),
                                     style: GoogleFonts.readexPro(fontSize: 13.0, color: theme.primaryText),
                                   ),
@@ -1067,6 +1079,14 @@ class _ModalEditarParceiroWidgetState extends State<ModalEditarParceiroWidget> {
                                     controller: _model.phoneRepTextController,
                                     focusNode: _model.phoneRepFocusNode,
                                     inputFormatters: [_model.phoneRepMask],
+                                    onChanged: (val) {
+                                      final clean = val.replaceAll(RegExp(r'\D'), '');
+                                      if (clean.length <= 10 && _model.phoneRepMask.getMask() != '(##) ####-####') {
+                                        _model.phoneRepMask.updateMask(mask: '(##) ####-####');
+                                      } else if (clean.length > 10 && _model.phoneRepMask.getMask() != '(##) # ####-####') {
+                                        _model.phoneRepMask.updateMask(mask: '(##) # ####-####');
+                                      }
+                                    },
                                     decoration: _buildInputDecoration('Telefone Celular *', theme, hint: '(00) 0 0000-0000'),
                                     style: GoogleFonts.readexPro(fontSize: 13.0, color: theme.primaryText),
                                   ),

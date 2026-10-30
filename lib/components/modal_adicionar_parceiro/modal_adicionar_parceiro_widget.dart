@@ -298,6 +298,7 @@ class _ModalAdicionarParceiroWidgetState
         fantasia: _model.nomeTextController.text,
         idSegmento: _model.idSegmento?.toString(),
         instagram: _model.instagramTextController.text,
+        phone: _model.foneTextController.text,
       );
 
       if ((_model.apiResult88s?.succeeded ?? false)) {

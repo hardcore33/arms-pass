@@ -894,6 +894,7 @@ class AtualizarStatusDaTrocaCall {
 class CriarParceiroCall {
   static Future<ApiCallResponse> call({
     int? idTenant,
+    String? phone = '',
     String? email = '',
     String? senha = '',
     String? razao = '',
@@ -948,7 +949,7 @@ class CriarParceiroCall {
     "fantasia": "${fantasia}",
     "cnpj": "${cnpj}",
     "filial": "${filial}",
-    "number": "${telefoneRepresentante}",
+    "number": "${(phone != null && phone.isNotEmpty) ? phone : telefoneRepresentante}",
     "email": "${emailRepresentante}",
     "street": "${rua}",
     "number_adress": "${numero}",
@@ -1017,14 +1018,73 @@ class AtualizarParceiroCall {
     String? filial = '',
     bool? isActive = true,
   }) async {
-    // Só inclui a senha no payload se o admin realmente digitou uma nova —
-    // campo vazio/nulo nunca deve sobrescrever a senha existente do parceiro.
-    final senhaField = (senha != null && senha.trim().isNotEmpty)
-        ? '"password": "${senha}",'
-        : '';
     final statusAtivo = isActive ?? true;
-    final ffApiRequestBody = '''
-{
+    final partnerIdInt = int.tryParse('$idPartner') ?? idPartner;
+    final segmentIdInt = int.tryParse('$idSegmento');
+    final segmentBlock = (segmentIdInt != null && segmentIdInt > 0)
+        ? '"segment": { "id": $segmentIdInt },'
+        : '';
+    final tenantBlock = (idTenant != null && idTenant > 0)
+        ? '"tenant": { "id": $idTenant },'
+        : '"tenant": null,';
+    final contractVal = (contract != null && contract.isNotEmpty && contract != 'null')
+        ? '"$contract"'
+        : 'null';
+    final photoVal = (photo != null && photo.isNotEmpty && photo != 'null')
+        ? '"$photo"'
+        : 'null';
+
+    // Rota oficial de parceiro: PUT /api/v1/partner atualiza diretamente a tabela partner no banco de dados
+    final partnerBody = '''{
+  "id": $partnerIdInt,
+  "isActive": $statusAtivo,
+  "isSelected": ${selecionado ?? false},
+  "razao": "${razao ?? ''}",
+  "fantasia": "${fantasia ?? ''}",
+  "cnpj": "${cnpj ?? ''}",
+  "filial": "${filial ?? ''}",
+  "number": "${phone ?? ''}",
+  "email": "${emailRepresentante ?? ''}",
+  "street": "${rua ?? ''}",
+  "number_adress": "${numero ?? ''}",
+  "cep": "${cep ?? ''}",
+  "neighborhood": "${bairro ?? ''}",
+  "city": "${cidade ?? ''}",
+  "state": "${state ?? ''}",
+  "contract": $contractVal,
+  "photo": $photoVal,
+  $segmentBlock
+  $tenantBlock
+  "representative_cpf": "${cpf ?? ''}",
+  "representative_rg": "${rg ?? ''}",
+  "representative_number": "${telefoneRepresentante ?? ''}",
+  "representative_name": "${representanteNome ?? ''}",
+  "proposal": "${proposal ?? ''}",
+  "instagram": "${instagram ?? ''}"
+}''';
+
+    final partnerResponse = await ApiManager.instance.makeApiCall(
+      callName: 'atualizarParceiro',
+      apiUrl: 'https://codeflowbr.online:8080/api/v1/partner',
+      callType: ApiCallType.PUT,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      params: {},
+      body: partnerBody,
+      bodyType: BodyType.TEXT,
+      returnBody: true,
+      encodeBodyUtf8: true,
+      decodeUtf8: true,
+      cache: false,
+      isStreamingApi: false,
+      alwaysAllowBody: false,
+    );
+
+    // Se o admin também digitou uma nova senha, sincroniza no usuário customer:
+    if ((senha != null && senha.trim().isNotEmpty) && idCustomer != null && idCustomer.isNotEmpty && idCustomer != 'null') {
+      try {
+        final customerBody = '''{
   "id": "${idCustomer}",
   "name": "${razao}",
   "cardNumber": "${cpf}",
@@ -1041,55 +1101,31 @@ class AtualizarParceiroCall {
     "isActive": ${statusAtivo},
     "inviteCode": "",
     "login": "${email}",
-    ${senhaField}
+    "password": "${senha}",
     "role": 1
-  },
-  "partner": {
-    "instagram": "${instagram}",
-    "id": "${idPartner}",
-    "segment": {
-      "id": "${idSegmento}"
-    },
-    "isActive": ${statusAtivo},
-    "isSelected": ${selecionado},
-    "razao": "${razao}",
-    "fantasia": "${fantasia}",
-    "cnpj": "${cnpj}",
-    "filial": "${filial}",
-    "number":"${phone}",
-    "email": "${emailRepresentante}",
-    "street": "${rua}",
-    "number_adress": "${numero}",
-    "cep": "${cep}",
-    "neighborhood": "${bairro}",
-    "city": "${cidade}",
-    "contract": "${contract}",
-    "photo": "${photo}",
-    "state": "${state}",
-    "representative_cpf": "${cpf}",
-    "representative_rg": "${rg}",
-    "representative_number": "${telefoneRepresentante}",
-    "representative_name": "${representanteNome}",
-    "proposal": "${proposal}"
   }
 }''';
-    return ApiManager.instance.makeApiCall(
-      callName: 'atualizarParceiro',
-      apiUrl: 'https://codeflowbr.online:8080/api/v1/customer',
-      callType: ApiCallType.PUT,
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      params: {},
-      body: ffApiRequestBody,
-      bodyType: BodyType.TEXT,
-      returnBody: true,
-      encodeBodyUtf8: true,
-      decodeUtf8: true,
-      cache: false,
-      isStreamingApi: false,
-      alwaysAllowBody: false,
-    );
+        await ApiManager.instance.makeApiCall(
+          callName: 'atualizarCustomerSenha',
+          apiUrl: 'https://codeflowbr.online:8080/api/v1/customer',
+          callType: ApiCallType.PUT,
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          params: {},
+          body: customerBody,
+          bodyType: BodyType.TEXT,
+          returnBody: true,
+          encodeBodyUtf8: true,
+          decodeUtf8: true,
+          cache: false,
+          isStreamingApi: false,
+          alwaysAllowBody: false,
+        );
+      } catch (_) {}
+    }
+
+    return partnerResponse;
   }
 }
 
